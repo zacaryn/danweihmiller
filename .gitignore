@@ -26,6 +26,20 @@ coverage
 .env
 .env.*
 !.env.example
+.env.local
+.env.development
+.env.test
+.env.production
+
+# AWS Configuration - Contains sensitive credentials
+src/aws-config.js
+src/config/aws-config.js
+aws-exports.js
+amplifyconfiguration.json
+amplify-build-config.json
+amplify-gradle-config.json
+amplifytools.xcconfig
+.amplify/
 
 # Firebase
 .firebase/
@@ -54,3 +68,16 @@ ui-debug.log
 .temp
 .tmp
 *.bak
+
+# Credentials and API keys
+*.pem
+*.key
+*.credentials.json
+*credentials*
+*secret*
+*PRIVATE*
+*private*
+
+# Local configuration that might contain sensitive information
+local.settings.json
+local.config.json

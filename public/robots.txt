@@ -1,0 +1,10 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin area
+Disallow: /admin/
+Disallow: /admin/*
+
+# Sitemap
+Sitemap: https://www.danweihmiller.com/sitemap.xml 

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import ListingCard from '../components/listings/ListingCard';
 import { useState, useEffect } from 'react';
-import { getListings } from '../firebase/listings';
+import { getListings } from '../services/listings-service';
+import SEO from '../components/shared/SEO';
 
 const ListingsContainer = styled.div`
   max-width: 1200px;
@@ -129,6 +130,7 @@ const Listings = () => {
       try {
         setLoading(true);
         setError(null);
+        
         const data = await getListings();
         setListings(data);
       } catch (err) {
@@ -170,51 +172,59 @@ const Listings = () => {
   }
 
   return (
-    <ListingsContainer>
-      <ListingsHeader>
-        <Title>Property Listings</Title>
-        <Subtitle>
-          Discover available properties in the Front Range of Colorado Springs
-        </Subtitle>
-      </ListingsHeader>
+    <>
+      <SEO 
+        pageName="Listings" 
+        description="Browse Dan Weihmiller's featured real estate listings in Colorado Springs and the Front Range. Find homes, properties, and investment opportunities in top neighborhoods."
+        image="/images/og-image.jpg"
+      />
+      
+      <ListingsContainer>
+        <ListingsHeader>
+          <Title>Property Listings</Title>
+          <Subtitle>
+            Discover available properties in the Front Range of Colorado Springs
+          </Subtitle>
+        </ListingsHeader>
 
-      <FilterBar>
-        <FilterButton 
-          active={filter === 'all'} 
-          onClick={() => setFilter('all')}
-        >
-          All Listings
-        </FilterButton>
-        <FilterButton 
-          active={filter === 'active'} 
-          onClick={() => setFilter('active')}
-        >
-          Active
-        </FilterButton>
-        <FilterButton 
-          active={filter === 'pending'} 
-          onClick={() => setFilter('pending')}
-        >
-          Pending
-        </FilterButton>
-        <FilterButton 
-          active={filter === 'sold'} 
-          onClick={() => setFilter('sold')}
-        >
-          Sold
-        </FilterButton>
-      </FilterBar>
+        <FilterBar>
+          <FilterButton 
+            active={filter === 'all'} 
+            onClick={() => setFilter('all')}
+          >
+            All Listings
+          </FilterButton>
+          <FilterButton 
+            active={filter === 'active'} 
+            onClick={() => setFilter('active')}
+          >
+            Active
+          </FilterButton>
+          <FilterButton 
+            active={filter === 'pending'} 
+            onClick={() => setFilter('pending')}
+          >
+            Pending
+          </FilterButton>
+          <FilterButton 
+            active={filter === 'sold'} 
+            onClick={() => setFilter('sold')}
+          >
+            Sold
+          </FilterButton>
+        </FilterBar>
 
-      {filteredListings.length === 0 ? (
-        <ErrorMessage>No listings found.</ErrorMessage>
-      ) : (
-        <ListingsGrid>
-          {filteredListings.map(listing => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </ListingsGrid>
-      )}
-    </ListingsContainer>
+        {filteredListings.length === 0 ? (
+          <ErrorMessage>No listings found.</ErrorMessage>
+        ) : (
+          <ListingsGrid>
+            {filteredListings.map(listing => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </ListingsGrid>
+        )}
+      </ListingsContainer>
+    </>
   );
 };
 

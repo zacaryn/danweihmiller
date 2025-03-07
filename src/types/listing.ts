@@ -14,4 +14,5 @@ export interface Listing {
   images: string[];
   status: 'active' | 'pending' | 'sold';
   datePosted: string;
+  mlsNumber?: string; // Optional MLS listing number
 } 

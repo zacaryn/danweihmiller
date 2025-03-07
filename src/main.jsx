@@ -3,6 +3,15 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@emotion/react'
 import './index.css'
 import App from './App.jsx'
+// Import AWS Amplify using named exports only
+import { Amplify, Auth } from 'aws-amplify'
+import awsConfig from './config/aws-config'
+
+// Configure Amplify
+Amplify.configure(awsConfig)
+
+// Configure Auth to use the IAM credentials for all service calls
+Auth.configure(awsConfig)
 
 const theme = {
   colors: {

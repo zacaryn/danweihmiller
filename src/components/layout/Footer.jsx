@@ -5,6 +5,10 @@ const FooterWrapper = styled.footer`
   color: ${props => props.theme.colors.white};
   padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.md};
   margin-top: auto;
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.sm};
+  }
 `;
 
 const FooterContent = styled.div`
@@ -17,6 +21,7 @@ const FooterContent = styled.div`
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 1.5rem;
   }
 `;
 
@@ -41,10 +46,24 @@ const FooterSection = styled.div`
     &:hover::after {
       width: 100%;
     }
+    
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      
+      &::after {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
   }
 
   p {
     margin-bottom: 0.5rem;
+    
+    @media (max-width: 768px) {
+      margin-bottom: 0.75rem;
+    }
   }
 
   a {
@@ -57,6 +76,42 @@ const FooterSection = styled.div`
       color: ${props => props.theme.colors.accent};
       transform: translateX(4px);
     }
+    
+    @media (max-width: 768px) {
+      &:hover {
+        transform: none;
+      }
+    }
+  }
+`;
+
+const SocialSection = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
+
+const SocialLink = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  transition: ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.accent};
+    transform: translateY(-3px);
+  }
+  
+  svg {
+    color: white;
   }
 `;
 
@@ -68,6 +123,7 @@ const Footer = () => {
           <h3>Dan Weihmiller Realty</h3>
           <p>Serving the Front Range</p>
           <p>of Colorado Springs</p>
+          <p>EXP Realty LLC</p>
         </FooterSection>
         <FooterSection>
           <h3>Contact</h3>
@@ -75,7 +131,7 @@ const Footer = () => {
             <a href="tel:7193018257">(719) 301-8257</a>
           </p>
           <p>
-            <a href="/contact">Send a Message</a>
+            <a href="mailto:buildingincolorado22@gmail.com">buildingincolorado22@gmail.com</a>
           </p>
         </FooterSection>
         <FooterSection>

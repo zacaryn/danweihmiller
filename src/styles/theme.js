@@ -17,6 +17,4 @@ export const theme = {
     desktop: '1024px',
     wide: '1280px'
   }
-};
-
-export type Theme = typeof theme; 
+}; 

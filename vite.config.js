@@ -9,5 +9,25 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     cors: true
-  }
+  },
+  resolve: {
+    alias: {
+      './runtimeConfig': './runtimeConfig.browser',
+    },
+  },
+  define: {
+    global: 'window',
+    'process.env': {},
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      // Define global conditions for use with various packages
+      define: {
+        global: 'globalThis',
+      },
+    },
+    include: [
+      'aws-amplify',
+    ],
+  },
 })

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import sceneImg from '../assets/images/scene.jpg';
+import SEO from '../components/shared/SEO';
 
 const AboutContainer = styled.div`
   max-width: 1200px;
@@ -69,12 +70,18 @@ const ContactButton = styled.a`
 
 const About = () => {
   return (
-    <div>
-      <AboutHero>
-        <HeroTitle>About Dan Weihmiller</HeroTitle>
-      </AboutHero>
+    <>
+      <SEO 
+        pageName="About" 
+        description="Get to know Dan Weihmiller, dedicated real estate professional serving Colorado Springs. Learn about my experience, background, approach and commitment to excellence in real estate."
+        useProfileImage={true}
+      />
       
       <AboutContainer>
+        <AboutHero>
+          <HeroTitle>About Dan Weihmiller</HeroTitle>
+        </AboutHero>
+        
         <ContentSection>
           <Paragraph>
             A licensed real estate professional serving the Front Range of Colorado Springs since 1987, 
@@ -105,7 +112,7 @@ const About = () => {
           <ContactButton href="/contact">Get in Touch</ContactButton>
         </ContentSection>
       </AboutContainer>
-    </div>
+    </>
   );
 };
 

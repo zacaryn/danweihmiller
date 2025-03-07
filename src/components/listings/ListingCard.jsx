@@ -1,11 +1,15 @@
 import styled from '@emotion/styled';
+import { Link } from 'react-router-dom';
 
-const Card = styled.div`
+const Card = styled(Link)`
   background: ${props => props.theme.colors.white};
   border-radius: ${props => props.theme.borderRadius.medium};
   box-shadow: ${props => props.theme.shadows.medium};
   overflow: hidden;
   transition: ${props => props.theme.transitions.default};
+  display: block;
+  text-decoration: none;
+  color: inherit;
 
   &:hover {
     transform: translateY(-4px);
@@ -67,6 +71,7 @@ const Features = styled.div`
 
 const ListingCard = ({ listing }) => {
   const { 
+    id,
     images, 
     status, 
     price, 
@@ -80,7 +85,7 @@ const ListingCard = ({ listing }) => {
   } = listing;
 
   return (
-    <Card>
+    <Card to={`/listings/${id}`}>
       <ImageContainer>
         <Image src={images[0]} alt={address} />
         <Status status={status}>

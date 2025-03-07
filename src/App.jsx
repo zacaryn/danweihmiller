@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Listings from './pages/Listings';
@@ -10,19 +11,21 @@ import AdminListings from './pages/AdminListings';
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="listings" element={<Listings />} />
-          <Route path="listings/:id" element={<ListingDetail />} />
-          <Route path="about" element={<About />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="admin" element={<Admin />} />
-          <Route path="admin/listings" element={<AdminListings />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="listings" element={<Listings />} />
+            <Route path="listings/:id" element={<ListingDetail />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="admin" element={<Admin />} />
+            <Route path="admin/listings" element={<AdminListings />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import sceneImg from '../assets/images/scene.jpg';
+import SEO from '../components/shared/SEO';
 
 const HeroSection = styled.section`
   min-height: 90vh;
@@ -163,43 +164,50 @@ const ExperienceContainer = styled.div`
 
 const Home = () => {
   return (
-    <div>
-      <HeroSection>
-        <HeroContent>
-          <AgentImage src={'/src/assets/images/headshot.jpg'} alt="Daniel Weihmiller" />
-          <HeroText>
-            <Title>Dan Weihmiller Realty</Title>
-            <Subtitle>
-              Bringing over 35 years of trusted real estate expertise to the Front Range of Colorado Springs.
-            </Subtitle>
-            <ButtonGroup>
-              <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
-              <SecondaryButton href="/listings">View Listings</SecondaryButton>
-            </ButtonGroup>
-          </HeroText>
-        </HeroContent>
-      </HeroSection>
+    <>
+      <SEO 
+        pageName="Home" 
+        description="Dan Weihmiller - Expert real estate agent serving Colorado Springs and the Front Range. Find your dream home or sell your property with personalized service."
+        image="/images/og-image.jpg"
+      />
+      <div>
+        <HeroSection>
+          <HeroContent>
+            <AgentImage src={'/src/assets/images/headshot.jpg'} alt="Daniel Weihmiller" />
+            <HeroText>
+              <Title>Dan Weihmiller Realty</Title>
+              <Subtitle>
+                Bringing over 35 years of trusted real estate expertise to the Front Range of Colorado Springs.
+              </Subtitle>
+              <ButtonGroup>
+                <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
+                <SecondaryButton href="/listings">View Listings</SecondaryButton>
+              </ButtonGroup>
+            </HeroText>
+          </HeroContent>
+        </HeroSection>
 
-      <ExperienceSection>
-        <ExperienceContainer>
-          <h2>Your Colorado Springs Real Estate Expert</h2>
-          <p>
-            Since 1987, Dan Weihmiller has been a cornerstone of the Front Range of Colorado Springs real estate community. 
-            With deep local roots and extensive market knowledge, Dan specializes in helping 
-            both buyers and sellers achieve their real estate goals.
-          </p>
-          <p>
-            Whether you're a first-time homebuyer, looking to upgrade, or interested in investment properties, 
-            Dan's comprehensive understanding of the local market ensures you'll receive expert guidance every 
-            step of the way.
-          </p>
-          <ButtonGroup>
-            <PrimaryButton href="/about">Learn More About Dan</PrimaryButton>
-            <SecondaryButton href="tel:7193018257">Call (719) 301-8257</SecondaryButton>
-          </ButtonGroup>
-        </ExperienceContainer>
-      </ExperienceSection>
-    </div>
+        <ExperienceSection>
+          <ExperienceContainer>
+            <h2>Your Colorado Springs Real Estate Expert</h2>
+            <p>
+              Since 1987, Dan Weihmiller has been a cornerstone of the Front Range of Colorado Springs real estate community. 
+              With deep local roots and extensive market knowledge, Dan specializes in helping 
+              both buyers and sellers achieve their real estate goals.
+            </p>
+            <p>
+              Whether you're a first-time homebuyer, looking to upgrade, or interested in investment properties, 
+              Dan's comprehensive understanding of the local market ensures you'll receive expert guidance every 
+              step of the way.
+            </p>
+            <ButtonGroup>
+              <PrimaryButton href="/about">Learn More About Dan</PrimaryButton>
+              <SecondaryButton href="tel:7193018257">Call (719) 301-8257</SecondaryButton>
+            </ButtonGroup>
+          </ExperienceContainer>
+        </ExperienceSection>
+      </div>
+    </>
   );
 };
 
