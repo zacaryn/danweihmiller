@@ -19,9 +19,11 @@ const HeroSection = styled.section`
     right: 0;
     bottom: 0;
     background: linear-gradient(
-      rgba(0, 0, 0, 0.5),
-      rgba(0, 0, 0, 0.3)
+      135deg,
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.2)
     );
+    backdrop-filter: blur(1px);
     transition: ${props => props.theme.transitions.slow};
   }
 `;
@@ -35,11 +37,11 @@ const HeroContent = styled.div`
   grid-template-columns: 1fr 1.5fr;
   gap: ${props => props.theme.spacing.xl};
   align-items: center;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: ${props => props.theme.borderRadius.large};
   box-shadow: ${props => props.theme.shadows.large};
   padding: ${props => props.theme.spacing.xl};
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;

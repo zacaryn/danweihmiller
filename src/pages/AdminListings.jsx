@@ -1,12 +1,14 @@
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaExternalLinkAlt, FaHome, FaList, FaEnvelope, FaCog } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaTrash, FaExternalLinkAlt, FaHome, FaList, FaEnvelope, FaCog, FaCloudDownloadAlt, FaBed, FaBath, FaRuler } from 'react-icons/fa';
 import ListingForm from '../components/admin/ListingForm';
 import ListingTable from '../components/admin/ListingTable';
 import MlsSearch from '../components/admin/MlsSearch';
 import { getListings, addListing, updateListing, deleteListing } from '../services/listings-service';
 import { importMlsListing } from '../services/mlsService';
+import OneHomeImport from '../components/admin/OneHomeImport';
+import { toast } from 'react-hot-toast';
 
 const AdminContainer = styled.div`
   max-width: 1200px;
@@ -18,7 +20,13 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.md};
+  
+  h2 {
+    margin: 0;
+    color: ${props => props.theme.colors.primary};
+    font-size: 1.5rem;
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -370,22 +378,6 @@ const EmptyState = styled.div`
   }
 `;
 
-// Function to search for real properties via address search APIs
-const searchProperties = async (criteria) => {
-  try {
-    console.log('Searching for properties with criteria:', criteria);
-    
-    // This would connect to a real property search API in production
-    // For example, Zillow API, Redfin API, or a custom property database
-    
-    // For now, we'll return empty results to show the search flow
-    return [];
-  } catch (error) {
-    console.error('Error searching for properties:', error);
-    throw error;
-  }
-};
-
 const AdminHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -440,6 +432,95 @@ const NavLink = styled.button`
   }
 `;
 
+const AdminActions = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.sm};
+`;
+
+const LoadingState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${props => props.theme.spacing.xl};
+  text-align: center;
+`;
+
+const Spinner = styled.div`
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid ${props => props.theme.colors.primary};
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const ResultsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${props => props.theme.spacing.md};
+`;
+
+const ResultsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${props => props.theme.spacing.md};
+`;
+
+const PropertyDetails = styled.div`
+  padding: ${props => props.theme.spacing.md};
+`;
+
+const PropertyAddress = styled.h3`
+  margin: 0 0 ${props => props.theme.spacing.xs};
+  color: ${props => props.theme.colors.primary};
+`;
+
+const PropertyLocation = styled.p`
+  margin: 0 0 ${props => props.theme.spacing.xs};
+  color: ${props => props.theme.colors.darkGray};
+`;
+
+const PropertySpecs = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
+  color: ${props => props.theme.colors.darkGray};
+  font-size: 0.9rem;
+`;
+
+const Spec = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.xs};
+`;
+
+const SearchResults = styled.div`
+  margin-top: ${props => props.theme.spacing.lg};
+`;
+
+// Function to search for real properties via address search APIs
+const searchProperties = async (criteria) => {
+  try {
+    console.log('Searching for properties with criteria:', criteria);
+    
+    // This would connect to a real property search API in production
+    // For example, Zillow API, Redfin API, or a custom property database
+    
+    // For now, we'll return empty results to show the search flow
+    return [];
+  } catch (error) {
+    console.error('Error searching for properties:', error);
+    throw error;
+  }
+};
+
 const AdminListings = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
@@ -450,6 +531,7 @@ const AdminListings = () => {
   const [activeTab, setActiveTab] = useState('listings');
   const [showMlsSearch, setShowMlsSearch] = useState(false);
   const [showPropertySearch, setShowPropertySearch] = useState(false);
+  const [showOneHomeImport, setShowOneHomeImport] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchCriteria, setSearchCriteria] = useState({
     address: '',
@@ -589,6 +671,24 @@ const AdminListings = () => {
     setShowForm(true);
   };
 
+  const handleImportFromOneHome = () => {
+    setShowForm(false);
+    setShowMlsSearch(false);
+    setShowPropertySearch(false);
+    setShowOneHomeImport(true);
+  };
+  
+  const handleOneHomeImportComplete = (importedListing) => {
+    setShowOneHomeImport(false);
+    
+    if (importedListing) {
+      // Add the imported listing to the listings array
+      setListings(prevListings => [importedListing, ...prevListings]);
+      // Show success toast or message
+      toast.success(`Successfully imported listing: ${importedListing.address}`);
+    }
+  };
+
   if (showForm) {
     return (
       <AdminContainer>
@@ -639,252 +739,108 @@ const AdminListings = () => {
       <Header>
         <h2>Property Listings</h2>
         <ButtonGroup>
-          {activeTab === 'listings' && (
-            <Button onClick={() => setShowForm(true)} disabled={loading}>
-              {loading ? 'Loading...' : 'Add New Listing'}
-            </Button>
-          )}
+          <ActionButton onClick={() => handleAddListing()} disabled={showForm || loading}>
+            <FaPlus /> Add New Listing
+          </ActionButton>
+          <ActionButton onClick={() => setShowMlsSearch(true)} disabled={showForm || loading}>
+            <FaSearch /> Import from MLS
+          </ActionButton>
+          <ActionButton onClick={() => setShowPropertySearch(true)} disabled={showForm || loading}>
+            <FaSearch /> Search Properties
+          </ActionButton>
+          <ActionButton onClick={handleImportFromOneHome} disabled={showForm || loading}>
+            <FaCloudDownloadAlt /> Import from OneHome
+          </ActionButton>
         </ButtonGroup>
       </Header>
 
-      <TabContainer>
-        <TabButtons>
-          <TabButton 
-            active={activeTab === 'listings'} 
-            onClick={() => setActiveTab('listings')}
-          >
-            My Listings
-          </TabButton>
-          <TabButton 
-            active={activeTab === 'propertySearch'} 
-            onClick={() => {
-              setActiveTab('propertySearch');
-              setShowPropertySearch(true);
-              setShowMlsSearch(false);
-            }}
-          >
-            Property Search
-          </TabButton>
-          <TabButton 
-            active={activeTab === 'mlsSearch'} 
-            onClick={() => {
-              setActiveTab('mlsSearch');
-              setShowMlsSearch(true);
-              setShowPropertySearch(false);
-            }}
-          >
-            MLS Search
-          </TabButton>
-          {searchResults.length > 0 && (
-            <TabButton 
-              active={activeTab === 'searchResults'} 
-              onClick={() => setActiveTab('searchResults')}
-            >
-              Search Results
-            </TabButton>
-          )}
-        </TabButtons>
+      {/* Show OneHome Import Form */}
+      {showOneHomeImport && (
+        <OneHomeImport onImportComplete={handleOneHomeImportComplete} />
+      )}
 
-        {activeTab === 'listings' && (
-          <>
-            {listings.length === 0 ? (
-              <EmptyState>
-                <h3>No Listings Found</h3>
-                <p>You haven't added any property listings yet.</p>
-                <p>Use the "Add New Listing" button to create your first listing or search for properties to import.</p>
-              </EmptyState>
-            ) : (
-              <ListingTable 
-                listings={listings} 
-                onEdit={handleEditClick} 
-                onDelete={handleDeleteListing} 
-              />
-            )}
-          </>
-        )}
+      {/* Show MLS Search */}
+      {showMlsSearch && (
+        <SearchForm onCancel={() => setShowMlsSearch(false)} onSearch={handleMlsSearch} />
+      )}
 
-        {activeTab === 'propertySearch' && showPropertySearch && (
-          <SearchContainer>
-            <h2>Search Property Databases</h2>
-            <p>Search for real properties by address, city, and other criteria.</p>
-            
-            <SearchForm onSubmit={handleSearch}>
-              <FormGroup>
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={searchCriteria.address}
-                  onChange={handleSearchChange}
-                  placeholder="Enter street address"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={searchCriteria.city}
-                  onChange={handleSearchChange}
-                  placeholder="Enter city"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  name="state"
-                  value={searchCriteria.state}
-                  onChange={handleSearchChange}
-                  placeholder="Enter state (e.g., CO)"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="zipCode">Zip Code</Label>
-                <Input
-                  id="zipCode"
-                  name="zipCode"
-                  value={searchCriteria.zipCode}
-                  onChange={handleSearchChange}
-                  placeholder="Enter zip code"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="minPrice">Min Price</Label>
-                <Input
-                  id="minPrice"
-                  name="minPrice"
-                  type="number"
-                  value={searchCriteria.minPrice}
-                  onChange={handleSearchChange}
-                  placeholder="Minimum price"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="maxPrice">Max Price</Label>
-                <Input
-                  id="maxPrice"
-                  name="maxPrice"
-                  type="number"
-                  value={searchCriteria.maxPrice}
-                  onChange={handleSearchChange}
-                  placeholder="Maximum price"
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="bedrooms">Bedrooms</Label>
-                <Select
-                  id="bedrooms"
-                  name="bedrooms"
-                  value={searchCriteria.bedrooms}
-                  onChange={handleSearchChange}
-                >
-                  <option value="">Any</option>
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                  <option value="4">4+</option>
-                  <option value="5">5+</option>
-                </Select>
-              </FormGroup>
-              
-              <FormGroup>
-                <Label htmlFor="bathrooms">Bathrooms</Label>
-                <Select
-                  id="bathrooms"
-                  name="bathrooms"
-                  value={searchCriteria.bathrooms}
-                  onChange={handleSearchChange}
-                >
-                  <option value="">Any</option>
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                  <option value="4">4+</option>
-                </Select>
-              </FormGroup>
-              
-              <ButtonGroup style={{ gridColumn: 'span 2', justifyContent: 'center', marginTop: '1rem' }}>
-                <Button type="submit" disabled={loading}>
-                  <FaSearch /> {loading ? 'Searching...' : 'Search Properties'}
-                </Button>
-                <BackButton type="button" onClick={handleResetSearch}>
-                  Back to Listings
-                </BackButton>
-              </ButtonGroup>
-            </SearchForm>
-            
-            <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-              <p>Note: This will search external property databases for real listings.</p>
-              <p>In production, this would connect to Zillow, Redfin, or similar APIs.</p>
-            </div>
-          </SearchContainer>
-        )}
+      {/* Show Property Search */}
+      {showPropertySearch && (
+        <PropertySearchForm 
+          criteria={searchCriteria} 
+          onCriteriaChange={handleSearchChange}
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+          onCancel={() => setShowPropertySearch(false)}
+        />
+      )}
 
-        {activeTab === 'mlsSearch' && showMlsSearch && (
-          <div>
-            <h2>MLS Property Search</h2>
-            <p>Search for properties in the Multiple Listing Service database.</p>
-            
-            <MlsSearch 
-              onSearch={(results) => {
-                setSearchResults(results);
-                setActiveTab('searchResults');
-              }} 
-              onBack={handleResetSearch}
+      {/* Show Listing Form */}
+      {showForm && (
+        <ListingForm
+          onSubmit={editMode ? handleEditListing : handleAddListing}
+          initialData={currentListing}
+          onCancel={() => {
+            setShowForm(false);
+            setEditMode(false);
+            setCurrentListing(null);
+          }}
+        />
+      )}
+      
+      {/* Show Search Results if any */}
+      {searchResults.length > 0 && (
+        <SearchResults>
+          <ResultsHeader>
+            <h3>Search Results</h3>
+            <Button onClick={() => setSearchResults([])}>Close Results</Button>
+          </ResultsHeader>
+          <ResultsGrid>
+            {searchResults.map(property => (
+              <PropertyCard key={property.id}>
+                <PropertyImage src={property.image} alt={property.address} />
+                <PropertyDetails>
+                  <PropertyAddress>{property.address}</PropertyAddress>
+                  <PropertyLocation>{property.city}, {property.state} {property.zipCode}</PropertyLocation>
+                  <PropertyPrice>${property.price.toLocaleString()}</PropertyPrice>
+                  <PropertySpecs>
+                    <Spec><FaBed /> {property.bedrooms}</Spec>
+                    <Spec><FaBath /> {property.bathrooms}</Spec>
+                    <Spec><FaRuler /> {property.squareFeet.toLocaleString()} sqft</Spec>
+                  </PropertySpecs>
+                  <ImportButton onClick={() => handleImportListing(property)}>
+                    Import Listing
+                  </ImportButton>
+                </PropertyDetails>
+              </PropertyCard>
+            ))}
+          </ResultsGrid>
+        </SearchResults>
+      )}
+
+      {/* Display listings */}
+      {!loading ? (
+        <>
+          {listings.length > 0 ? (
+            <ListingTable
+              listings={listings}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteListing}
             />
-          </div>
-        )}
-
-        {activeTab === 'searchResults' && (
-          <Card>
-            <Header>
-              <h2>Search Results</h2>
-              <BackButton onClick={handleResetSearch}>
-                Back to Search
-              </BackButton>
-            </Header>
-            
-            {searchResults.length === 0 ? (
-              <EmptyState>
-                <h3>No Results Found</h3>
-                <p>Your search did not match any properties.</p>
-                <p>Try adjusting your search criteria.</p>
-              </EmptyState>
-            ) : (
-              <>
-                <p>Found {searchResults.length} properties matching your criteria.</p>
-                {/* Display search results in a table or grid */}
-                <div style={{ marginTop: '1rem' }}>
-                  {searchResults.map((property) => (
-                    <div key={property.id} style={{ 
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '1rem',
-                      borderBottom: '1px solid #eee'
-                    }}>
-                      <div>
-                        <h3>{property.address}</h3>
-                        <p>{property.city}, {property.state} {property.zipCode}</p>
-                        <p>${property.price.toLocaleString()} • {property.bedrooms} beds • {property.bathrooms} baths</p>
-                      </div>
-                      <Button onClick={() => handleImportListing(property)}>
-                        <FaPlus /> Import
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </Card>
-        )}
-      </TabContainer>
+          ) : (
+            <EmptyState>
+              <FaHome size={48} />
+              <h3>No Listings Found</h3>
+              <p>Add your first property listing to get started.</p>
+            </EmptyState>
+          )}
+        </>
+      ) : (
+        <LoadingState>
+          <Spinner />
+          <p>Loading listings...</p>
+        </LoadingState>
+      )}
     </AdminContainer>
   );
 };

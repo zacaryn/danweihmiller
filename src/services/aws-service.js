@@ -1,10 +1,9 @@
 // Import from aws-amplify using named exports only
-import { Amplify, Auth, Storage } from 'aws-amplify';
+import { Storage, Auth } from 'aws-amplify';
 import awsConfig from '../config/aws-config';
 import { ListingsDB, InquiriesDB } from './db-service';
 
-// Configure AWS services once at the beginning
-Amplify.configure(awsConfig);
+// No extra configuration needed - main.jsx already configures Amplify correctly
 
 // Listings Service (DynamoDB)
 export const ListingsService = {
@@ -94,20 +93,88 @@ export const InquiriesService = {
 
 // Storage Service (S3)
 export const StorageService = {
+  // Test the AWS credentials
+  async testConnection() {
+    try {
+      console.log("Testing AWS credentials and S3 connection...");
+      
+      // First, check if Storage is available
+      if (!Storage) {
+        throw new Error("Storage is not properly configured");
+      }
+      
+      // Try to list objects in the S3 bucket
+      const result = await Storage.list('', { 
+        level: 'public',
+        customPrefix: {
+          public: ''
+        }
+      });
+      console.log(`Successfully connected to S3. Found ${result.length} objects.`);
+      
+      return {
+        success: true,
+        message: `Successfully connected to S3`,
+        objectCount: result.length
+      };
+    } catch (error) {
+      console.error("AWS connection test failed:", error);
+      return {
+        success: false,
+        message: `Connection test failed: ${error.message}`,
+        error: error
+      };
+    }
+  },
+
   // Upload an image to S3
   async uploadImage(file, path) {
     try {
-      console.log(`Uploading image to S3 at path ${path}...`);
-      // Now that S3 is set up, we can use:
-      const result = await Storage.put(path, file, {
-        contentType: file.type,
+      console.log(`Starting upload process for file:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        path: path
       });
       
-      // Get the full URL of the uploaded image
-      const imageUrl = await Storage.get(result.key);
+      if (!file) {
+        throw new Error('No file provided for upload');
+      }
+      
+      // Override public access to prevent CORS issues
+      const uploadOptions = {
+        contentType: file.type,
+        progressCallback: (progress) => {
+          console.log(`Upload progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
+        },
+        level: 'public',
+        customPrefix: {
+          public: ''
+        }
+      };
+      
+      console.log('Attempting upload with options:', uploadOptions);
+      
+      const result = await Storage.put(path, file, uploadOptions);
+      console.log('Upload result:', result);
+      
+      if (!result || !result.key) {
+        throw new Error('Upload failed: No result key returned from S3');
+      }
+      
+      console.log(`Upload successful, getting URL for key: ${result.key}`);
+      
+      const imageUrl = await Storage.get(result.key, { 
+        level: 'public',
+        download: false,
+        expires: 60 * 60 * 24 * 365
+      });
+      
+      console.log(`Final image URL: ${imageUrl}`);
       return imageUrl;
+      
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Detailed upload error:', error);
       throw error;
     }
   },

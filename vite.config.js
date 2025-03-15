@@ -8,7 +8,15 @@ export default defineConfig({
     host: '10.0.0.53',
     port: 5173,
     strictPort: true,
-    cors: true
+    cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
+      }
+    }
   },
   resolve: {
     alias: {

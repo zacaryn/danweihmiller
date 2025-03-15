@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getListing } from '../services/listings-service';
-import { FaExternalLinkAlt } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaHome } from 'react-icons/fa';
 import SEO from '../components/shared/SEO';
 
 const DetailContainer = styled.div`
@@ -172,6 +172,27 @@ const ErrorMessage = styled.div`
   border: 1px solid #f5c6cb;
 `;
 
+const OneHomeButton = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #007ead; /* OneHome blue color */
+  color: white;
+  padding: ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  text-decoration: none;
+  font-weight: 500;
+  width: 100%;
+  margin-top: ${props => props.theme.spacing.sm};
+  transition: ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    background-color: #005e82;
+    transform: translateY(-2px);
+  }
+`;
+
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -303,10 +324,10 @@ const ListingDetail = () => {
             </FeatureList>
             <ButtonGroup>
               <ContactButton as={Link} to={`/contact?listing=${id}`}>Contact Agent</ContactButton>
-              {listing.viewLink && (
-                <ViewListingButton href={listing.viewLink} target="_blank" rel="noopener noreferrer">
-                  View on OneHome <FaExternalLinkAlt size={14} />
-                </ViewListingButton>
+              {listing.oneHomeUrl && (
+                <OneHomeButton href={listing.oneHomeUrl} target="_blank" rel="noopener noreferrer">
+                  <FaHome size={16} /> View on OneHome <FaExternalLinkAlt size={12} />
+                </OneHomeButton>
               )}
             </ButtonGroup>
           </Sidebar>
