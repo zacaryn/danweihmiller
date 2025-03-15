@@ -7,10 +7,12 @@ import SEO from '../components/shared/SEO';
 const ListingsContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.xl};
+  padding: ${props => props.theme.spacing.lg};
+  padding-top: calc(80px + ${props => props.theme.spacing.md});
   
   @media (max-width: 768px) {
     padding: ${props => props.theme.spacing.md};
+    padding-top: calc(60px + ${props => props.theme.spacing.md});
   }
 `;
 

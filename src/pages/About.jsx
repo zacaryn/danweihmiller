@@ -3,19 +3,27 @@ import sceneImg from '../assets/images/scene.jpg';
 import SEO from '../components/shared/SEO';
 
 const AboutContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.lg};
+  padding-top: calc(80px + ${props => props.theme.spacing.md});
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md} 0;
+    padding-top: calc(60px + ${props => props.theme.spacing.md});
+  }
 `;
 
 const AboutHero = styled.div`
   position: relative;
   background: url(${sceneImg}) center/cover no-repeat;
   height: 300px;
-  margin-bottom: 3rem;
+  margin-bottom: ${props => props.theme.spacing.xl};
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: ${props => props.theme.borderRadius.medium};
+  overflow: hidden;
   
   &::after {
     content: '';
@@ -24,7 +32,17 @@ const AboutHero = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: linear-gradient(
+      to bottom,
+      rgba(23, 51, 107, 0.75),
+      rgba(23, 51, 107, 0.35)
+    );
+  }
+
+  @media (max-width: 768px) {
+    height: 200px;
+    margin-bottom: ${props => props.theme.spacing.lg};
+    border-radius: 0;
   }
 `;
 
@@ -34,37 +52,75 @@ const HeroTitle = styled.h1`
   position: relative;
   z-index: 1;
   text-align: center;
+  font-family: 'Playfair Display', serif;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
 `;
 
 const ContentSection = styled.section`
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: ${props => props.theme.spacing.lg};
+  background: ${props => props.theme.colors.white};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.medium};
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+    border-radius: 0;
+    box-shadow: none;
+  }
 `;
 
 const Paragraph = styled.p`
   font-size: 1.1rem;
   line-height: 1.8;
-  margin-bottom: 1.5rem;
+  margin-bottom: ${props => props.theme.spacing.md};
   color: ${props => props.theme.colors.text};
+  padding: 0 ${props => props.theme.spacing.xs};
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0;
+  }
+
+  &:last-of-type {
+    margin-bottom: ${props => props.theme.spacing.lg};
+  }
 `;
 
 const ContactButton = styled.a`
   display: inline-block;
-  padding: 1rem 2rem;
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
   background-color: ${props => props.theme.colors.primary};
-  color: white;
+  color: ${props => props.theme.colors.white};
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: ${props => props.theme.borderRadius.small};
   font-weight: 500;
-  transition: background-color 0.3s ease;
-  margin-top: 1rem;
+  transition: ${props => props.theme.transitions.fast};
+  text-align: center;
+  min-width: 160px;
+  border: 2px solid ${props => props.theme.colors.primary};
+  margin: 0 ${props => props.theme.spacing.sm};
 
   &:hover {
-    background-color: ${props => props.theme.colors.secondary};
+    background-color: transparent;
+    color: ${props => props.theme.colors.primary};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.medium};
+  }
+
+  @media (max-width: 768px) {
+    width: calc(100% - ${props => props.theme.spacing.md});
+    min-width: unset;
+    margin: 0 ${props => props.theme.spacing.xs};
   }
 `;
 

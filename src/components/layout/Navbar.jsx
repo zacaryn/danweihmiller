@@ -25,6 +25,10 @@ const BrandingGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    gap: ${props => props.theme.spacing.xs};
+  }
 `;
 
 const AgentName = styled(Link)`
@@ -47,9 +51,12 @@ const Separator = styled.span`
   color: ${props => props.theme.colors.white};
   opacity: 0.8;
   font-size: 1.5rem;
+  margin: 0 ${props => props.theme.spacing.sm};
 
   @media (max-width: 768px) {
-    display: none;
+    font-size: 1.25rem;
+    margin: 0 ${props => props.theme.spacing.xs};
+    opacity: 0.6;
   }
 `;
 

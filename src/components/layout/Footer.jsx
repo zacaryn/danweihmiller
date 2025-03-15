@@ -134,7 +134,9 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <p><a href="/listings">View Listings</a></p>
           <p><a href="/about">About Dan</a></p>
-          <p>© {new Date().getFullYear()} All rights reserved</p>
+          <p style={{ marginTop: '1rem', fontSize: '0.9rem', opacity: '0.7' }}>
+            © {new Date().getFullYear()} All rights reserved | Website by <a href="https://hh6.io" target="_blank" rel="noopener noreferrer" style={{ opacity: '0.8' }}>HH6 Influential</a>
+          </p>
         </FooterSection>
       </FooterContent>
     </FooterWrapper>

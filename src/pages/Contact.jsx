@@ -4,19 +4,31 @@ import ContactForm from '../components/contact/ContactForm';
 import SEO from '../components/shared/SEO';
 
 const ContactContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.lg};
+  padding-top: calc(80px + ${props => props.theme.spacing.md}); // Reduced desktop padding
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md} 0;
+    padding-top: calc(60px + ${props => props.theme.spacing.md}); // Keep mobile padding the same
+  }
 `;
 
 const ContactHeader = styled.div`
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: ${props => props.theme.spacing.xl};
+  padding: 0 ${props => props.theme.spacing.sm};
   
   h1 {
     font-size: 2.5rem;
     color: ${props => props.theme.colors.primary};
-    margin-bottom: 1rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+
+    @media (max-width: 768px) {
+      font-size: 2rem;
+      margin-bottom: ${props => props.theme.spacing.sm};
+    }
   }
   
   p {
@@ -25,18 +37,24 @@ const ContactHeader = styled.div`
     max-width: 800px;
     margin: 0 auto;
     color: ${props => props.theme.colors.text};
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
   }
 `;
 
 const ContactGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  margin-top: 2rem;
+  gap: ${props => props.theme.spacing.xl};
+  margin-top: ${props => props.theme.spacing.lg};
+  padding: 0 ${props => props.theme.spacing.sm};
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: ${props => props.theme.spacing.md};
+    padding: 0;
   }
 `;
 
@@ -44,25 +62,34 @@ const ContactInfo = styled.div`
   h2 {
     font-size: 1.8rem;
     color: ${props => props.theme.colors.primary};
-    margin-bottom: 1.5rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
   }
 
   p {
     font-size: 1.1rem;
     line-height: 1.8;
-    margin-bottom: 1.5rem;
+    margin-bottom: ${props => props.theme.spacing.md};
     color: ${props => props.theme.colors.text};
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
   }
 `;
 
 const ContactMethod = styled.div`
-  margin-bottom: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.sm};
   transition: ${props => props.theme.transitions.default};
   padding: ${props => props.theme.spacing.sm};
   border-radius: ${props => props.theme.borderRadius.small};
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: ${props => props.theme.spacing.sm};
 
   &:hover {
     background-color: ${props => props.theme.colors.lightGray};
@@ -72,6 +99,10 @@ const ContactMethod = styled.div`
     font-size: 1.2rem;
     color: ${props => props.theme.colors.primary};
     margin-bottom: ${props => props.theme.spacing.xs};
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
   }
 
   a {
@@ -80,10 +111,15 @@ const ContactMethod = styled.div`
     font-size: 1.1rem;
     transition: ${props => props.theme.transitions.fast};
     display: inline-block;
+    word-break: break-word;
     
     &:hover {
       color: ${props => props.theme.colors.primary};
       transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
     }
   }
 
@@ -96,10 +132,16 @@ const ContactMethod = styled.div`
     background-color: ${props => props.theme.colors.accent};
     color: ${props => props.theme.colors.primary};
     border-radius: 50%;
+    flex-shrink: 0;
   }
 
   .content {
     flex: 1;
+    min-width: 0; // Prevents content from overflowing
+  }
+
+  @media (max-width: 480px) {
+    align-items: flex-start;
   }
 `;
 
@@ -109,35 +151,53 @@ const ContactCard = styled.div`
   border-radius: ${props => props.theme.borderRadius.medium};
   box-shadow: ${props => props.theme.shadows.medium};
   transition: ${props => props.theme.transitions.default};
+  overflow: hidden;
 
   &:hover {
     box-shadow: ${props => props.theme.shadows.large};
     transform: translateY(-2px);
   }
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+    border-radius: 0;
+    box-shadow: none;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
 `;
 
 const SocialSection = styled.div`
-  margin-top: 3rem;
+  margin-top: ${props => props.theme.spacing.xl};
   
   h2 {
     font-size: 1.5rem;
     color: ${props => props.theme.colors.primary};
-    margin-bottom: 1.5rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+
+    @media (max-width: 768px) {
+      font-size: 1.3rem;
+    }
   }
 `;
 
 const SocialLinks = styled.div`
   display: flex;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+  gap: ${props => props.theme.spacing.md};
+  margin-top: ${props => props.theme.spacing.md};
+  justify-content: center;
+  flex-wrap: wrap;
 `;
 
 const SocialButton = styled.a`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   background-color: ${props => props.theme.colors.primary};
   color: white;
   border-radius: 50%;
@@ -151,15 +211,40 @@ const SocialButton = styled.a`
   }
 
   svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
+  }
+
+  @media (max-width: 768px) {
+    width: 45px;
+    height: 45px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 `;
 
 const SocialCard = styled(ContactCard)`
-  margin-top: 2rem;
+  margin-top: ${props => props.theme.spacing.lg};
   text-align: center;
-  padding: 2rem;
+  padding: ${props => props.theme.spacing.lg};
+
+  @media (max-width: 768px) {
+    margin-top: ${props => props.theme.spacing.md};
+    padding: ${props => props.theme.spacing.md};
+    border-radius: 0;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+  }
 `;
 
 const Contact = () => {

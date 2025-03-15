@@ -27,8 +27,16 @@ const HeroSection = styled.section`
   }
 
   @media (max-width: 768px) {
-    min-height: auto;
-    padding: 120px 0 40px;
+    min-height: calc(100vh - 60px);
+    padding: 100px 0 40px;
+    
+    &::after {
+      background: linear-gradient(
+        to bottom,
+        rgba(23, 51, 107, 0.75),
+        rgba(23, 51, 107, 0.35)
+      );
+    }
   }
 `;
 
@@ -36,7 +44,7 @@ const HeroContent = styled.div`
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing.md};
+  padding: 0 ${props => props.theme.spacing.lg};
   position: relative;
   z-index: 1;
   display: grid;
@@ -48,10 +56,12 @@ const HeroContent = styled.div`
     grid-template-columns: 1fr;
     text-align: center;
     gap: ${props => props.theme.spacing.lg};
+    padding: 0 ${props => props.theme.spacing.md};
   }
 
   @media (max-width: 480px) {
     padding: 0 ${props => props.theme.spacing.sm};
+    gap: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -68,7 +78,7 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: ${props => props.theme.spacing.lg};
   background: rgba(255, 255, 255, 0.95);
-  padding: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.lg};
   border-radius: ${props => props.theme.borderRadius.large};
   backdrop-filter: blur(10px);
   box-shadow: ${props => props.theme.shadows.large};
@@ -79,6 +89,12 @@ const ProfileSection = styled.div`
     text-align: center;
     max-width: 500px;
     margin: 0 auto;
+    width: 100%;
+    padding: ${props => props.theme.spacing.md};
+    gap: ${props => props.theme.spacing.md};
+  }
+
+  @media (max-width: 480px) {
     padding: ${props => props.theme.spacing.sm};
   }
 `;
@@ -96,6 +112,11 @@ const ImageWrapper = styled.div`
     width: 150px;
     height: 150px;
   }
+
+  @media (max-width: 480px) {
+    width: 120px;
+    height: 120px;
+  }
 `;
 
 const AgentImage = styled.img`
@@ -106,6 +127,7 @@ const AgentImage = styled.img`
 
 const ProfileInfo = styled.div`
   flex: 1;
+  min-width: 0; // Prevents content from overflowing
 `;
 
 const BrandingTitle = styled.div`
@@ -115,8 +137,10 @@ const BrandingTitle = styled.div`
   margin-bottom: ${props => props.theme.spacing.md};
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: ${props => props.theme.spacing.xs};
+    margin-bottom: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -130,6 +154,10 @@ const AgentName = styled.h1`
   @media (max-width: 768px) {
     font-size: 2.8rem;
   }
+
+  @media (max-width: 480px) {
+    font-size: 2.2rem;
+  }
 `;
 
 const Separator = styled.span`
@@ -139,7 +167,13 @@ const Separator = styled.span`
   margin: 0 ${props => props.theme.spacing.sm};
 
   @media (max-width: 768px) {
-    display: none;
+    font-size: 2rem;
+    margin: 0 ${props => props.theme.spacing.xs};
+    opacity: 0.6;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.6rem;
   }
 `;
 
@@ -153,13 +187,28 @@ const BrokerageLogo = styled.img`
 
   @media (max-width: 768px) {
     height: 24px;
-    margin-top: 4px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 480px) {
+    height: 20px;
+    margin-top: 6px;
   }
 `;
 
 const SmallBrokerageLogo = styled(BrokerageLogo)`
-  height: 20px;
+  height: 24px;
   margin-top: 8px;
+
+  @media (max-width: 768px) {
+    height: 20px;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 480px) {
+    height: 16px;
+    margin-top: 4px;
+  }
 `;
 
 const Title = styled.h1`
@@ -199,6 +248,10 @@ const Stats = styled.div`
     justify-content: center;
     gap: ${props => props.theme.spacing.md};
   }
+
+  @media (max-width: 480px) {
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const StatItem = styled.div`
@@ -211,6 +264,10 @@ const StatNumber = styled.div`
   color: ${props => props.theme.colors.primary};
   line-height: 1;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
 `;
 
 const StatLabel = styled.div`
@@ -218,12 +275,16 @@ const StatLabel = styled.div`
   color: ${props => props.theme.colors.darkGray};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+  }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.sm};
-  margin-top: ${props => props.theme.spacing.md};
+  margin-top: ${props => props.theme.spacing.lg};
   
   @media (max-width: 968px) {
     justify-content: center;
@@ -232,6 +293,7 @@ const ButtonGroup = styled.div`
   @media (max-width: 480px) {
     flex-direction: column;
     gap: ${props => props.theme.spacing.sm};
+    margin-top: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -248,6 +310,7 @@ const BaseButton = styled.a`
   @media (max-width: 480px) {
     width: 100%;
     min-width: unset;
+    padding: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -278,7 +341,7 @@ const SecondaryButton = styled(BaseButton)`
 `;
 
 const FeaturesSection = styled.section`
-  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.lg};
   background: ${props => props.theme.colors.background};
 
   @media (max-width: 768px) {
@@ -295,12 +358,13 @@ const FeaturesGrid = styled.div`
 
   @media (max-width: 968px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: ${props => props.theme.spacing.md};
   }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     max-width: 600px;
-    gap: ${props => props.theme.spacing.md};
+    gap: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -320,7 +384,7 @@ const FeatureCard = styled.div`
     padding: ${props => props.theme.spacing.md};
     
     &:hover {
-      transform: none;
+      transform: translateY(-2px);
     }
   }
 `;
@@ -329,11 +393,19 @@ const FeatureTitle = styled.h3`
   font-size: 1.5rem;
   color: ${props => props.theme.colors.primary};
   margin-bottom: ${props => props.theme.spacing.sm};
+
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const FeatureText = styled.p`
   color: ${props => props.theme.colors.text};
   line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
 `;
 
 const Home = () => {
