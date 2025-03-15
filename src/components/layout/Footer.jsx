@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import expLogo from '../../assets/images/exp_realty_logo.png';
 
 const FooterWrapper = styled.footer`
   background-color: ${props => props.theme.colors.primary};
@@ -31,6 +32,7 @@ const FooterSection = styled.div`
     margin-bottom: ${props => props.theme.spacing.sm};
     position: relative;
     display: inline-block;
+    color: ${props => props.theme.colors.white};
     
     &::after {
       content: '';
@@ -60,6 +62,7 @@ const FooterSection = styled.div`
 
   p {
     margin-bottom: 0.5rem;
+    opacity: 0.8;
     
     @media (max-width: 768px) {
       margin-bottom: 0.75rem;
@@ -71,10 +74,12 @@ const FooterSection = styled.div`
     text-decoration: none;
     transition: ${props => props.theme.transitions.fast};
     display: inline-block;
-    
+    opacity: 0.8;
+
     &:hover {
       color: ${props => props.theme.colors.accent};
       transform: translateX(4px);
+      opacity: 1;
     }
     
     @media (max-width: 768px) {
@@ -85,34 +90,23 @@ const FooterSection = styled.div`
   }
 `;
 
-const SocialSection = styled.div`
-  margin-top: 1rem;
+const BrokerageSection = styled.div`
   display: flex;
-  
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
   @media (max-width: 768px) {
     justify-content: center;
   }
 `;
 
-const SocialLink = styled.a`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  margin-right: 0.5rem;
-  transition: ${props => props.theme.transitions.fast};
-  
-  &:hover {
-    background-color: ${props => props.theme.colors.accent};
-    transform: translateY(-3px);
-  }
-  
-  svg {
-    color: white;
-  }
+const BrokerageLogo = styled.img`
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
 `;
 
 const Footer = () => {
@@ -120,10 +114,12 @@ const Footer = () => {
     <FooterWrapper>
       <FooterContent>
         <FooterSection>
-          <h3>Dan Weihmiller Realty</h3>
+          <h3>Dan Weihmiller</h3>
           <p>Serving the Front Range</p>
           <p>of Colorado Springs</p>
-          <p>EXP Realty LLC</p>
+          <BrokerageSection>
+            <BrokerageLogo src={expLogo} alt="eXp Realty" />
+          </BrokerageSection>
         </FooterSection>
         <FooterSection>
           <h3>Contact</h3>
@@ -131,7 +127,7 @@ const Footer = () => {
             <a href="tel:7193018257">(719) 301-8257</a>
           </p>
           <p>
-            <a href="mailto:buildingincolorado22@gmail.com">buildingincolorado22@gmail.com</a>
+            <a href="mailto:dan@danweihmiller.com">dan@danweihmiller.com</a>
           </p>
         </FooterSection>
         <FooterSection>
@@ -139,7 +135,6 @@ const Footer = () => {
           <p><a href="/listings">View Listings</a></p>
           <p><a href="/about">About Dan</a></p>
           <p>© {new Date().getFullYear()} All rights reserved</p>
-          <p><small>Website by <a href="https://hh6influential.com/" target="_blank" rel="noopener noreferrer">HH6 Influential</a></small></p>
         </FooterSection>
       </FooterContent>
     </FooterWrapper>

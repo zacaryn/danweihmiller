@@ -1,15 +1,15 @@
 import styled from '@emotion/styled';
 import sceneImg from '../assets/images/scene.jpg';
+import expLogo from '../assets/images/exp_realty_logo.png';
 import SEO from '../components/shared/SEO';
 
 const HeroSection = styled.section`
-  min-height: 90vh;
+  min-height: 100vh;
+  padding-top: 80px; // Account for fixed navbar
   background: url(${sceneImg}) center/cover no-repeat;
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: ${props => props.theme.spacing.md};
-  position: relative;
   
   &::after {
     content: '';
@@ -19,149 +19,321 @@ const HeroSection = styled.section`
     right: 0;
     bottom: 0;
     background: linear-gradient(
-      135deg,
-      rgba(0, 0, 0, 0.4),
-      rgba(0, 0, 0, 0.2)
+      to right,
+      rgba(23, 51, 107, 0.75),
+      rgba(23, 51, 107, 0.35) 50%,
+      rgba(23, 51, 107, 0.05)
     );
-    backdrop-filter: blur(1px);
-    transition: ${props => props.theme.transitions.slow};
+  }
+
+  @media (max-width: 768px) {
+    min-height: auto;
+    padding: 120px 0 40px;
   }
 `;
 
 const HeroContent = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   width: 100%;
+  margin: 0 auto;
+  padding: 0 ${props => props.theme.spacing.md};
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr;
   gap: ${props => props.theme.spacing.xl};
   align-items: center;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: ${props => props.theme.borderRadius.large};
-  box-shadow: ${props => props.theme.shadows.large};
-  padding: ${props => props.theme.spacing.xl};
-  backdrop-filter: blur(8px);
 
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
     text-align: center;
-    max-width: 600px;
+    gap: ${props => props.theme.spacing.lg};
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 ${props => props.theme.spacing.sm};
+  }
+`;
+
+const IntroSection = styled.div`
+  color: ${props => props.theme.colors.white};
+
+  @media (max-width: 968px) {
+    order: 2;
+  }
+`;
+
+const ProfileSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.lg};
+  background: rgba(255, 255, 255, 0.95);
+  padding: ${props => props.theme.spacing.md};
+  border-radius: ${props => props.theme.borderRadius.large};
+  backdrop-filter: blur(10px);
+  box-shadow: ${props => props.theme.shadows.large};
+
+  @media (max-width: 968px) {
+    order: 1;
+    flex-direction: column;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: ${props => props.theme.spacing.sm};
+  }
+`;
+
+const ImageWrapper = styled.div`
+  flex-shrink: 0;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid ${props => props.theme.colors.white};
+  box-shadow: ${props => props.theme.shadows.medium};
+
+  @media (max-width: 768px) {
+    width: 150px;
+    height: 150px;
   }
 `;
 
 const AgentImage = styled.img`
   width: 100%;
-  max-width: 350px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  object-fit: cover;
+`;
 
-  @media (max-width: 968px) {
-    margin: 0 auto;
+const ProfileInfo = styled.div`
+  flex: 1;
+`;
+
+const BrandingTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.md};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: ${props => props.theme.spacing.xs};
   }
 `;
 
-const HeroText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`;
-
-const Title = styled.h1`
+const AgentName = styled.h1`
   font-family: 'Playfair Display', serif;
   font-size: 3.5rem;
-  color: ${props => props.theme.colors.primary};
   line-height: 1.2;
+  color: inherit;
+  margin: 0;
 
   @media (max-width: 768px) {
     font-size: 2.8rem;
   }
 `;
 
+const Separator = styled.span`
+  font-size: 2.5rem;
+  color: ${props => props.theme.colors.white};
+  opacity: 0.8;
+  margin: 0 ${props => props.theme.spacing.sm};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const BrokerageLogo = styled.img`
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  margin-top: 12px;
+
+  @media (max-width: 768px) {
+    height: 24px;
+    margin-top: 4px;
+  }
+`;
+
+const SmallBrokerageLogo = styled(BrokerageLogo)`
+  height: 20px;
+  margin-top: 8px;
+`;
+
+const Title = styled.h1`
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  line-height: 1.2;
+  margin-bottom: ${props => props.theme.spacing.sm};
+  color: inherit;
+
+  @media (max-width: 768px) {
+    font-size: 2.8rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2.2rem;
+  }
+`;
+
 const Subtitle = styled.p`
   font-size: 1.25rem;
-  color: ${props => props.theme.colors.text};
   line-height: 1.6;
+  margin-bottom: ${props => props.theme.spacing.md};
+  color: inherit;
+  opacity: 0.9;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+`;
+
+const Stats = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.lg};
+  margin: ${props => props.theme.spacing.md} 0;
+
+  @media (max-width: 968px) {
+    justify-content: center;
+    gap: ${props => props.theme.spacing.md};
+  }
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatNumber = styled.div`
+  font-size: 2rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.primary};
+  line-height: 1;
+  margin-bottom: 0.5rem;
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.theme.colors.darkGray};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.sm};
+  margin-top: ${props => props.theme.spacing.md};
+  
+  @media (max-width: 968px) {
+    justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const BaseButton = styled.a`
   display: inline-block;
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
   text-decoration: none;
   border-radius: ${props => props.theme.borderRadius.small};
   font-weight: 500;
   transition: ${props => props.theme.transitions.fast};
-  box-shadow: ${props => props.theme.shadows.small};
   text-align: center;
   min-width: 160px;
 
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 968px) {
+  @media (max-width: 480px) {
     width: 100%;
+    min-width: unset;
   }
 `;
 
 const PrimaryButton = styled(BaseButton)`
-  background-color: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  border: 2px solid ${props => props.theme.colors.primary};
+  background-color: ${props => props.theme.colors.white};
+  color: ${props => props.theme.colors.primary};
+  border: 2px solid ${props => props.theme.colors.white};
 
   &:hover {
-    background-color: ${props => props.theme.colors.secondary};
-    border-color: ${props => props.theme.colors.secondary};
+    background-color: transparent;
+    color: ${props => props.theme.colors.white};
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadows.medium};
   }
 `;
 
 const SecondaryButton = styled(BaseButton)`
-  background-color: ${props => props.theme.colors.white};
-  color: ${props => props.theme.colors.primary};
-  border: 2px solid ${props => props.theme.colors.primary};
+  background-color: transparent;
+  color: ${props => props.theme.colors.white};
+  border: 2px solid ${props => props.theme.colors.white};
 
   &:hover {
-    background-color: ${props => props.theme.colors.lightGray};
+    background-color: ${props => props.theme.colors.white};
+    color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadows.medium};
   }
 `;
 
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.sm};
-  
-  @media (max-width: 968px) {
-    justify-content: center;
-    flex-direction: column;
-    width: 100%;
-  }
-`;
-
-const ExperienceSection = styled.section`
+const FeaturesSection = styled.section`
   padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.md};
-  background: ${props => props.theme.colors.white};
+  background: ${props => props.theme.colors.background};
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.sm};
+  }
 `;
 
-const ExperienceContainer = styled.div`
-  max-width: 800px;
+const FeaturesGrid = styled.div`
+  max-width: 1400px;
   margin: 0 auto;
-  text-align: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${props => props.theme.spacing.lg};
 
-  h2 {
-    font-size: 2.5rem;
-    color: ${props => props.theme.colors.primary};
-    margin-bottom: ${props => props.theme.spacing.md};
+  @media (max-width: 968px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  p {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    margin-bottom: ${props => props.theme.spacing.md};
-    color: ${props => props.theme.colors.text};
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    gap: ${props => props.theme.spacing.md};
   }
+`;
+
+const FeatureCard = styled.div`
+  background: ${props => props.theme.colors.white};
+  padding: ${props => props.theme.spacing.lg};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.medium};
+  transition: ${props => props.theme.transitions.default};
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${props => props.theme.shadows.large};
+  }
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+    
+    &:hover {
+      transform: none;
+    }
+  }
+`;
+
+const FeatureTitle = styled.h3`
+  font-size: 1.5rem;
+  color: ${props => props.theme.colors.primary};
+  margin-bottom: ${props => props.theme.spacing.sm};
+`;
+
+const FeatureText = styled.p`
+  color: ${props => props.theme.colors.text};
+  line-height: 1.6;
 `;
 
 const Home = () => {
@@ -169,15 +341,18 @@ const Home = () => {
     <>
       <SEO 
         pageName="Home" 
-        description="Dan Weihmiller - Expert real estate agent serving Colorado Springs and the Front Range. Find your dream home or sell your property with personalized service."
+        description="Dan Weihmiller - Real estate professional with eXp Realty serving Colorado Springs and the Front Range. Find your dream home or sell your property with personalized service."
         image="/images/og-image.jpg"
       />
       <div>
         <HeroSection>
           <HeroContent>
-            <AgentImage src={'/src/assets/images/headshot.jpg'} alt="Daniel Weihmiller" />
-            <HeroText>
-              <Title>Dan Weihmiller Realty</Title>
+            <IntroSection>
+              <BrandingTitle>
+                <AgentName>Dan Weihmiller</AgentName>
+                <Separator>|</Separator>
+                <BrokerageLogo src={expLogo} alt="eXp Realty" />
+              </BrandingTitle>
               <Subtitle>
                 Bringing over 35 years of trusted real estate expertise to the Front Range of Colorado Springs.
               </Subtitle>
@@ -185,29 +360,50 @@ const Home = () => {
                 <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
                 <SecondaryButton href="/listings">View Listings</SecondaryButton>
               </ButtonGroup>
-            </HeroText>
+            </IntroSection>
+            <ProfileSection>
+              <ImageWrapper>
+                <AgentImage src={'/src/assets/images/headshot.jpg'} alt="Daniel Weihmiller" />
+              </ImageWrapper>
+              <ProfileInfo>
+                <Stats>
+                  <StatItem>
+                    <StatNumber>35+</StatNumber>
+                    <StatLabel>Years Experience</StatLabel>
+                  </StatItem>
+                  <StatItem>
+                    <StatNumber>500+</StatNumber>
+                    <StatLabel>Properties Sold</StatLabel>
+                  </StatItem>
+                </Stats>
+                <SmallBrokerageLogo src={expLogo} alt="eXp Realty" />
+              </ProfileInfo>
+            </ProfileSection>
           </HeroContent>
         </HeroSection>
 
-        <ExperienceSection>
-          <ExperienceContainer>
-            <h2>Your Colorado Springs Real Estate Expert</h2>
-            <p>
-              Since 1987, Dan Weihmiller has been a cornerstone of the Front Range of Colorado Springs real estate community. 
-              With deep local roots and extensive market knowledge, Dan specializes in helping 
-              both buyers and sellers achieve their real estate goals.
-            </p>
-            <p>
-              Whether you're a first-time homebuyer, looking to upgrade, or interested in investment properties, 
-              Dan's comprehensive understanding of the local market ensures you'll receive expert guidance every 
-              step of the way.
-            </p>
-            <ButtonGroup>
-              <PrimaryButton href="/about">Learn More About Dan</PrimaryButton>
-              <SecondaryButton href="tel:7193018257">Call (719) 301-8257</SecondaryButton>
-            </ButtonGroup>
-          </ExperienceContainer>
-        </ExperienceSection>
+        <FeaturesSection>
+          <FeaturesGrid>
+            <FeatureCard>
+              <FeatureTitle>Local Expertise</FeatureTitle>
+              <FeatureText>
+                Deep understanding of Colorado Springs neighborhoods, market trends, and property values to help you make informed decisions.
+              </FeatureText>
+            </FeatureCard>
+            <FeatureCard>
+              <FeatureTitle>Personalized Service</FeatureTitle>
+              <FeatureText>
+                Dedicated attention to your unique needs, whether you're buying your first home or selling an investment property.
+              </FeatureText>
+            </FeatureCard>
+            <FeatureCard>
+              <FeatureTitle>Proven Results</FeatureTitle>
+              <FeatureText>
+                A track record of successful transactions and satisfied clients throughout the Front Range region.
+              </FeatureText>
+            </FeatureCard>
+          </FeaturesGrid>
+        </FeaturesSection>
       </div>
     </>
   );

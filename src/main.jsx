@@ -21,14 +21,21 @@ Storage.configure({
 
 const theme = {
   colors: {
-    primary: '#4A4036',
-    secondary: '#8B7355',
-    accent: '#D4C4B7',
-    background: '#F5F5F5',
-    text: '#2D2D2D',
+    // Darker royal blue
+    primary: '#0E1F45',
+    // Adjusted complementary blue
+    secondary: '#1B3366',
+    // Sophisticated gray accent for b&w integration
+    accent: '#E8E9ED',
+    // Cool white background
+    background: '#FCFCFD',
+    // Deep blue-gray text
+    text: '#1A2B45',
     white: '#FFFFFF',
-    lightGray: '#F8F8F8',
-    darkGray: '#4A4A4A'
+    // Light cool gray for subtle backgrounds
+    lightGray: '#F4F5F7',
+    // Rich gray for secondary text
+    darkGray: '#3E4B63'
   },
   spacing: {
     xs: '0.5rem',
@@ -38,9 +45,9 @@ const theme = {
     xl: '4rem'
   },
   shadows: {
-    small: '0 2px 4px rgba(0,0,0,0.1)',
-    medium: '0 4px 6px rgba(0,0,0,0.1)',
-    large: '0 6px 8px rgba(0,0,0,0.1)'
+    small: '0 2px 4px rgba(23, 51, 107, 0.06)',
+    medium: '0 4px 6px rgba(23, 51, 107, 0.1)',
+    large: '0 6px 8px rgba(23, 51, 107, 0.14)'
   },
   transitions: {
     default: 'all 0.3s ease',

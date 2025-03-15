@@ -7,26 +7,42 @@ import SEO from '../components/shared/SEO';
 const ListingsContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.xl};
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+  }
 `;
 
 const ListingsHeader = styled.div`
   text-align: center;
   margin-bottom: ${props => props.theme.spacing.xl};
+  
+  @media (max-width: 768px) {
+    margin-bottom: ${props => props.theme.spacing.lg};
+  }
 `;
 
 const Title = styled.h1`
   font-size: 2.5rem;
   color: ${props => props.theme.colors.primary};
   margin-bottom: ${props => props.theme.spacing.sm};
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const Subtitle = styled.p`
-  font-size: 1.1rem;
-  color: ${props => props.theme.colors.text};
+  font-size: 1.2rem;
+  color: ${props => props.theme.colors.darkGray};
   max-width: 600px;
   margin: 0 auto;
-  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0 ${props => props.theme.spacing.sm};
+  }
 `;
 
 const ComingSoonMessage = styled.div`
@@ -72,51 +88,62 @@ const PrimaryButton = styled.a`
   }
 `;
 
+const FilterBar = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.xl};
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    gap: ${props => props.theme.spacing.sm};
+    margin-bottom: ${props => props.theme.spacing.lg};
+  }
+`;
+
+const FilterButton = styled.button`
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  border: none;
+  border-radius: ${props => props.theme.borderRadius.small};
+  background: ${props => props.active ? props.theme.colors.primary : props.theme.colors.white};
+  color: ${props => props.active ? props.theme.colors.white : props.theme.colors.text};
+  font-weight: 500;
+  cursor: pointer;
+  transition: ${props => props.theme.transitions.default};
+  box-shadow: ${props => props.theme.shadows.small};
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadows.medium};
+  }
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+    font-size: 0.9rem;
+  }
+`;
+
 const ListingsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: ${props => props.theme.spacing.lg};
-  margin-top: ${props => props.theme.spacing.xl};
-`;
-
-const FilterBar = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.md};
-  margin-bottom: ${props => props.theme.spacing.lg};
-  flex-wrap: wrap;
-`;
-
-const FilterButton = styled.button`
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  background: ${props => props.active ? props.theme.colors.primary : props.theme.colors.white};
-  color: ${props => props.active ? props.theme.colors.white : props.theme.colors.primary};
-  border: 2px solid ${props => props.theme.colors.primary};
-  border-radius: ${props => props.theme.borderRadius.small};
-  cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
-
-  &:hover {
-    background: ${props => props.theme.colors.primary};
-    color: ${props => props.theme.colors.white};
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: ${props => props.theme.spacing.md};
   }
 `;
 
 const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 1.2rem;
+  text-align: center;
+  padding: ${props => props.theme.spacing.xl};
   color: ${props => props.theme.colors.primary};
 `;
 
 const ErrorMessage = styled.div`
   text-align: center;
-  padding: ${props => props.theme.spacing.lg};
-  color: #e74c3c;
-  background: #fdf0ed;
-  border-radius: ${props => props.theme.borderRadius.medium};
-  margin: ${props => props.theme.spacing.lg} 0;
+  padding: ${props => props.theme.spacing.xl};
+  color: ${props => props.theme.colors.error};
 `;
 
 const Listings = () => {
