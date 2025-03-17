@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthService } from '../services/aws-service';
 import AdminInquiries from './AdminInquiries';
+import AdminListings from './AdminListings';
 import { FaHome, FaList, FaEnvelope, FaCog } from 'react-icons/fa';
 import SEO from '../components/shared/SEO';
 
@@ -233,33 +234,6 @@ const ActionButton = styled.button`
   }
 `;
 
-const GuideList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.md};
-`;
-
-const GuideItem = styled.div`
-  padding-bottom: ${props => props.theme.spacing.sm};
-  border-bottom: 1px solid ${props => props.theme.colors.lightGray};
-  
-  &:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-`;
-
-const GuideTitle = styled.h4`
-  margin: 0 0 ${props => props.theme.spacing.xs} 0;
-  color: ${props => props.theme.colors.primary};
-`;
-
-const GuideDescription = styled.p`
-  margin: 0;
-  color: ${props => props.theme.colors.darkGray};
-  font-size: 0.9rem;
-`;
-
 const Card = styled.div`
   background: ${props => props.theme.colors.white};
   border-radius: ${props => props.theme.borderRadius.medium};
@@ -269,64 +243,17 @@ const Card = styled.div`
   overflow: hidden;
 `;
 
-const SettingsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: ${props => props.theme.spacing.lg};
-  margin-top: ${props => props.theme.spacing.lg};
-`;
-
-const SettingsCard = styled(Card)`
-  overflow: hidden;
-`;
-
-const SettingsCardHeader = styled.div`
+const SettingsInfo = styled.div`
+  background: ${props => props.theme.colors.accent};
   padding: ${props => props.theme.spacing.md};
-  background: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  margin: -${props => props.theme.spacing.lg} -${props => props.theme.spacing.lg} ${props => props.theme.spacing.md};
+  border-radius: ${props => props.theme.borderRadius.small};
+  margin-bottom: ${props => props.theme.spacing.md};
+  border-left: 3px solid ${props => props.theme.colors.primary};
   
-  h3 {
+  p {
     margin: 0;
-    font-size: 1.2rem;
+    color: ${props => props.theme.colors.text};
   }
-`;
-
-const SettingsCardContent = styled.div`
-  padding: 0;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: ${props => props.theme.spacing.md};
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: ${props => props.theme.spacing.xs};
-  font-weight: 500;
-  color: ${props => props.theme.colors.darkGray};
-`;
-
-const CheckboxGroup = styled.div`
-  margin-bottom: ${props => props.theme.spacing.md};
-`;
-
-const Checkbox = styled.label`
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  cursor: pointer;
-  
-  input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-  }
-`;
-
-const CheckboxLabel = styled.span`
-  color: ${props => props.theme.colors.darkGray};
 `;
 
 const authenticate = async (username, password) => {
@@ -351,7 +278,7 @@ const Admin = () => {
     }
   }, [searchParams]);
 
-  // Check if user is already logged in on mount
+  // Update checkLoggedIn to use AuthService
   useEffect(() => {
     const checkLoggedIn = async () => {
       const isAuthenticated = await AuthService.isAuthenticated();
@@ -372,10 +299,8 @@ const Admin = () => {
       if (result.success) {
         setIsLoggedIn(true);
         localStorage.setItem('isAdminLoggedIn', 'true');
-        
-        // In the future, this will store the JWT token from AWS Cognito
       } else {
-        setError('Invalid username or password');
+        setError(result.error || 'Invalid username or password');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -390,19 +315,14 @@ const Admin = () => {
       await AuthService.logout();
       setIsLoggedIn(false);
       localStorage.removeItem('isAdminLoggedIn');
-      // Will clear AWS Cognito tokens in the future
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
   const navigateToSection = (section) => {
-    if (section === 'listings') {
-      navigate('/admin/listings');
-    } else {
-      navigate(`/admin?tab=${section}`);
-      setActiveTab(section);
-    }
+    navigate(`/admin?tab=${section}`);
+    setActiveTab(section);
   };
 
   if (!isLoggedIn) {
@@ -465,8 +385,8 @@ const Admin = () => {
             <FaHome /> Dashboard
           </NavLink>
           <NavLink 
-            active={activeTab === 'listings' || window.location.pathname === '/admin/listings'} 
-            onClick={() => navigateToSection('listings')}
+            active={activeTab === 'listings'} 
+            onClick={() => setActiveTab('listings')}
           >
             <FaList /> Listings
           </NavLink>
@@ -526,29 +446,15 @@ const Admin = () => {
                   </ActionButton>
                 </DashboardContent>
               </DashboardCard>
-              
-              <DashboardCard>
-                <DashboardCardHeader>
-                  <h3>Getting Started</h3>
-                </DashboardCardHeader>
-                <DashboardContent>
-                  <GuideList>
-                    <GuideItem>
-                      <GuideTitle>Add Your First Listing</GuideTitle>
-                      <GuideDescription>Go to Listings and click "Add New Listing" to create your first property listing.</GuideDescription>
-                    </GuideItem>
-                    <GuideItem>
-                      <GuideTitle>Respond to Inquiries</GuideTitle>
-                      <GuideDescription>Check the Inquiries tab to see and respond to customer messages.</GuideDescription>
-                    </GuideItem>
-                    <GuideItem>
-                      <GuideTitle>Update Your Settings</GuideTitle>
-                      <GuideDescription>Configure your account settings in the Settings tab.</GuideDescription>
-                    </GuideItem>
-                  </GuideList>
-                </DashboardContent>
-              </DashboardCard>
             </DashboardGrid>
+          </div>
+        )}
+
+        {activeTab === 'listings' && (
+          <div>
+            <h2>Manage Listings</h2>
+            <p>Add, edit, and remove property listings.</p>
+            <AdminListings />
           </div>
         )}
 
@@ -563,71 +469,17 @@ const Admin = () => {
         {activeTab === 'settings' && (
           <div>
             <h2>Admin Settings</h2>
-            <p>Configure your account and website settings.</p>
+            <p>Configure AWS permissions and database access.</p>
             
-            <SettingsGrid>
-              <SettingsCard>
-                <SettingsCardHeader>
-                  <h3>Profile Settings</h3>
-                </SettingsCardHeader>
-                <SettingsCardContent>
-                  <FormGroup>
-                    <Label>Display Name</Label>
-                    <Input type="text" defaultValue="Dan Weihmiller" />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>Email Address</Label>
-                    <Input type="email" defaultValue="buildingincolorado22@gmail.com" />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>Phone</Label>
-                    <Input type="tel" defaultValue="(719) 301-8257" />
-                  </FormGroup>
-                  <Button primary center>Save Profile</Button>
-                </SettingsCardContent>
-              </SettingsCard>
-              
-              <SettingsCard>
-                <SettingsCardHeader>
-                  <h3>Password</h3>
-                </SettingsCardHeader>
-                <SettingsCardContent>
-                  <FormGroup>
-                    <Label>Current Password</Label>
-                    <Input type="password" />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>New Password</Label>
-                    <Input type="password" />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>Confirm New Password</Label>
-                    <Input type="password" />
-                  </FormGroup>
-                  <Button primary center>Update Password</Button>
-                </SettingsCardContent>
-              </SettingsCard>
-              
-              <SettingsCard>
-                <SettingsCardHeader>
-                  <h3>Notification Settings</h3>
-                </SettingsCardHeader>
-                <SettingsCardContent>
-                  <CheckboxGroup>
-                    <Checkbox defaultChecked>
-                      <CheckboxLabel>Email me when I receive a new inquiry</CheckboxLabel>
-                    </Checkbox>
-                    <Checkbox defaultChecked>
-                      <CheckboxLabel>Email me when a listing is viewed</CheckboxLabel>
-                    </Checkbox>
-                    <Checkbox>
-                      <CheckboxLabel>Send weekly summary reports</CheckboxLabel>
-                    </Checkbox>
-                  </CheckboxGroup>
-                  <Button primary center>Save Preferences</Button>
-                </SettingsCardContent>
-              </SettingsCard>
-            </SettingsGrid>
+            <SettingsInfo>
+              <p>DynamoDB services require appropriate IAM permissions. Please contact your administrator if you need help configuring AWS access.</p>
+            </SettingsInfo>
+            
+            <Card>
+              <h3>Security</h3>
+              <p>For security reasons, please remember to log out when you're finished managing your website.</p>
+              <Button primary onClick={handleLogout}>Log Out</Button>
+            </Card>
           </div>
         )}
       </AdminContainer>

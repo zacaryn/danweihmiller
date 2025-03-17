@@ -243,41 +243,69 @@ const Stats = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.lg};
   margin: ${props => props.theme.spacing.md} 0;
+  padding: ${props => props.theme.spacing.md};
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.small};
 
   @media (max-width: 968px) {
     justify-content: center;
-    gap: ${props => props.theme.spacing.md};
+    gap: ${props => props.theme.spacing.xl};
+    width: 100%;
   }
 
   @media (max-width: 480px) {
-    gap: ${props => props.theme.spacing.sm};
+    gap: ${props => props.theme.spacing.lg};
+    padding: ${props => props.theme.spacing.sm};
   }
 `;
 
 const StatItem = styled.div`
   text-align: center;
+  position: relative;
+  
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -${props => props.theme.spacing.md};
+    top: 50%;
+    transform: translateY(-50%);
+    height: 40px;
+    width: 1px;
+    background: ${props => props.theme.colors.lightGray};
+  }
+
+  @media (max-width: 480px) {
+    &:not(:last-child)::after {
+      right: -${props => props.theme.spacing.sm};
+      height: 30px;
+    }
+  }
 `;
 
 const StatNumber = styled.div`
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 600;
   color: ${props => props.theme.colors.primary};
   line-height: 1;
   margin-bottom: 0.5rem;
+  font-family: 'Playfair Display', serif;
 
   @media (max-width: 480px) {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: ${props => props.theme.colors.darkGray};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-weight: 500;
 
   @media (max-width: 480px) {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
   }
 `;
 
@@ -448,7 +476,6 @@ const Home = () => {
                     <StatLabel>Properties Sold</StatLabel>
                   </StatItem>
                 </Stats>
-                <SmallBrokerageLogo src={expLogo} alt="eXp Realty" />
               </ProfileInfo>
             </ProfileSection>
           </HeroContent>

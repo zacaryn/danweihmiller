@@ -140,7 +140,7 @@ const About = () => {
         
         <ContentSection>
           <Paragraph>
-            A licensed real estate professional serving the Front Range of Colorado Springs since 1987, 
+            A licensed real estate professional with eXp Realty serving Colorado Springs since 1987, 
             Dan Weihmiller has established himself as a trusted name in the community. Dan is dedicated 
             to providing exceptional service and is always happy to answer any of your real estate questions.
           </Paragraph>
@@ -153,7 +153,7 @@ const About = () => {
           </Paragraph>
 
           <Paragraph>
-            Specializing in residential real estate in the Front Range of Colorado Springs, Dan has 
+            Specializing in residential real estate in Colorado Springs, Dan has 
             developed a deep understanding of local market trends, neighborhood characteristics, 
             and property values. This expertise allows him to provide his clients with accurate, 
             up-to-date information and realistic expectations.

@@ -20,8 +20,8 @@ const SEO = ({
   useProfileImage = false,
   children
 }) => {
-  const defaultDescription = "Dan Weihmiller Real Estate - Expert real estate services in Colorado Springs. Over 35 years of trusted experience serving the Front Range.";
-  const siteTitle = "Dan Weihmiller Real Estate | Colorado Springs";
+  const defaultDescription = "Dan Weihmiller, Realtor® with eXp Realty - Expert real estate services in Colorado Springs. Over 35 years of trusted experience serving the Front Range.";
+  const siteTitle = "Dan Weihmiller, Realtor® with eXp Realty | Colorado Springs";
   const profileImage = '/images/dan-weihmiller.jpg';
   
   // Determine which title to use
@@ -47,7 +47,7 @@ const SEO = ({
       <meta property="og:title" content={displayTitle} />
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={displayImage} />
-      <meta property="og:site_name" content="Dan Weihmiller Real Estate" />
+      <meta property="og:site_name" content="Dan Weihmiller, Realtor® with eXp Realty" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -60,8 +60,8 @@ const SEO = ({
       <meta name="geo.placename" content="Colorado Springs" />
       
       {/* Image Alt Text for Accessibility */}
-      <meta name="twitter:image:alt" content="Dan Weihmiller Real Estate, Colorado Springs" />
-      <meta property="og:image:alt" content="Dan Weihmiller Real Estate, Colorado Springs" />
+      <meta name="twitter:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
+      <meta property="og:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
       
       {/* Pass through any additional meta tags */}
       {children}

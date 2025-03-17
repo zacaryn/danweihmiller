@@ -1,382 +1,337 @@
+import { useState } from 'react';
 import styled from '@emotion/styled';
-import { useState, useRef } from 'react';
+import { ListingsService, StorageService } from '../../services/aws-service';
 
-const Form = styled.form`
-  background: ${props => props.theme.colors.white};
-  padding: ${props => props.theme.spacing.lg};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
-  margin-bottom: ${props => props.theme.spacing.xl};
+const FormContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: ${props => props.theme.spacing.md};
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #333;
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: ${props => props.theme.spacing.sm};
-  border: 1px solid ${props => props.theme.colors.darkGray};
-  border-radius: ${props => props.theme.borderRadius.small};
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #4A4036;
+  }
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  padding: ${props => props.theme.spacing.sm};
-  border: 1px solid ${props => props.theme.colors.darkGray};
-  border-radius: ${props => props.theme.borderRadius.small};
-  min-height: 100px;
+const Textarea = styled.textarea`
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-height: 120px;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: #4A4036;
+  }
 `;
 
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.sm};
-  margin-top: ${props => props.theme.spacing.md};
+const Select = styled.select`
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+
+  &:focus {
+    outline: none;
+    border-color: #4A4036;
+  }
 `;
 
 const Button = styled.button`
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  background: ${props => props.primary ? props.theme.colors.primary : 'transparent'};
-  color: ${props => props.primary ? props.theme.colors.white : props.theme.colors.primary};
-  border: 2px solid ${props => props.theme.colors.primary};
-  border-radius: ${props => props.theme.borderRadius.small};
+  padding: 0.75rem 1.5rem;
+  background-color: #4A4036;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
+  transition: background-color 0.2s;
 
   &:hover {
-    background: ${props => props.primary ? props.theme.colors.secondary : props.theme.colors.lightGray};
+    background-color: #5B4D42;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 
-const ImageUrlInput = styled.div`
-  margin: ${props => props.theme.spacing.md} 0;
-`;
-
-const ImageUrlList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.sm};
-`;
-
-const ImageUrlRow = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.sm};
-  align-items: center;
-`;
-
-const ImagePreview = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.sm};
-  flex-wrap: wrap;
-  margin-top: ${props => props.theme.spacing.sm};
-`;
-
-const PreviewImage = styled.div`
-  position: relative;
-  width: 100px;
-  height: 100px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: ${props => props.theme.borderRadius.small};
-  }
-
-  button {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: ${props => props.theme.colors.primary};
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    
-    &:hover {
-      background: ${props => props.theme.colors.secondary};
-    }
-  }
-`;
-
-const ImagePreviewGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: ${props => props.theme.spacing.md};
-  margin-top: ${props => props.theme.spacing.md};
-`;
-
-const PreviewCard = styled.div`
-  position: relative;
-  aspect-ratio: 16/9;
-  border-radius: ${props => props.theme.borderRadius.small};
-  overflow: hidden;
-  border: 1px solid ${props => props.theme.colors.lightGray};
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const ErrorText = styled.div`
-  color: #e74c3c;
-  font-size: 0.9rem;
-  margin-top: 4px;
-`;
-
-const PreviewError = styled.div`
-  padding: ${props => props.theme.spacing.sm};
-  background: #fee;
-  color: #c00;
-  font-size: 0.9rem;
+const Message = styled.div`
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
   text-align: center;
+  
+  ${props => props.type === 'success' && `
+    background-color: #d4edda;
+    color: #155724;
+  `}
+  
+  ${props => props.type === 'error' && `
+    background-color: #f8d7da;
+    color: #721c24;
+  `}
 `;
 
-const ListingForm = ({ onSubmit, initialData, onCancel }) => {
+const ImagePreview = styled.img`
+  max-width: 200px;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+`;
+
+const ListingForm = ({ initialData, onSuccess }) => {
   const [formData, setFormData] = useState(initialData || {
     title: '',
     price: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    description: '',
+    status: 'active',
     bedrooms: '',
     bathrooms: '',
     squareFeet: '',
-    status: 'active',
-    images: []
+    description: '',
+    externalLink: '',
+    coverImage: null
   });
-  
-  const [imageUrls, setImageUrls] = useState(['']);
-  const [urlErrors, setUrlErrors] = useState({});
-  const [previewErrors, setPreviewErrors] = useState({});
-  const fileInputRef = useRef();
 
-  const validateUrl = (url) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
+  const [status, setStatus] = useState({
+    submitting: false,
+    message: null,
+    type: null
+  });
+
+  const [imagePreview, setImagePreview] = useState(initialData?.coverImage || null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const checkImageUrl = async (url) => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    });
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Preview the image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setFormData(prev => ({
+      ...prev,
+      coverImage: file
+    }));
   };
 
-  const addImageUrlField = () => {
-    setImageUrls([...imageUrls, '']);
-    setUrlErrors({});
-    setPreviewErrors({});
-  };
-
-  const updateImageUrl = async (index, value) => {
-    const newUrls = [...imageUrls];
-    newUrls[index] = value;
-    setImageUrls(newUrls);
-
-    // Clear existing errors
-    const newUrlErrors = { ...urlErrors };
-    const newPreviewErrors = { ...previewErrors };
-    delete newUrlErrors[index];
-    delete newPreviewErrors[index];
-
-    // Validate URL format
-    if (value.trim() !== '') {
-      if (!validateUrl(value)) {
-        newUrlErrors[index] = 'Please enter a valid URL';
-      } else {
-        // Check if image loads
-        const isValidImage = await checkImageUrl(value);
-        if (!isValidImage) {
-          newPreviewErrors[index] = 'Unable to load image from URL';
-        }
-      }
-    }
-
-    setUrlErrors(newUrlErrors);
-    setPreviewErrors(newPreviewErrors);
-  };
-
-  const removeImageUrl = (index) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index));
-    
-    // Remove errors for this index
-    const newUrlErrors = { ...urlErrors };
-    const newPreviewErrors = { ...previewErrors };
-    delete newUrlErrors[index];
-    delete newPreviewErrors[index];
-    setUrlErrors(newUrlErrors);
-    setPreviewErrors(newPreviewErrors);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus({ submitting: true, message: null, type: null });
 
-    // Validate all URLs before submitting
-    const newUrlErrors = {};
-    imageUrls.forEach((url, index) => {
-      if (url.trim() !== '' && !validateUrl(url)) {
-        newUrlErrors[index] = 'Please enter a valid URL';
+    try {
+      let coverImageUrl = formData.coverImage;
+
+      // If there's a new file to upload
+      if (formData.coverImage instanceof File) {
+        coverImageUrl = await StorageService.uploadImage(formData.coverImage);
       }
-    });
 
-    if (Object.keys(newUrlErrors).length > 0) {
-      setUrlErrors(newUrlErrors);
-      return;
+      const listingData = {
+        ...formData,
+        coverImage: coverImageUrl,
+        price: parseFloat(formData.price),
+        bedrooms: parseInt(formData.bedrooms),
+        bathrooms: parseFloat(formData.bathrooms),
+        squareFeet: parseInt(formData.squareFeet)
+      };
+
+      if (initialData?.id) {
+        await ListingsService.updateListing(initialData.id, listingData);
+      } else {
+        await ListingsService.createListing(listingData);
+      }
+
+      setStatus({
+        submitting: false,
+        message: `Listing ${initialData ? 'updated' : 'created'} successfully!`,
+        type: 'success'
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Error submitting listing:', error);
+      setStatus({
+        submitting: false,
+        message: 'Error saving listing. Please try again.',
+        type: 'error'
+      });
     }
-
-    const validUrls = imageUrls.filter(url => url.trim() !== '' && validateUrl(url));
-    onSubmit({ ...formData, images: validUrls });
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <FormGrid>
-        <Input
-          placeholder="Title"
-          value={formData.title}
-          onChange={e => setFormData({ ...formData, title: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Price"
-          value={formData.price}
-          onChange={e => setFormData({ ...formData, price: e.target.value })}
-          required
-        />
-        <Input
-          placeholder="Address"
-          value={formData.address}
-          onChange={e => setFormData({ ...formData, address: e.target.value })}
-          required
-        />
-        <Input
-          placeholder="City"
-          value={formData.city}
-          onChange={e => setFormData({ ...formData, city: e.target.value })}
-          required
-        />
-        <Input
-          placeholder="State"
-          value={formData.state}
-          onChange={e => setFormData({ ...formData, state: e.target.value })}
-          required
-        />
-        <Input
-          placeholder="Zip Code"
-          value={formData.zipCode}
-          onChange={e => setFormData({ ...formData, zipCode: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Bedrooms"
-          value={formData.bedrooms}
-          onChange={e => setFormData({ ...formData, bedrooms: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Bathrooms"
-          value={formData.bathrooms}
-          onChange={e => setFormData({ ...formData, bathrooms: e.target.value })}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Square Feet"
-          value={formData.squareFeet}
-          onChange={e => setFormData({ ...formData, squareFeet: e.target.value })}
-          required
-        />
-        <select
-          value={formData.status}
-          onChange={e => setFormData({ ...formData, status: e.target.value })}
-          required
-        >
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="sold">Sold</option>
-        </select>
-      </FormGrid>
+    <FormContainer>
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+          <Label htmlFor="title">Title *</Label>
+          <Input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
 
-      <TextArea
-        placeholder="Description"
-        value={formData.description}
-        onChange={e => setFormData({ ...formData, description: e.target.value })}
-      />
+        <FormGroup>
+          <Label htmlFor="price">Price *</Label>
+          <Input
+            type="number"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+            min="0"
+            step="0.01"
+          />
+        </FormGroup>
 
-      <ImageUrlInput>
-        <h3>Property Images</h3>
-        <ImageUrlList>
-          {imageUrls.map((url, index) => (
-            <ImageUrlRow key={index}>
-              <div style={{ flex: 1 }}>
-                <Input
-                  type="url"
-                  placeholder="Image URL"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                />
-                {urlErrors[index] && (
-                  <ErrorText>{urlErrors[index]}</ErrorText>
-                )}
-              </div>
-              <Button type="button" onClick={() => removeImageUrl(index)}>
-                Remove
-              </Button>
-            </ImageUrlRow>
-          ))}
-        </ImageUrlList>
-        <Button type="button" onClick={addImageUrlField}>
-          Add Image URL
+        <FormGroup>
+          <Label htmlFor="status">Status *</Label>
+          <Select
+            id="status"
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            required
+          >
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="sold">Sold</option>
+          </Select>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="bedrooms">Bedrooms *</Label>
+          <Input
+            type="number"
+            id="bedrooms"
+            name="bedrooms"
+            value={formData.bedrooms}
+            onChange={handleChange}
+            required
+            min="0"
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="bathrooms">Bathrooms *</Label>
+          <Input
+            type="number"
+            id="bathrooms"
+            name="bathrooms"
+            value={formData.bathrooms}
+            onChange={handleChange}
+            required
+            min="0"
+            step="0.5"
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="squareFeet">Square Feet *</Label>
+          <Input
+            type="number"
+            id="squareFeet"
+            name="squareFeet"
+            value={formData.squareFeet}
+            onChange={handleChange}
+            required
+            min="0"
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="description">Description *</Label>
+          <Textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="externalLink">External Link</Label>
+          <Input
+            type="url"
+            id="externalLink"
+            name="externalLink"
+            value={formData.externalLink}
+            onChange={handleChange}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="coverImage">Cover Image {initialData ? '(Leave empty to keep current)' : '*'}</Label>
+          <Input
+            type="file"
+            id="coverImage"
+            name="coverImage"
+            onChange={handleImageChange}
+            accept="image/*"
+            required={!initialData}
+          />
+          {imagePreview && (
+            <ImagePreview src={imagePreview} alt="Cover" />
+          )}
+        </FormGroup>
+
+        <Button type="submit" disabled={status.submitting}>
+          {status.submitting ? 'Saving...' : initialData ? 'Update Listing' : 'Create Listing'}
         </Button>
 
-        <ImagePreviewGrid>
-          {imageUrls.map((url, index) => {
-            if (!url.trim() || urlErrors[index]) return null;
-            
-            return (
-              <PreviewCard key={index}>
-                {previewErrors[index] ? (
-                  <PreviewError>{previewErrors[index]}</PreviewError>
-                ) : (
-                  <img src={url} alt={`Preview ${index + 1}`} />
-                )}
-              </PreviewCard>
-            );
-          })}
-        </ImagePreviewGrid>
-      </ImageUrlInput>
-
-      <ButtonGroup>
-        <Button type="submit" primary>
-          {initialData ? 'Update Listing' : 'Add Listing'}
-        </Button>
-        <Button type="button" onClick={onCancel}>
-          Cancel
-        </Button>
-      </ButtonGroup>
-    </Form>
+        {status.message && (
+          <Message type={status.type}>{status.message}</Message>
+        )}
+      </Form>
+    </FormContainer>
   );
 };
 

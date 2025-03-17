@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getListing } from '../services/listings-service';
+import { ListingsService } from '../services/aws-service';
 import { FaExternalLinkAlt, FaHome } from 'react-icons/fa';
 import SEO from '../components/shared/SEO';
 
@@ -214,7 +214,7 @@ const ListingDetail = () => {
   const fetchListing = async () => {
     try {
       setLoading(true);
-      const data = await getListing(id);
+      const data = await ListingsService.getListing(id);
       setListing(data);
       setLoading(false);
     } catch (error) {

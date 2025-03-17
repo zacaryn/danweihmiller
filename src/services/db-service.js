@@ -1,228 +1,239 @@
-import AWS from 'aws-sdk';
-import awsConfig from '../config/aws-config';
+import { v4 as uuidv4 } from 'uuid';
+import { publicDynamoDBClient, createAuthenticatedDynamoDBClient } from '../config/dynamodb-client.js';
+import { PutCommand, GetCommand, ScanCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 
-// Configure AWS with the IAM credentials
-AWS.config.update({
-  region: 'us-east-1',
-  accessKeyId: awsConfig.credentials.accessKeyId,
-  secretAccessKey: awsConfig.credentials.secretAccessKey
-});
+console.log('Loading db-service.js...');
+console.log('Imported clients:', { publicDynamoDBClient, createAuthenticatedDynamoDBClient });
 
-// Log AWS configuration for debugging
-console.log('AWS SDK Version:', AWS.VERSION);
-console.log('AWS Region:', AWS.config.region);
-console.log('Using Access Key ID:', awsConfig.credentials.accessKeyId.substring(0, 5) + '...');
+// Table names
+const LISTINGS_TABLE = 'danweihmiller-listings';
+const INQUIRIES_TABLE = 'danweihmiller-inquiries';
 
-// Create DynamoDB document client
-const docClient = new AWS.DynamoDB.DocumentClient();
-
-// DynamoDB table names
-const LISTINGS_TABLE = 'Listings';
-const INQUIRIES_TABLE = 'ContactInquiries';
-
-// Listings operations
-export const ListingsDB = {
-  // Get all listings from DynamoDB
-  async getAll() {
-    const params = {
-      TableName: LISTINGS_TABLE
-    };
-    
-    try {
-      const data = await docClient.scan(params).promise();
-      return data.Items;
-    } catch (error) {
-      console.error('Error fetching listings from DynamoDB:', error);
-      throw error;
-    }
-  },
-  
-  // Get a single listing by ID
-  async getById(id) {
-    const params = {
-      TableName: LISTINGS_TABLE,
-      Key: { id }
-    };
-    
-    try {
-      const data = await docClient.get(params).promise();
-      return data.Item;
-    } catch (error) {
-      console.error(`Error fetching listing ${id} from DynamoDB:`, error);
-      throw error;
-    }
-  },
-  
-  // Add a new listing
-  async add(listing) {
-    const newListing = {
-      ...listing,
-      id: listing.id || `listing-${Date.now()}`,
-      datePosted: new Date().toISOString(),
-    };
-    
-    const params = {
-      TableName: LISTINGS_TABLE,
-      Item: newListing
-    };
-    
-    try {
-      await docClient.put(params).promise();
-      return newListing.id;
-    } catch (error) {
-      console.error('Error adding listing to DynamoDB:', error);
-      throw error;
-    }
-  },
-  
-  // Update an existing listing
-  async update(id, listing) {
-    // First, check if the listing exists
-    const existingListing = await this.getById(id);
-    if (!existingListing) {
-      throw new Error(`Listing with id ${id} not found`);
-    }
-    
-    // Create updated listing object
-    const updatedListing = {
-      ...existingListing,
-      ...listing,
-      id, // ensure ID remains the same
-      updatedAt: new Date().toISOString()
-    };
-    
-    const params = {
-      TableName: LISTINGS_TABLE,
-      Item: updatedListing
-    };
-    
-    try {
-      await docClient.put(params).promise();
-      return true;
-    } catch (error) {
-      console.error(`Error updating listing ${id} in DynamoDB:`, error);
-      throw error;
-    }
-  },
-  
-  // Delete a listing
-  async delete(id) {
-    const params = {
-      TableName: LISTINGS_TABLE,
-      Key: { id }
-    };
-    
-    try {
-      await docClient.delete(params).promise();
-      return true;
-    } catch (error) {
-      console.error(`Error deleting listing ${id} from DynamoDB:`, error);
-      throw error;
-    }
-  }
-};
-
-// Inquiries operations
-export const InquiriesDB = {
-  // Get all inquiries
-  async getAll() {
-    const params = {
-      TableName: INQUIRIES_TABLE
-    };
-    
-    try {
-      const data = await docClient.scan(params).promise();
-      return data.Items;
-    } catch (error) {
-      console.error('Error fetching inquiries from DynamoDB:', error);
-      throw error;
-    }
-  },
-  
-  // Get inquiries for a specific listing
-  async getByListingId(listingId) {
-    // Since there's no listingIdIndex, we'll use scan with a filter expression
-    const params = {
-      TableName: INQUIRIES_TABLE,
-      FilterExpression: 'listingId = :listingId',
-      ExpressionAttributeValues: {
-        ':listingId': listingId
-      }
-    };
-    
-    try {
-      const data = await docClient.scan(params).promise();
-      return data.Items;
-    } catch (error) {
-      console.error(`Error fetching inquiries for listing ${listingId} from DynamoDB:`, error);
-      throw error;
-    }
-  },
-  
-  // Add a new inquiry
-  async add(inquiry) {
-    // Ensure the timestamp is included since it's part of the table's primary key
-    const newInquiry = {
-      ...inquiry,
-      id: inquiry.id || `inquiry-${Date.now()}`,
-      timestamp: inquiry.timestamp || new Date().toISOString()
-    };
-    
-    const params = {
-      TableName: INQUIRIES_TABLE,
-      Item: newInquiry
-    };
-    
-    try {
-      console.log('Saving inquiry to DynamoDB:', JSON.stringify(newInquiry));
-      await docClient.put(params).promise();
-      console.log('Inquiry saved successfully with ID:', newInquiry.id);
-      return { success: true, id: newInquiry.id };
-    } catch (error) {
-      console.error('Error adding inquiry to DynamoDB:', error);
-      // Log more details about the error
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      throw error;
-    }
-  }
-};
-
-// Test function to diagnose DynamoDB connectivity
-export const testDynamoDBConnection = async () => {
+// Get DynamoDB client instance based on operation type
+const getDynamoDBClient = async (requiresAuth = false) => {
   try {
-    console.log('Testing DynamoDB connectivity...');
-    
-    // 1. Test listing tables
-    const dynamoDB = new AWS.DynamoDB();
-    const tables = await dynamoDB.listTables().promise();
-    console.log('Available DynamoDB tables:', tables.TableNames);
-    
-    // 2. Test scanning the inquiries table
-    const params = {
-      TableName: INQUIRIES_TABLE,
-      Limit: 1
-    };
-    
-    const scanResult = await docClient.scan(params).promise();
-    console.log('Scan test result:', JSON.stringify(scanResult));
-    
-    return {
-      success: true,
-      message: 'DynamoDB connection successful',
-      tables: tables.TableNames,
-      scanResult
-    };
+    console.log('Getting DynamoDB client, requiresAuth:', requiresAuth);
+    const client = requiresAuth ? 
+      await createAuthenticatedDynamoDBClient() : 
+      publicDynamoDBClient;
+    console.log('Using client:', client);
+    return client;
   } catch (error) {
-    console.error('DynamoDB connection test failed:', error);
-    return {
-      success: false,
-      message: 'DynamoDB connection failed',
-      error: {
-        code: error.code,
-        message: error.message,
-        stack: error.stack
-      }
-    };
+    console.error('Error getting DynamoDB client:', error);
+    throw error;
+  }
+};
+
+// Listings Database Service
+export const ListingsDB = {
+  // Get all listings (public)
+  async getAll() {
+    try {
+      const dynamodb = await getDynamoDBClient(false);
+      const command = new ScanCommand({
+        TableName: LISTINGS_TABLE
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Items;
+    } catch (error) {
+      console.error('Error getting all listings:', error);
+      throw error;
+    }
+  },
+  
+  // Get a single listing by ID (public)
+  async getById(id) {
+    try {
+      const dynamodb = await getDynamoDBClient(false);
+      const command = new GetCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id }
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Item;
+    } catch (error) {
+      console.error('Error getting listing by ID:', error);
+      throw error;
+    }
+  },
+  
+  // Add a new listing (requires auth)
+  async add(listing) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const timestamp = new Date().toISOString();
+      const item = {
+        id: uuidv4(),
+        ...listing,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+
+      const command = new PutCommand({
+        TableName: LISTINGS_TABLE,
+        Item: item
+      });
+      
+      await dynamodb.send(command);
+      return item;
+    } catch (error) {
+      console.error('Error adding listing:', error);
+      throw error;
+    }
+  },
+  
+  // Update a listing (requires auth)
+  async update(id, listing) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const timestamp = new Date().toISOString();
+      const command = new UpdateCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id },
+        UpdateExpression: 'set title = :title, price = :price, status = :status, ' +
+          'bedrooms = :bedrooms, bathrooms = :bathrooms, squareFeet = :squareFeet, ' +
+          'description = :description, externalLink = :externalLink, ' +
+          'coverImage = :coverImage, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':title': listing.title,
+          ':price': listing.price,
+          ':status': listing.status,
+          ':bedrooms': listing.bedrooms,
+          ':bathrooms': listing.bathrooms,
+          ':squareFeet': listing.squareFeet,
+          ':description': listing.description,
+          ':externalLink': listing.externalLink,
+          ':coverImage': listing.coverImage,
+          ':updatedAt': timestamp
+        },
+        ReturnValues: 'ALL_NEW'
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Attributes;
+    } catch (error) {
+      console.error('Error updating listing:', error);
+      throw error;
+    }
+  },
+  
+  // Delete a listing (requires auth)
+  async delete(id) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const command = new DeleteCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id }
+      });
+      
+      await dynamodb.send(command);
+      return true;
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      throw error;
+    }
+  }
+};
+
+// Inquiries Database Service
+export const InquiriesDB = {
+  // Get all inquiries (requires auth)
+  async getAll() {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const command = new ScanCommand({
+        TableName: INQUIRIES_TABLE
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Items;
+    } catch (error) {
+      console.error('Error getting all inquiries:', error);
+      throw error;
+    }
+  },
+  
+  // Get a single inquiry by ID (requires auth)
+  async getById(id) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const command = new GetCommand({
+        TableName: INQUIRIES_TABLE,
+        Key: { id }
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Item;
+    } catch (error) {
+      console.error('Error getting inquiry by ID:', error);
+      throw error;
+    }
+  },
+  
+  // Add a new inquiry (public)
+  async add(inquiry) {
+    try {
+      const dynamodb = await getDynamoDBClient(false);
+      const timestamp = new Date().toISOString();
+      const item = {
+        id: uuidv4(),
+        ...inquiry,
+        isRead: false,
+        createdAt: timestamp
+      };
+
+      const command = new PutCommand({
+        TableName: INQUIRIES_TABLE,
+        Item: item
+      });
+      
+      await dynamodb.send(command);
+      return item;
+    } catch (error) {
+      console.error('Error adding inquiry:', error);
+      throw error;
+    }
+  },
+  
+  // Mark an inquiry as read (requires auth)
+  async markAsRead(id) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const command = new UpdateCommand({
+        TableName: INQUIRIES_TABLE,
+        Key: { id },
+        UpdateExpression: 'set isRead = :isRead',
+        ExpressionAttributeValues: {
+          ':isRead': true
+        },
+        ReturnValues: 'ALL_NEW'
+      });
+      
+      const result = await dynamodb.send(command);
+      return result.Attributes;
+    } catch (error) {
+      console.error('Error marking inquiry as read:', error);
+      throw error;
+    }
+  },
+  
+  // Delete an inquiry (requires auth)
+  async delete(id) {
+    try {
+      const dynamodb = await getDynamoDBClient(true);
+      const command = new DeleteCommand({
+        TableName: INQUIRIES_TABLE,
+        Key: { id }
+      });
+      
+      await dynamodb.send(command);
+      return true;
+    } catch (error) {
+      console.error('Error deleting inquiry:', error);
+      throw error;
+    }
   }
 };
 

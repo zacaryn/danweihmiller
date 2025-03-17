@@ -1,56 +1,172 @@
-// Import from aws-amplify using named exports only
 import { Storage, Auth } from 'aws-amplify';
-import awsConfig from '../config/aws-config';
-import { ListingsDB, InquiriesDB } from './db-service';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { 
+  DynamoDBDocumentClient, 
+  PutCommand, 
+  GetCommand, 
+  ScanCommand, 
+  DeleteCommand,
+  UpdateCommand
+} from '@aws-sdk/lib-dynamodb';
+import { v4 as uuid } from 'uuid';
 
-// No extra configuration needed - main.jsx already configures Amplify correctly
+// Constants
+const REGION = 'us-east-1';
+const LISTINGS_TABLE = 'danweihmiller-listings';
+const INQUIRIES_TABLE = 'danweihmiller-inquiries';
+const S3_BUCKET = 'danweihmiller-property-images';
 
-// Listings Service (DynamoDB)
+// Create a public DynamoDB client with explicit IAM credentials for unauthenticated operations
+const publicClient = DynamoDBDocumentClient.from(
+  new DynamoDBClient({ 
+    region: REGION,
+    credentials: {
+      accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+      secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
+    }
+  })
+);
+
+// Function to get an authenticated DynamoDB client
+const getAuthenticatedClient = async () => {
+  try {
+    const credentials = await Auth.currentCredentials();
+    const client = DynamoDBDocumentClient.from(
+      new DynamoDBClient({
+        region: REGION,
+        credentials
+      })
+    );
+    return client;
+  } catch (error) {
+    console.error('Error getting authenticated client:', error);
+    throw new Error('Authentication required for this operation');
+  }
+};
+
+// Listing Service - uses DynamoDB for listings data
 export const ListingsService = {
-  // Get all listings
-  async getListings() {
+  // Get all listings (public)
+  getAllListings: async () => {
     try {
-      return await ListingsDB.getAll();
+      const result = await publicClient.send(new ScanCommand({
+        TableName: LISTINGS_TABLE
+      }));
+      return result.Items || [];
     } catch (error) {
       console.error('Error fetching listings:', error);
-      throw error;
+      return [];
     }
   },
 
-  // Get a single listing by ID
-  async getListing(id) {
+  // Get a single listing by ID (public)
+  getListing: async (id) => {
     try {
-      return await ListingsDB.getById(id);
+      const result = await publicClient.send(new GetCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id }
+      }));
+      return result.Item || null;
     } catch (error) {
       console.error('Error fetching listing:', error);
-      throw error;
+      return null;
     }
   },
 
-  // Add a new listing
-  async addListing(listing) {
+  // Create a new listing (admin only)
+  createListing: async (listing) => {
     try {
-      return await ListingsDB.add(listing);
+      const client = await getAuthenticatedClient();
+      const timestamp = new Date().toISOString();
+      const id = `lst_${uuid()}`;
+      
+      // Upload image if it's a File object
+      let imageUrl = listing.coverImage;
+      if (listing.coverImage instanceof File) {
+        const fileName = `listings/${id}/${listing.coverImage.name}`;
+        await Storage.put(fileName, listing.coverImage, {
+          contentType: listing.coverImage.type,
+          level: 'protected'
+        });
+        imageUrl = await Storage.get(fileName, { level: 'protected' });
+      }
+      
+      const item = {
+        id,
+        ...listing,
+        coverImage: imageUrl,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+
+      await client.send(new PutCommand({
+        TableName: LISTINGS_TABLE,
+        Item: item
+      }));
+
+      return item;
     } catch (error) {
-      console.error('Error adding listing:', error);
+      console.error('Error creating listing:', error);
       throw error;
     }
   },
 
-  // Update a listing
-  async updateListing(id, listing) {
+  // Update an existing listing (admin only)
+  updateListing: async (id, listing) => {
     try {
-      return await ListingsDB.update(id, listing);
+      const client = await getAuthenticatedClient();
+      const timestamp = new Date().toISOString();
+      
+      // Get the existing listing first
+      const existingResult = await client.send(new GetCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id }
+      }));
+      
+      if (!existingResult.Item) {
+        throw new Error('Listing not found');
+      }
+      
+      // Upload new image if provided as a File
+      let imageUrl = listing.coverImage;
+      if (listing.coverImage instanceof File) {
+        const fileName = `listings/${id}/${listing.coverImage.name}`;
+        await Storage.put(fileName, listing.coverImage, {
+          contentType: listing.coverImage.type,
+          level: 'protected'
+        });
+        imageUrl = await Storage.get(fileName, { level: 'protected' });
+      }
+      
+      const updatedItem = {
+        ...existingResult.Item,
+        ...listing,
+        id,
+        coverImage: imageUrl || existingResult.Item.coverImage,
+        updatedAt: timestamp
+      };
+
+      await client.send(new PutCommand({
+        TableName: LISTINGS_TABLE,
+        Item: updatedItem
+      }));
+
+      return updatedItem;
     } catch (error) {
       console.error('Error updating listing:', error);
       throw error;
     }
   },
 
-  // Delete a listing
-  async deleteListing(id) {
+  // Delete a listing (admin only)
+  deleteListing: async (id) => {
     try {
-      return await ListingsDB.delete(id);
+      const client = await getAuthenticatedClient();
+      await client.send(new DeleteCommand({
+        TableName: LISTINGS_TABLE,
+        Key: { id }
+      }));
+      return true;
     } catch (error) {
       console.error('Error deleting listing:', error);
       throw error;
@@ -58,133 +174,115 @@ export const ListingsService = {
   }
 };
 
-// Contact Inquiries Service (DynamoDB)
+// Inquiries Service - uses DynamoDB for inquiries data
 export const InquiriesService = {
-  // Submit a new inquiry
-  async submitInquiry(inquiry) {
+  // Submit a new inquiry (public)
+  submitInquiry: async (inquiry) => {
     try {
-      return await InquiriesDB.add(inquiry);
+      if (!import.meta.env.VITE_AWS_ACCESS_KEY_ID || !import.meta.env.VITE_AWS_SECRET_ACCESS_KEY) {
+        console.error('AWS credentials are not configured');
+        throw new Error('Server configuration error. Please contact the administrator.');
+      }
+
+      const timestamp = new Date().toISOString();
+      const item = {
+        id: `inq_${uuid()}`,
+        ...inquiry,
+        isRead: false,
+        createdAt: timestamp
+      };
+
+      console.log('Submitting inquiry with public client');
+      await publicClient.send(new PutCommand({
+        TableName: INQUIRIES_TABLE,
+        Item: item
+      }));
+
+      return item;
     } catch (error) {
       console.error('Error submitting inquiry:', error);
-      throw error;
+      if (error.name === 'CredentialsProviderError') {
+        throw new Error('Authentication error. Please try again later.');
+      } else if (error.name === 'AccessDeniedException') {
+        throw new Error('Permission denied. Your request cannot be processed.');
+      } else {
+        throw error;
+      }
     }
   },
 
-  // Get all inquiries
-  async getInquiries() {
+  // Get all inquiries (admin only)
+  getInquiries: async () => {
     try {
-      return await InquiriesDB.getAll();
+      const client = await getAuthenticatedClient();
+      const result = await client.send(new ScanCommand({
+        TableName: INQUIRIES_TABLE
+      }));
+      return result.Items || [];
     } catch (error) {
       console.error('Error fetching inquiries:', error);
+      return [];
+    }
+  },
+
+  // Mark an inquiry as read (admin only)
+  markAsRead: async (id) => {
+    try {
+      const client = await getAuthenticatedClient();
+      const result = await client.send(new UpdateCommand({
+        TableName: INQUIRIES_TABLE,
+        Key: { id },
+        UpdateExpression: 'set isRead = :isRead',
+        ExpressionAttributeValues: {
+          ':isRead': true
+        },
+        ReturnValues: 'ALL_NEW'
+      }));
+      return result.Attributes;
+    } catch (error) {
+      console.error('Error marking inquiry as read:', error);
       throw error;
     }
   },
 
-  // Get inquiries for a specific listing
-  async getInquiriesForListing(listingId) {
+  // Delete an inquiry (admin only)
+  deleteInquiry: async (id) => {
     try {
-      return await InquiriesDB.getByListingId(listingId);
+      const client = await getAuthenticatedClient();
+      await client.send(new DeleteCommand({
+        TableName: INQUIRIES_TABLE,
+        Key: { id }
+      }));
+      return true;
     } catch (error) {
-      console.error('Error fetching inquiries for listing:', error);
+      console.error('Error deleting inquiry:', error);
       throw error;
     }
   }
 };
 
-// Storage Service (S3)
+// Storage Service - handles S3 operations for images
 export const StorageService = {
-  // Test the AWS credentials
-  async testConnection() {
-    try {
-      console.log("Testing AWS credentials and S3 connection...");
-      
-      // First, check if Storage is available
-      if (!Storage) {
-        throw new Error("Storage is not properly configured");
-      }
-      
-      // Try to list objects in the S3 bucket
-      const result = await Storage.list('', { 
-        level: 'public',
-        customPrefix: {
-          public: ''
-        }
-      });
-      console.log(`Successfully connected to S3. Found ${result.length} objects.`);
-      
-      return {
-        success: true,
-        message: `Successfully connected to S3`,
-        objectCount: result.length
-      };
-    } catch (error) {
-      console.error("AWS connection test failed:", error);
-      return {
-        success: false,
-        message: `Connection test failed: ${error.message}`,
-        error: error
-      };
-    }
-  },
-
   // Upload an image to S3
-  async uploadImage(file, path) {
+  uploadImage: async (file, customPath = null) => {
     try {
-      console.log(`Starting upload process for file:`, {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        path: path
-      });
-      
-      if (!file) {
-        throw new Error('No file provided for upload');
-      }
-      
-      // Override public access to prevent CORS issues
-      const uploadOptions = {
+      const path = customPath || `images/${Date.now()}-${file.name}`;
+      await Storage.put(path, file, {
         contentType: file.type,
-        progressCallback: (progress) => {
-          console.log(`Upload progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
-        },
-        level: 'public',
-        customPrefix: {
-          public: ''
-        }
-      };
-      
-      console.log('Attempting upload with options:', uploadOptions);
-      
-      const result = await Storage.put(path, file, uploadOptions);
-      console.log('Upload result:', result);
-      
-      if (!result || !result.key) {
-        throw new Error('Upload failed: No result key returned from S3');
-      }
-      
-      console.log(`Upload successful, getting URL for key: ${result.key}`);
-      
-      const imageUrl = await Storage.get(result.key, { 
-        level: 'public',
-        download: false,
-        expires: 60 * 60 * 24 * 365
+        level: 'protected'
       });
-      
-      console.log(`Final image URL: ${imageUrl}`);
-      return imageUrl;
-      
+      const url = await Storage.get(path, { level: 'protected' });
+      return url;
     } catch (error) {
-      console.error('Detailed upload error:', error);
+      console.error('Error uploading image:', error);
       throw error;
     }
   },
 
   // Delete an image from S3
-  async deleteImage(path) {
+  deleteImage: async (path) => {
     try {
-      console.log(`Deleting image from S3 at path ${path}...`);
-      // Now that S3 is set up, we can use:
-      await Storage.remove(path);
+      await Storage.remove(path, { level: 'protected' });
       return true;
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -193,39 +291,32 @@ export const StorageService = {
   }
 };
 
-// Authentication Service (Cognito)
+// Simple authentication wrapper around Amplify Auth
 export const AuthService = {
-  // Log in with username and password
-  async login(username, password) {
+  login: async (username, password) => {
     try {
-      console.log(`Logging in as ${username}...`);
-      // Use the configured Cognito authentication
-      const user = await Auth.signIn(username, password);
-      return { success: true, user };
+      await Auth.signIn(username, password);
+      return { success: true };
     } catch (error) {
-      console.error('Error logging in:', error);
-      if (error.code === 'UserNotFoundException' || error.code === 'NotAuthorizedException') {
-        return { success: false, message: 'Invalid username or password' };
-      }
-      throw error;
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Invalid username or password' 
+      };
     }
   },
 
-  // Log out
-  async logout() {
+  logout: async () => {
     try {
-      console.log('Logging out...');
       await Auth.signOut();
-      localStorage.removeItem('isAdminLoggedIn');
       return true;
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Logout error:', error);
       throw error;
     }
   },
 
-  // Check if user is logged in
-  async isAuthenticated() {
+  isAuthenticated: async () => {
     try {
       const user = await Auth.currentAuthenticatedUser();
       return !!user;
@@ -233,69 +324,13 @@ export const AuthService = {
       return false;
     }
   },
-  
-  // Get current user's information
-  async getCurrentUser() {
+
+  getCurrentUser: async () => {
     try {
-      const user = await Auth.currentAuthenticatedUser();
-      return user;
+      return await Auth.currentAuthenticatedUser();
     } catch (error) {
       console.error('Error getting current user:', error);
       return null;
     }
   }
-};
-
-// Property Search Service
-export const PropertySearchService = {
-  // Search for properties
-  async searchProperties(criteria) {
-    try {
-      console.log('Searching for properties with criteria:', criteria);
-      // This will be connected to a real estate API in the future
-      
-      // Mock search results for now
-      return [
-        {
-          id: '123',
-          address: '123 Main Street',
-          city: 'Colorado Springs',
-          state: 'CO',
-          zipCode: '80920',
-          price: 450000,
-          bedrooms: 3,
-          bathrooms: 2,
-          squareFeet: 1800,
-          year: 2005,
-          mlsNumber: 'MLS123456',
-          image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'
-        },
-        {
-          id: '456',
-          address: '456 Park Avenue',
-          city: 'Denver',
-          state: 'CO',
-          zipCode: '80202',
-          price: 550000,
-          bedrooms: 4,
-          bathrooms: 3,
-          squareFeet: 2200,
-          year: 2010,
-          mlsNumber: 'MLS789012',
-          image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'
-        }
-      ];
-    } catch (error) {
-      console.error('Error searching for properties:', error);
-      throw error;
-    }
-  }
-};
-
-export default {
-  ListingsService,
-  InquiriesService,
-  StorageService,
-  AuthService,
-  PropertySearchService
 }; 

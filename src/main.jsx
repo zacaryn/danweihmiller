@@ -3,21 +3,60 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@emotion/react'
 import './index.css'
 import App from './App.jsx'
-// Import AWS Amplify using named exports only
 import { Amplify, Auth, Storage } from 'aws-amplify'
 import awsConfig from './config/aws-config'
 
-// Configure Amplify
-Amplify.configure(awsConfig)
+// Log environment variables (without exposing secrets)
+console.log('Environment variables check:', {
+  AWS_REGION: import.meta.env.VITE_AWS_REGION,
+  AWS_ACCESS_KEY_ID: import.meta.env.VITE_AWS_ACCESS_KEY_ID ? 'Defined' : 'Not defined',
+  AWS_SECRET_ACCESS_KEY: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY ? 'Defined' : 'Not defined',
+  AWS_S3_BUCKET: import.meta.env.VITE_AWS_S3_BUCKET
+});
 
-// Configure Auth to use the IAM credentials for all service calls
-Auth.configure(awsConfig)
+// Configure Amplify with the complete configuration
+Amplify.configure({
+  ...awsConfig,
+  Storage: {
+    AWSS3: {
+      ...awsConfig.Storage.AWSS3,
+      level: 'protected',
+      customPrefix: {
+        protected: 'protected/'
+      }
+    }
+  }
+});
 
-// Explicitly configure Storage with credentials
-Storage.configure({
-  ...awsConfig.Storage,
-  credentials: awsConfig.credentials
-})
+// Enhanced debug logging for development
+if (process.env.NODE_ENV === 'development') {
+  Auth.currentAuthenticatedUser()
+    .then(user => {
+      console.log('Current authenticated user:', user);
+      return Auth.currentCredentials();
+    })
+    .then(credentials => {
+      console.log('Cognito credentials obtained successfully');
+      return Auth.currentSession();
+    })
+    .then(session => {
+      console.log('Current session tokens:', {
+        idToken: session.getIdToken().getJwtToken(),
+        accessToken: session.getAccessToken().getJwtToken()
+      });
+    })
+    .catch(err => {
+      console.error('Auth state check failed:', err);
+    });
+
+  // Monitor storage operations
+  Storage.configure({
+    logger: {
+      debug: console.log,
+      error: console.error
+    }
+  });
+}
 
 const theme = {
   colors: {

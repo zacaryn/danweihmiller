@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { InquiriesService } from '../services/aws-service';
-import { FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTrash } from 'react-icons/fa';
+import { InquiriesService, ListingsService } from '../services/aws-service';
+import { FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTrash, FaHome } from 'react-icons/fa';
 
 const InquiriesContainer = styled.div`
   margin-top: ${props => props.theme.spacing.lg};
@@ -173,6 +173,72 @@ const FilterButton = styled.button`
   }
 `;
 
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${props => props.theme.spacing.md};
+  border-bottom: 1px solid ${props => props.theme.colors.lightGray};
+  padding-bottom: ${props => props.theme.spacing.sm};
+`;
+
+const CardDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${props => props.theme.spacing.md};
+`;
+
+const ContactInfo = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${props => props.theme.spacing.md};
+`;
+
+const InfoItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${props => props.theme.colors.darkGray};
+`;
+
+const Message = styled.div`
+  background: ${props => props.theme.colors.lightGray};
+  padding: ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  line-height: 1.6;
+`;
+
+const PropertyInfo = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: ${props => props.theme.colors.accent};
+  padding: ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.borderRadius.small};
+  margin-bottom: ${props => props.theme.spacing.sm};
+  border-left: 3px solid ${props => props.theme.colors.primary};
+  gap: ${props => props.theme.spacing.xs};
+
+  strong {
+    color: ${props => props.theme.colors.primary};
+    margin-right: ${props => props.theme.spacing.xs};
+  }
+
+  a {
+    color: ${props => props.theme.colors.secondary};
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const Status = styled.span`
+  padding: 0.25rem 0.5rem;
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: 0.8rem;
+  color: ${props => props.theme.colors.white};
+`;
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('en-US', {
@@ -182,6 +248,83 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date);
+};
+
+const InquiryCard = ({ inquiry, onMarkAsRead, onDelete }) => {
+  const [propertyDetails, setPropertyDetails] = useState(null);
+  const [loadingProperty, setLoadingProperty] = useState(false);
+  
+  useEffect(() => {
+    // Fetch property details if there's a listingId
+    const fetchPropertyDetails = async () => {
+      if (inquiry.listingId) {
+        try {
+          setLoadingProperty(true);
+          const listing = await ListingsService.getListing(inquiry.listingId);
+          setPropertyDetails(listing);
+        } catch (error) {
+          console.error('Error fetching property details:', error);
+        } finally {
+          setLoadingProperty(false);
+        }
+      }
+    };
+    
+    fetchPropertyDetails();
+  }, [inquiry.listingId]);
+  
+  const isReadStatus = inquiry.isRead ? 'Read' : 'Unread';
+  const statusColor = inquiry.isRead ? '#4CAF50' : '#FFC107';
+  
+  return (
+    <Card>
+      <CardHeader>
+        <h3>{inquiry.name}</h3>
+        <Status style={{ backgroundColor: statusColor }}>
+          {isReadStatus}
+        </Status>
+      </CardHeader>
+      <CardDetails>
+        <ContactInfo>
+          <InfoItem>
+            <FaEnvelope /> {inquiry.email}
+          </InfoItem>
+          <InfoItem>
+            <FaPhone /> {inquiry.phone || 'Not provided'}
+          </InfoItem>
+          <InfoItem>
+            <FaCalendarAlt /> {new Date(inquiry.createdAt).toLocaleDateString()}
+          </InfoItem>
+        </ContactInfo>
+        <Message>{inquiry.message}</Message>
+        {inquiry.listingId && (
+          <PropertyInfo>
+            <FaHome />
+            <strong>Related Property:</strong> 
+            {loadingProperty ? (
+              'Loading property details...'
+            ) : propertyDetails ? (
+              <a href={`/listings/${inquiry.listingId}`} target="_blank" rel="noopener noreferrer">
+                {propertyDetails.title || 'Unknown property'}
+              </a>
+            ) : (
+              `ID: ${inquiry.listingId}`
+            )}
+          </PropertyInfo>
+        )}
+        <InquiryActions>
+          {!inquiry.isRead && (
+            <Button primary onClick={() => onMarkAsRead(inquiry.id)}>
+              <FaCheckCircle /> Mark as Read
+            </Button>
+          )}
+          <Button danger onClick={() => onDelete(inquiry.id)}>
+            <FaTrash /> Delete
+          </Button>
+        </InquiryActions>
+      </CardDetails>
+    </Card>
+  );
 };
 
 const AdminInquiries = () => {
@@ -202,7 +345,7 @@ const AdminInquiries = () => {
       
       // Sort inquiries by date (newest first)
       const sortedInquiries = [...data].sort((a, b) => {
-        return new Date(b.timestamp) - new Date(a.timestamp);
+        return new Date(b.createdAt) - new Date(a.createdAt);
       });
       
       setInquiries(sortedInquiries || []);
@@ -214,28 +357,37 @@ const AdminInquiries = () => {
     }
   };
 
-  const markAsResolved = (id) => {
-    setInquiries(prev => prev.map(inquiry => {
-      if (inquiry.id === id) {
-        return { ...inquiry, status: 'resolved' };
-      }
-      return inquiry;
-    }));
-    // In a full implementation, this would also update the status in DynamoDB
+  const markAsRead = async (id) => {
+    try {
+      await InquiriesService.markAsRead(id);
+      setInquiries(prev => prev.map(inquiry => {
+        if (inquiry.id === id) {
+          return { ...inquiry, isRead: true };
+        }
+        return inquiry;
+      }));
+    } catch (error) {
+      console.error('Error marking inquiry as read:', error);
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this inquiry?')) {
-      setInquiries(prev => prev.filter(inquiry => inquiry.id !== id));
-      // In a full implementation, this would also delete the inquiry from DynamoDB
+      try {
+        await InquiriesService.deleteInquiry(id);
+        setInquiries(prev => prev.filter(inquiry => inquiry.id !== id));
+      } catch (error) {
+        console.error('Error deleting inquiry:', error);
+      }
     }
   };
 
   const filteredInquiries = inquiries.filter(inquiry => {
     if (filter === 'all') return true;
-    if (filter === 'resolved') return inquiry.status === 'resolved';
-    if (filter === 'pending') return !inquiry.status || inquiry.status !== 'resolved';
-    if (filter === inquiry.inquiryType) return true;
+    if (filter === 'resolved') return inquiry.isRead === true;
+    if (filter === 'pending') return inquiry.isRead === false;
+    if (filter === 'property') return inquiry.listingId;
+    if (filter === 'general') return !inquiry.listingId;
     return false;
   });
 
@@ -261,13 +413,13 @@ const AdminInquiries = () => {
             active={filter === 'pending'} 
             onClick={() => setFilter('pending')}
           >
-            Pending
+            Unread
           </FilterButton>
           <FilterButton 
             active={filter === 'resolved'} 
             onClick={() => setFilter('resolved')}
           >
-            Resolved
+            Read
           </FilterButton>
           <FilterButton 
             active={filter === 'property'} 
@@ -294,44 +446,12 @@ const AdminInquiries = () => {
         </EmptyState>
       ) : (
         filteredInquiries.map(inquiry => (
-          <InquiryItem key={inquiry.id} status={inquiry.status}>
-            <InquiryHeader>
-              <div>
-                <InquiryName>{inquiry.name}</InquiryName>
-                <InquiryType>{inquiry.inquiryType || 'general'}</InquiryType>
-              </div>
-              <InquiryDate>
-                <FaCalendarAlt /> {formatDate(inquiry.timestamp)}
-              </InquiryDate>
-            </InquiryHeader>
-            
-            <InquiryContact>
-              <ContactItem>
-                <FaEnvelope /> {inquiry.email}
-              </ContactItem>
-              {inquiry.phone && (
-                <ContactItem>
-                  <FaPhone /> {inquiry.phone}
-                </ContactItem>
-              )}
-            </InquiryContact>
-            
-            <InquiryContent>
-              <strong>Message:</strong>
-              <InquiryMessage>{inquiry.message}</InquiryMessage>
-            </InquiryContent>
-            
-            <InquiryActions>
-              {(!inquiry.status || inquiry.status !== 'resolved') && (
-                <Button primary onClick={() => markAsResolved(inquiry.id)}>
-                  <FaCheckCircle /> Mark as Resolved
-                </Button>
-              )}
-              <DeleteButton onClick={() => handleDelete(inquiry.id)}>
-                <FaTrash /> Delete
-              </DeleteButton>
-            </InquiryActions>
-          </InquiryItem>
+          <InquiryCard 
+            key={inquiry.id} 
+            inquiry={inquiry} 
+            onMarkAsRead={markAsRead} 
+            onDelete={handleDelete} 
+          />
         ))
       )}
     </InquiriesContainer>

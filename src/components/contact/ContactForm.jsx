@@ -2,23 +2,19 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { InquiriesService, ListingsService } from '../../services/aws-service';
-import { testDynamoDBConnection } from '../../services/db-service';
 
 const FormContainer = styled.div`
-  background: ${props => props.theme.colors.white};
+  max-width: 600px;
+  margin: 2rem auto;
   padding: ${props => props.theme.spacing.lg};
+  background: ${props => props.theme.colors.white};
   border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
-  margin-bottom: ${props => props.theme.spacing.lg};
-  transition: ${props => props.theme.transitions.default};
-  width: 100%;
-
+  box-shadow: ${props => props.theme.shadows.large};
+  border: 1px solid ${props => props.theme.colors.lightGray};
+  
   @media (max-width: 768px) {
+    margin: 1rem auto;
     padding: ${props => props.theme.spacing.md};
-  }
-
-  &:hover {
-    box-shadow: ${props => props.theme.shadows.large};
   }
 `;
 
@@ -26,78 +22,64 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.md};
-  width: 100%;
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.xs};
-  width: 100%;
 `;
 
 const Label = styled.label`
-  font-weight: 500;
+  font-weight: 600;
   color: ${props => props.theme.colors.primary};
-  font-size: 1rem;
-  
-  @media (max-width: 768px) {
-    font-size: 0.95rem;
-  }
+  margin-bottom: ${props => props.theme.spacing.xs};
 `;
 
 const Input = styled.input`
-  padding: ${props => props.theme.spacing.sm};
-  border: 1px solid #ddd;
+  padding: ${props => props.theme.spacing.md};
+  border: 1px solid ${props => props.theme.colors.lightGray};
   border-radius: ${props => props.theme.borderRadius.small};
   font-size: 1rem;
   transition: ${props => props.theme.transitions.fast};
-  width: 100%;
-
-  @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.xs};
-    font-size: 0.95rem;
-  }
+  background-color: ${props => props.theme.colors.white};
 
   &:focus {
-    border-color: ${props => props.theme.colors.primary};
     outline: none;
-    box-shadow: 0 0 0 2px rgba(74, 64, 54, 0.1);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
   }
 `;
 
 const Textarea = styled.textarea`
-  padding: ${props => props.theme.spacing.sm};
-  border: 1px solid #ddd;
+  padding: ${props => props.theme.spacing.md};
+  border: 1px solid ${props => props.theme.colors.lightGray};
   border-radius: ${props => props.theme.borderRadius.small};
   font-size: 1rem;
-  min-height: 120px;
+  min-height: 140px;
   resize: vertical;
   transition: ${props => props.theme.transitions.fast};
-  width: 100%;
-
-  @media (max-width: 768px) {
-    min-height: 100px;
-    font-size: 0.95rem;
-  }
+  background-color: ${props => props.theme.colors.white};
 
   &:focus {
-    border-color: ${props => props.theme.colors.primary};
     outline: none;
-    box-shadow: 0 0 0 2px rgba(74, 64, 54, 0.1);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
   }
 `;
 
-const SubmitButton = styled.button`
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+const Button = styled.button`
+  padding: ${props => props.theme.spacing.md};
   background-color: ${props => props.theme.colors.primary};
   color: ${props => props.theme.colors.white};
   border: none;
   border-radius: ${props => props.theme.borderRadius.small};
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: ${props => props.theme.transitions.fast};
   margin-top: ${props => props.theme.spacing.sm};
+  width: 100%;
 
   &:hover {
     background-color: ${props => props.theme.colors.secondary};
@@ -106,218 +88,165 @@ const SubmitButton = styled.button`
   }
 
   &:disabled {
-    background-color: #cccccc;
+    background-color: ${props => props.theme.colors.lightGray};
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 `;
 
-const Select = styled.select`
-  padding: ${props => props.theme.spacing.sm};
-  border: 1px solid #ddd;
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-size: 1rem;
-  transition: ${props => props.theme.transitions.fast};
-
-  &:focus {
-    border-color: ${props => props.theme.colors.primary};
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(74, 64, 54, 0.1);
-  }
-`;
-
-const SuccessMessage = styled.div`
+const Message = styled.div`
   padding: ${props => props.theme.spacing.md};
-  background-color: #d4edda;
-  color: #155724;
   border-radius: ${props => props.theme.borderRadius.small};
   margin-top: ${props => props.theme.spacing.md};
+  text-align: center;
+  
+  ${props => props.type === 'success' && `
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  `}
+  
+  ${props => props.type === 'error' && `
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  `}
 `;
 
-const ErrorMessage = styled.div`
-  padding: ${props => props.theme.spacing.md};
-  background-color: #f8d7da;
-  color: #721c24;
-  border-radius: ${props => props.theme.borderRadius.small};
-  margin-top: ${props => props.theme.spacing.md};
-`;
-
-const ListingInfo = styled.div`
-  background-color: ${props => props.theme.colors.accent};
+const PropertyInfo = styled.div`
+  background-color: #f8f9fa;
   padding: ${props => props.theme.spacing.md};
   border-radius: ${props => props.theme.borderRadius.small};
   margin-bottom: ${props => props.theme.spacing.md};
+  border-left: 4px solid ${props => props.theme.colors.primary};
 
   h3 {
     margin-top: 0;
     margin-bottom: ${props => props.theme.spacing.xs};
     color: ${props => props.theme.colors.primary};
+    font-size: 1.2rem;
   }
 
   p {
     margin: 0;
-    margin-bottom: ${props => props.theme.spacing.xs};
+    color: ${props => props.theme.colors.text};
   }
 `;
 
-const DiagnosticInfo = styled.div`
-  padding: ${props => props.theme.spacing.md};
-  background-color: #f8f9fa;
-  color: #333;
-  border-radius: ${props => props.theme.borderRadius.small};
-  margin-top: ${props => props.theme.spacing.md};
-  font-family: monospace;
-  font-size: 12px;
-  white-space: pre-wrap;
-  overflow-x: auto;
-  max-height: 200px;
-  overflow-y: auto;
-`;
-
-const submitContactForm = async (formData) => {
-  try {
-    console.log('Submitting contact form data:', JSON.stringify(formData));
-    
-    // Test DynamoDB connection first
-    const testResult = await testDynamoDBConnection();
-    console.log('DynamoDB connection test:', testResult);
-    
-    if (!testResult.success) {
-      throw new Error(`DynamoDB connection test failed: ${testResult.message}`);
-    }
-    
-    const result = await InquiriesService.submitInquiry(formData);
-    console.log('Form submission result:', result);
-    return result;
-  } catch (error) {
-    console.error('Error submitting contact form:', error);
-    // Try to get more detailed error information
-    if (error.code) {
-      console.error(`AWS Error: ${error.code} - ${error.message}`);
-    }
-    throw error;
-  }
-};
-
-const fetchListingDetails = async (listingId) => {
-  try {
-    return await ListingsService.getListing(listingId);
-  } catch (error) {
-    console.error('Error fetching listing details:', error);
-    throw error;
-  }
-};
-
-const ContactForm = ({ listingId = null }) => {
+const ContactForm = () => {
   const [searchParams] = useSearchParams();
+  const listingId = searchParams.get('listing');
+  const [listingDetails, setListingDetails] = useState(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     message: '',
-    inquiryType: 'general',
-    listingId: listingId || searchParams.get('listing') || '',
-    source: 'website'
+    listingId: null
   });
   
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [listingDetails, setListingDetails] = useState(null);
+  const [status, setStatus] = useState({
+    submitting: false,
+    message: null,
+    type: null
+  });
 
+  // Fetch listing details if a listing ID is provided
   useEffect(() => {
-    // Update listingId if it changes via props or URL
-    const listingParam = searchParams.get('listing');
-    if (listingParam || listingId) {
-      setFormData(prev => ({
-        ...prev,
-        listingId: listingId || listingParam || '',
-        inquiryType: 'property'
-      }));
-
-      // Fetch listing details if a listing ID is provided
-      const fetchListing = async () => {
+    const fetchListingDetails = async () => {
+      if (listingId) {
         try {
-          const details = await fetchListingDetails(listingId || listingParam);
-          if (details) {
-            setListingDetails(details);
-          }
+          const listing = await ListingsService.getListing(listingId);
+          setListingDetails(listing);
+          // Pre-populate the message with just listing title for better UX
+          setFormData(prev => ({
+            ...prev,
+            listingId,
+            message: `I'm interested in inquiring about ${listing.address}`
+          }));
         } catch (error) {
           console.error('Error fetching listing details:', error);
         }
-      };
+      }
+    };
 
-      fetchListing();
-    }
-  }, [searchParams, listingId]);
+    fetchListingDetails();
+  }, [listingId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
+    
+    // Basic validation
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setStatus({
+        submitting: false,
+        message: 'Please fill out all required fields.',
+        type: 'error'
+      });
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setStatus({
+        submitting: false,
+        message: 'Please enter a valid email address.',
+        type: 'error'
+      });
+      return;
+    }
+
+    setStatus({ submitting: true, message: null, type: null });
 
     try {
-      // Add timestamp and generate unique ID
-      const dataToSubmit = {
+      console.log('Submitting inquiry from contact form');
+      await InquiriesService.submitInquiry({
         ...formData,
-        id: `inquiry-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        timestamp: new Date().toISOString()
-      };
-      
-      console.log('Starting form submission process...');
-      const result = await submitContactForm(dataToSubmit);
-      console.log('Form submission completed with result:', result);
-      
-      if (result.success) {
-        setSubmitSuccess(true);
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          message: '',
-          inquiryType: 'general',
-          listingId: listingId || searchParams.get('listing') || '',
-          source: 'website'
-        });
-      } else {
-        console.error('Form submission returned unsuccessful:', result);
-        setSubmitError(`There was a problem submitting your message: ${result.message || 'Unknown error'}`);
-      }
+        listingId: listingId || null // Ensure listingId is included if present
+      });
+      setStatus({
+        submitting: false,
+        message: "Thank you for your message! We'll get back to you soon.",
+        type: 'success'
+      });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        message: '',
+        listingId: null
+      });
     } catch (error) {
-      console.error('Form submission threw an exception:', error);
-      let errorMessage = 'An unexpected error occurred. Please try again later.';
-      
-      // Try to extract a more detailed error message
-      if (error.code && error.message) {
-        errorMessage = `Error (${error.code}): ${error.message}`;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      setSubmitError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error submitting inquiry:', error);
+      setStatus({
+        submitting: false,
+        message: error.message || 'Sorry, there was an error sending your message. Please try again.',
+        type: 'error'
+      });
     }
   };
 
   return (
     <FormContainer>
       {listingDetails && (
-        <ListingInfo>
-          <h3>Inquiry About Property</h3>
-          <p><strong>{listingDetails.title}</strong></p>
-          <p>{listingDetails.address}</p>
-          <p>${listingDetails.price?.toLocaleString()}</p>
-        </ListingInfo>
+        <PropertyInfo>
+          <h3>Inquiry about: {listingDetails.address}</h3>
+          {listingDetails.city && listingDetails.state && (
+            <p>{listingDetails.city}, {listingDetails.state}</p>
+          )}
+        </PropertyInfo>
       )}
-
+      
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label htmlFor="name">Name *</Label>
@@ -344,7 +273,7 @@ const ContactForm = ({ listingId = null }) => {
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">Phone (optional)</Label>
           <Input
             type="tel"
             id="phone"
@@ -352,21 +281,6 @@ const ContactForm = ({ listingId = null }) => {
             value={formData.phone}
             onChange={handleChange}
           />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="inquiryType">Inquiry Type</Label>
-          <Select
-            id="inquiryType"
-            name="inquiryType"
-            value={formData.inquiryType}
-            onChange={handleChange}
-          >
-            <option value="general">General Inquiry</option>
-            <option value="property">Property Inquiry</option>
-            <option value="selling">Selling a Property</option>
-            <option value="buying">Buying a Property</option>
-          </Select>
         </FormGroup>
 
         <FormGroup>
@@ -380,18 +294,12 @@ const ContactForm = ({ listingId = null }) => {
           />
         </FormGroup>
 
-        <SubmitButton type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Sending...' : 'Send Message'}
-        </SubmitButton>
+        <Button type="submit" disabled={status.submitting}>
+          {status.submitting ? 'Sending...' : 'Send Message'}
+        </Button>
 
-        {submitSuccess && (
-          <SuccessMessage>
-            Thank you for your message! Dan will get back to you as soon as possible.
-          </SuccessMessage>
-        )}
-
-        {submitError && (
-          <ErrorMessage>{submitError}</ErrorMessage>
+        {status.message && (
+          <Message type={status.type}>{status.message}</Message>
         )}
       </Form>
     </FormContainer>

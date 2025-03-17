@@ -260,7 +260,7 @@ const Contact = () => {
         <ContactHeader>
           <h1>Get in Touch</h1>
           <p>
-            Looking to buy or sell property in the Front Range of Colorado Springs? 
+            Looking to buy or sell property in Colorado Springs? 
             I'm here to help answer any of your real estate questions and guide you 
             through the process.
           </p>
