@@ -441,7 +441,7 @@ const Home = () => {
     <>
       <SEO 
         pageName="Home" 
-        description="Dan Weihmiller - Real estate professional with eXp Realty serving Colorado Springs and the Front Range. Find your dream home or sell your property with personalized service."
+        description="Dan Weihmiller, Realtor® with eXp Realty - Expert real estate services in Colorado Springs and the Front Range. Over 35 years of trusted experience serving the Front Range."
         image="/images/og-image.jpg"
       />
       <div>

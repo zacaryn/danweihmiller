@@ -4,7 +4,8 @@ import styled from '@emotion/styled';
 import { InquiriesService, ListingsService } from '../../services/aws-service';
 
 const FormContainer = styled.div`
-  max-width: 600px;
+  max-width: 800px;
+  width: 100%;
   margin: 2rem auto;
   padding: ${props => props.theme.spacing.lg};
   background: ${props => props.theme.colors.white};
@@ -15,6 +16,11 @@ const FormContainer = styled.div`
   @media (max-width: 768px) {
     margin: 1rem auto;
     padding: ${props => props.theme.spacing.md};
+    max-width: 100%;
+    width: 100%;
+    border-radius: ${props => props.theme.borderRadius.small};
+    box-shadow: none;
+    border: none;
   }
 `;
 
@@ -43,11 +49,18 @@ const Input = styled.input`
   font-size: 1rem;
   transition: ${props => props.theme.transitions.fast};
   background-color: ${props => props.theme.colors.white};
+  width: 100%;
+  height: 50px;
 
   &:focus {
     outline: none;
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    height: 55px;
   }
 `;
 
@@ -60,16 +73,22 @@ const Textarea = styled.textarea`
   resize: vertical;
   transition: ${props => props.theme.transitions.fast};
   background-color: ${props => props.theme.colors.white};
+  width: 100%;
 
   &:focus {
     outline: none;
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
   }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    min-height: 160px;
+  }
 `;
 
 const Button = styled.button`
-  padding: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
   background-color: ${props => props.theme.colors.primary};
   color: ${props => props.theme.colors.white};
   border: none;
@@ -80,6 +99,13 @@ const Button = styled.button`
   transition: ${props => props.theme.transitions.fast};
   margin-top: ${props => props.theme.spacing.sm};
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 54px;
+  overflow: visible;
+  white-space: nowrap;
 
   &:hover {
     background-color: ${props => props.theme.colors.secondary};
@@ -91,6 +117,12 @@ const Button = styled.button`
     background-color: ${props => props.theme.colors.lightGray};
     cursor: not-allowed;
     transform: none;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    height: 56px;
+    margin-top: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -131,6 +163,18 @@ const PropertyInfo = styled.div`
     margin: 0;
     color: ${props => props.theme.colors.text};
   }
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.md};
+    
+    h3 {
+      font-size: 1.3rem;
+    }
+    
+    p {
+      font-size: 1.1rem;
+    }
+  }
 `;
 
 const ContactForm = () => {
@@ -159,11 +203,11 @@ const ContactForm = () => {
         try {
           const listing = await ListingsService.getListing(listingId);
           setListingDetails(listing);
-          // Pre-populate the message with just listing title for better UX
+          // Pre-populate the message with property details
           setFormData(prev => ({
             ...prev,
             listingId,
-            message: `I'm interested in inquiring about ${listing.address}`
+            message: "I'm interested in inquiring about this property."
           }));
         } catch (error) {
           console.error('Error fetching listing details:', error);
@@ -240,9 +284,11 @@ const ContactForm = () => {
     <FormContainer>
       {listingDetails && (
         <PropertyInfo>
-          <h3>Inquiry about: {listingDetails.address}</h3>
-          {listingDetails.city && listingDetails.state && (
-            <p>{listingDetails.city}, {listingDetails.state}</p>
+          <h3>Inquiry about Property</h3>
+          <p><strong>{listingDetails.title || listingDetails.address}</strong></p>
+          {listingDetails.price && <p>${listingDetails.price.toLocaleString()}</p>}
+          {listingDetails.bedrooms && listingDetails.bathrooms && (
+            <p>{listingDetails.bedrooms} bed, {listingDetails.bathrooms} bath{listingDetails.squareFeet ? `, ${listingDetails.squareFeet.toLocaleString()} sq ft` : ''}</p>
           )}
         </PropertyInfo>
       )}
@@ -257,6 +303,7 @@ const ContactForm = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            placeholder="Your name"
           />
         </FormGroup>
 
@@ -269,6 +316,7 @@ const ContactForm = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            placeholder="Your email address"
           />
         </FormGroup>
 
@@ -280,6 +328,7 @@ const ContactForm = () => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
+            placeholder="Your phone number"
           />
         </FormGroup>
 
@@ -291,6 +340,7 @@ const ContactForm = () => {
             value={formData.message}
             onChange={handleChange}
             required
+            placeholder="How can Dan help you today?"
           />
         </FormGroup>
 

@@ -46,17 +46,52 @@ const getAuthenticatedClient = async () => {
 
 // Listing Service - uses DynamoDB for listings data
 export const ListingsService = {
+  // Helper to process images in listings
+  _processListingImages: (listing) => {
+    // Create a copy to avoid modifying the original object
+    const processedListing = { ...listing };
+    
+    // If the listing has protected image URLs that are expired or inaccessible,
+    // we can return a fallback to handle it in the UI
+    if (processedListing.coverImage && processedListing.coverImage.includes('/protected/')) {
+      // Log for debugging
+      console.log('Protected image URL detected:', processedListing.coverImage);
+    }
+    
+    // If the listing has an images array with protected URLs
+    if (processedListing.images && Array.isArray(processedListing.images)) {
+      processedListing.images.forEach((imageUrl, index) => {
+        if (imageUrl && imageUrl.includes('/protected/')) {
+          console.log('Protected image URL in array:', imageUrl);
+        }
+      });
+    }
+    
+    return processedListing;
+  },
+
   // Get all listings (public)
   getAllListings: async () => {
     try {
       const result = await publicClient.send(new ScanCommand({
         TableName: LISTINGS_TABLE
       }));
-      return result.Items || [];
+      
+      // Process each listing to handle image URLs
+      const processedItems = (result.Items || []).map(item => 
+        ListingsService._processListingImages(item)
+      );
+      
+      return processedItems;
     } catch (error) {
       console.error('Error fetching listings:', error);
       return [];
     }
+  },
+
+  // Get listings (alias for getAllListings)
+  getListings: async () => {
+    return ListingsService.getAllListings();
   },
 
   // Get a single listing by ID (public)
@@ -66,7 +101,11 @@ export const ListingsService = {
         TableName: LISTINGS_TABLE,
         Key: { id }
       }));
-      return result.Item || null;
+      
+      if (!result.Item) return null;
+      
+      // Process the listing to handle image URLs
+      return ListingsService._processListingImages(result.Item);
     } catch (error) {
       console.error('Error fetching listing:', error);
       return null;
@@ -84,11 +123,21 @@ export const ListingsService = {
       let imageUrl = listing.coverImage;
       if (listing.coverImage instanceof File) {
         const fileName = `listings/${id}/${listing.coverImage.name}`;
+        
+        // Upload to protected location for admin access
         await Storage.put(fileName, listing.coverImage, {
           contentType: listing.coverImage.type,
           level: 'protected'
         });
-        imageUrl = await Storage.get(fileName, { level: 'protected' });
+        
+        // Also upload to public location for user access
+        await Storage.put(fileName, listing.coverImage, {
+          contentType: listing.coverImage.type,
+          level: 'public'
+        });
+        
+        // Use the public URL for the listing
+        imageUrl = `https://danweihmiller-property-images.s3.us-east-1.amazonaws.com/public/${fileName}`;
       }
       
       const item = {
@@ -131,11 +180,21 @@ export const ListingsService = {
       let imageUrl = listing.coverImage;
       if (listing.coverImage instanceof File) {
         const fileName = `listings/${id}/${listing.coverImage.name}`;
+        
+        // Upload to protected location for admin access
         await Storage.put(fileName, listing.coverImage, {
           contentType: listing.coverImage.type,
           level: 'protected'
         });
-        imageUrl = await Storage.get(fileName, { level: 'protected' });
+        
+        // Also upload to public location for user access
+        await Storage.put(fileName, listing.coverImage, {
+          contentType: listing.coverImage.type,
+          level: 'public'
+        });
+        
+        // Use the public URL for the listing
+        imageUrl = `https://danweihmiller-property-images.s3.us-east-1.amazonaws.com/public/${fileName}`;
       }
       
       const updatedItem = {
@@ -267,12 +326,21 @@ export const StorageService = {
   uploadImage: async (file, customPath = null) => {
     try {
       const path = customPath || `images/${Date.now()}-${file.name}`;
+      
+      // Upload to protected location for admin access
       await Storage.put(path, file, {
         contentType: file.type,
         level: 'protected'
       });
-      const url = await Storage.get(path, { level: 'protected' });
-      return url;
+      
+      // Also upload to public location for user access
+      await Storage.put(path, file, {
+        contentType: file.type,
+        level: 'public'
+      });
+      
+      // Return the public URL for public-facing content
+      return `https://danweihmiller-property-images.s3.us-east-1.amazonaws.com/public/${path}`;
     } catch (error) {
       console.error('Error uploading image:', error);
       throw error;
@@ -282,7 +350,9 @@ export const StorageService = {
   // Delete an image from S3
   deleteImage: async (path) => {
     try {
+      // Remove from both protected and public locations
       await Storage.remove(path, { level: 'protected' });
+      await Storage.remove(path, { level: 'public' });
       return true;
     } catch (error) {
       console.error('Error deleting image:', error);
