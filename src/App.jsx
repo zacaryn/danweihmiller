@@ -7,6 +7,7 @@ import ListingDetail from './pages/ListingDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
@@ -20,6 +21,8 @@ const App = () => {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="admin" element={<Admin />} />
+            {/* 404 route - must be last */}
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>
