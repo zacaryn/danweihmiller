@@ -16,17 +16,6 @@ const LISTINGS_TABLE = 'danweihmiller-listings';
 const INQUIRIES_TABLE = 'danweihmiller-inquiries';
 const S3_BUCKET = 'danweihmiller-property-images';
 
-// Create a public DynamoDB client with explicit IAM credentials for unauthenticated operations
-const publicClient = DynamoDBDocumentClient.from(
-  new DynamoDBClient({ 
-    region: REGION,
-    credentials: {
-      accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-      secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-    }
-  })
-);
-
 // Function to get an authenticated DynamoDB client
 const getAuthenticatedClient = async () => {
   try {
@@ -73,16 +62,12 @@ export const ListingsService = {
   // Get all listings (public)
   getAllListings: async () => {
     try {
-      const result = await publicClient.send(new ScanCommand({
-        TableName: LISTINGS_TABLE
-      }));
-      
-      // Process each listing to handle image URLs
-      const processedItems = (result.Items || []).map(item => 
-        ListingsService._processListingImages(item)
-      );
-      
-      return processedItems;
+      const response = await fetch('/api/listings');
+      if (!response.ok) {
+        throw new Error('Failed to fetch listings');
+      }
+      const data = await response.json();
+      return data || [];
     } catch (error) {
       console.error('Error fetching listings:', error);
       return [];
@@ -97,15 +82,15 @@ export const ListingsService = {
   // Get a single listing by ID (public)
   getListing: async (id) => {
     try {
-      const result = await publicClient.send(new GetCommand({
-        TableName: LISTINGS_TABLE,
-        Key: { id }
-      }));
-      
-      if (!result.Item) return null;
-      
-      // Process the listing to handle image URLs
-      return ListingsService._processListingImages(result.Item);
+      const response = await fetch(`/api/listings/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error('Failed to fetch listing');
+      }
+      const data = await response.json();
+      return data || null;
     } catch (error) {
       console.error('Error fetching listing:', error);
       return null;
@@ -238,35 +223,23 @@ export const InquiriesService = {
   // Submit a new inquiry (public)
   submitInquiry: async (inquiry) => {
     try {
-      if (!import.meta.env.VITE_AWS_ACCESS_KEY_ID || !import.meta.env.VITE_AWS_SECRET_ACCESS_KEY) {
-        console.error('AWS credentials are not configured');
-        throw new Error('Server configuration error. Please contact the administrator.');
+      const response = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(inquiry),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit inquiry');
       }
-
-      const timestamp = new Date().toISOString();
-      const item = {
-        id: `inq_${uuid()}`,
-        ...inquiry,
-        isRead: false,
-        createdAt: timestamp
-      };
-
-      console.log('Submitting inquiry with public client');
-      await publicClient.send(new PutCommand({
-        TableName: INQUIRIES_TABLE,
-        Item: item
-      }));
-
-      return item;
+      
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error submitting inquiry:', error);
-      if (error.name === 'CredentialsProviderError') {
-        throw new Error('Authentication error. Please try again later.');
-      } else if (error.name === 'AccessDeniedException') {
-        throw new Error('Permission denied. Your request cannot be processed.');
-      } else {
-        throw error;
-      }
+      throw error;
     }
   },
 
