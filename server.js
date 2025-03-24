@@ -7,8 +7,8 @@ import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand } from '@aw
 import { v4 as uuid } from 'uuid';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' });
+// Load environment variables from .env.local or .env
+dotenv.config({ path: process.env.NODE_ENV === 'production' ? '.env' : '.env.local' });
 
 // Get the directory path for ESM modules
 const __filename = fileURLToPath(import.meta.url);
@@ -16,15 +16,58 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Debug middleware to log requests
+// Simple rate limiting middleware
+const rateLimit = (windowMs = 60000, max = 100) => {
+  const requests = new Map();
+  
+  return (req, res, next) => {
+    const ip = req.ip;
+    const now = Date.now();
+    const windowStart = now - windowMs;
+    
+    // Clean up old requests
+    requests.forEach((timestamp, key) => {
+      if (timestamp < windowStart) {
+        requests.delete(key);
+      }
+    });
+    
+    // Count requests for this IP
+    const requestTimes = requests.get(ip) || [];
+    requestTimes.push(now);
+    requests.set(ip, requestTimes.filter(time => time > windowStart));
+    
+    // Check rate limit
+    if (requests.get(ip).length > max) {
+      return res.status(429).json({ 
+        error: 'Too many requests', 
+        message: 'Please try again later' 
+      });
+    }
+    
+    next();
+  };
+};
+
+// Apply rate limiting to API routes
+app.use('/api', rateLimit(60000, 120)); // 120 requests per minute
+
+// Logger middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(
+      `${new Date().toISOString()} - ${req.method} ${req.url} ${res.statusCode} ${duration}ms`
+    );
+  });
   next();
 });
 
@@ -39,9 +82,11 @@ const client = DynamoDBDocumentClient.from(
   })
 );
 
-// Log environment variable loading for debugging
-console.log('AWS Access Key available:', !!process.env.VITE_AWS_ACCESS_KEY_ID);
-console.log('AWS Secret Key available:', !!process.env.VITE_AWS_SECRET_ACCESS_KEY);
+// Log environment variable loading for debugging (only in non-production)
+if (!isProduction) {
+  console.log('AWS Access Key available:', !!process.env.VITE_AWS_ACCESS_KEY_ID);
+  console.log('AWS Secret Key available:', !!process.env.VITE_AWS_SECRET_ACCESS_KEY);
+}
 
 // Constants for DynamoDB tables
 const LISTINGS_TABLE = 'danweihmiller-listings';
@@ -75,7 +120,10 @@ app.get('/api/listings/:id?', async (req, res) => {
     return res.json(result.Items || []);
   } catch (error) {
     console.error('Error fetching listing(s):', error);
-    return res.status(500).json({ error: 'Error fetching listings' });
+    return res.status(500).json({ 
+      error: 'Error fetching listings',
+      message: isProduction ? 'An unexpected error occurred' : error.message
+    });
   }
 });
 
@@ -87,6 +135,12 @@ app.post('/api/inquiries', async (req, res) => {
     // Basic validation
     if (!inquiry.name || !inquiry.email || !inquiry.message) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inquiry.email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
     
     // Create timestamp
@@ -109,8 +163,16 @@ app.post('/api/inquiries', async (req, res) => {
     return res.json({ success: true, message: 'Inquiry submitted successfully' });
   } catch (error) {
     console.error('Error submitting inquiry:', error);
-    return res.status(500).json({ error: 'Error submitting inquiry' });
+    return res.status(500).json({ 
+      error: 'Error submitting inquiry',
+      message: isProduction ? 'An unexpected error occurred' : error.message
+    });
   }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Catch-all handler for SPA
@@ -118,9 +180,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: isProduction ? 'An unexpected error occurred' : err.message
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running in ${isProduction ? 'production' : 'development'} mode on port ${PORT}`);
 });
 
 export default app; 

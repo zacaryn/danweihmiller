@@ -10,9 +10,7 @@
     "build": "vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "prod": "node server.js",
-    "netlify:dev": "netlify dev",
-    "netlify:build": "netlify build"
+    "prod": "node server.js"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.768.0",
@@ -23,7 +21,6 @@
     "@aws-sdk/lib-dynamodb": "^3.767.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@netlify/functions": "^3.0.2",
     "aws-amplify": "^5.3.12",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.6.2",

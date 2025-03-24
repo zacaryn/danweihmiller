@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import sceneImg from '../assets/images/scene.jpg';
 import expLogo from '../assets/images/exp_realty_logo.png';
+import headshot from '../assets/images/headshot.jpg';
 import SEO from '../components/shared/SEO';
 
 const HeroSection = styled.section`
@@ -463,7 +464,7 @@ const Home = () => {
             </IntroSection>
             <ProfileSection>
               <ImageWrapper>
-                <AgentImage src={'/src/assets/images/headshot.jpg'} alt="Daniel Weihmiller" />
+                <AgentImage src={headshot} alt="Daniel Weihmiller" />
               </ImageWrapper>
               <ProfileInfo>
                 <Stats>

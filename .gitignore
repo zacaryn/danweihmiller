@@ -32,8 +32,6 @@ coverage
 .env.production
 
 # AWS Configuration - Contains sensitive credentials
-src/aws-config.js
-src/config/aws-config.js
 aws-exports.js
 amplifyconfiguration.json
 amplify-build-config.json
