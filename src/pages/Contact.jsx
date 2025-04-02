@@ -335,13 +335,13 @@ const Contact = () => {
               <p>Get the latest updates on new properties, market trends, and real estate advice.</p>
               
               <SocialLinks style={{ justifyContent: 'center' }}>
-                <SocialButton href="#" title="Facebook" aria-label="Facebook">
+                <SocialButton href="https://www.facebook.com/danweihmillerrealtor" title="Facebook" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
                   <FaFacebookF />
                 </SocialButton>
                 <SocialButton href="https://www.linkedin.com/in/danweihmiller/" title="LinkedIn" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
                   <FaLinkedinIn />
                 </SocialButton>
-                <SocialButton href="#" title="Instagram" aria-label="Instagram">
+                <SocialButton href="https://www.instagram.com/danweihmiller/" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
                   <FaInstagram />
                 </SocialButton>
               </SocialLinks>

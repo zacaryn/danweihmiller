@@ -459,11 +459,7 @@ const Admin = () => {
         )}
 
         {activeTab === 'inquiries' && (
-          <div>
-            <h2>Contact Inquiries</h2>
-            <p>Review and manage customer inquiries from the contact form.</p>
-            <AdminInquiries />
-          </div>
+          <AdminInquiries />
         )}
 
         {activeTab === 'settings' && (
