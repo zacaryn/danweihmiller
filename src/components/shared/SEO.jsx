@@ -35,19 +35,60 @@ const SEO = ({
     document.title = displayTitle;
   }, [displayTitle]);
 
+  // Schema.org JSON-LD data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "@id": "https://www.danweihmiller.com/#realestateagent",
+    "name": "Dan Weihmiller",
+    "url": "https://www.danweihmiller.com/",
+    "image": profileImage,
+    "description": defaultDescription,
+    "telephone": "(719) 301-8257",
+    "email": "buildingincolorado22@gmail.com",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Colorado Springs",
+      "addressRegion": "CO",
+      "addressCountry": "US"
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "Colorado Springs"
+    },
+    "priceRange": "$$",
+    "sameAs": [
+      "https://www.facebook.com/danweihmiller",
+      "https://www.linkedin.com/in/danweihmiller",
+      "https://www.instagram.com/danweihmiller"
+    ]
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.danweihmiller.com/#website",
+    "name": "Dan Weihmiller",
+    "url": "https://www.danweihmiller.com/",
+    "publisher": {
+      "@id": "https://www.danweihmiller.com/#realestateagent"
+    }
+  };
+
   return (
     <Helmet>
       {/* Primary Meta Tags */}
       <title>{displayTitle}</title>
       <meta name="title" content={displayTitle} />
       <meta name="description" content={description || defaultDescription} />
+      <meta name="application-name" content="Dan Weihmiller" />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
       <meta property="og:title" content={displayTitle} />
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={displayImage} />
-      <meta property="og:site_name" content="Dan Weihmiller, Realtor® with eXp Realty" />
+      <meta property="og:site_name" content="Dan Weihmiller" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -62,6 +103,14 @@ const SEO = ({
       {/* Image Alt Text for Accessibility */}
       <meta name="twitter:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
       <meta property="og:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
+      
+      {/* Schema.org JSON-LD */}
+      <script type="application/ld+json">
+        {JSON.stringify(jsonLd)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
+      </script>
       
       {/* Pass through any additional meta tags */}
       {children}

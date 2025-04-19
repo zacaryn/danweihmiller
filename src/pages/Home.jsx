@@ -3,6 +3,7 @@ import sceneImg from '../assets/images/scene.jpg';
 import expLogo from '../assets/images/exp_realty_logo.png';
 import headshot from '../assets/images/headshot.jpg';
 import SEO from '../components/shared/SEO';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const HeroSection = styled.section`
   min-height: 100vh;
@@ -49,7 +50,7 @@ const HeroContent = styled.div`
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(auto, 600px) 1fr;
   gap: ${props => props.theme.spacing.xl};
   align-items: center;
 
@@ -77,12 +78,10 @@ const IntroSection = styled.div`
 const ProfileSection = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: ${props => props.theme.spacing.lg};
-  background: rgba(255, 255, 255, 0.95);
   padding: ${props => props.theme.spacing.lg};
-  border-radius: ${props => props.theme.borderRadius.large};
-  backdrop-filter: blur(10px);
-  box-shadow: ${props => props.theme.shadows.large};
+  margin-right: -2rem;
 
   @media (max-width: 968px) {
     order: 1;
@@ -93,10 +92,7 @@ const ProfileSection = styled.div`
     width: 100%;
     padding: ${props => props.theme.spacing.md};
     gap: ${props => props.theme.spacing.md};
-  }
-
-  @media (max-width: 480px) {
-    padding: ${props => props.theme.spacing.sm};
+    justify-content: center;
   }
 `;
 
@@ -104,10 +100,15 @@ const ImageWrapper = styled.div`
   flex-shrink: 0;
   width: 180px;
   height: 180px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid ${props => props.theme.colors.white};
-  box-shadow: ${props => props.theme.shadows.medium};
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+  }
 
   @media (max-width: 768px) {
     width: 150px;
@@ -124,11 +125,20 @@ const AgentImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid ${props => props.theme.colors.white};
+  box-shadow: ${props => props.theme.shadows.medium};
 `;
 
 const ProfileInfo = styled.div`
   flex: 1;
-  min-width: 0; // Prevents content from overflowing
+  min-width: 0;
+  position: relative;
+  padding-left: ${props => props.theme.spacing.lg};
+
+  @media (max-width: 968px) {
+    padding-left: 0;
+  }
 `;
 
 const BrandingTitle = styled.div`
@@ -242,22 +252,30 @@ const Subtitle = styled.p`
 
 const Stats = styled.div`
   display: flex;
-  gap: ${props => props.theme.spacing.lg};
-  margin: ${props => props.theme.spacing.md} 0;
-  padding: ${props => props.theme.spacing.md};
-  background: rgba(255, 255, 255, 0.8);
+  flex-direction: column;
+  gap: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  background: rgba(255, 255, 255, 0.1);
   border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.small};
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
   @media (max-width: 968px) {
-    justify-content: center;
-    gap: ${props => props.theme.spacing.xl};
     width: 100%;
   }
 
   @media (max-width: 480px) {
-    gap: ${props => props.theme.spacing.lg};
-    padding: ${props => props.theme.spacing.sm};
+    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  }
+`;
+
+const StatsRow = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.lg};
+  justify-content: center;
+
+  @media (max-width: 480px) {
+    gap: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -271,42 +289,42 @@ const StatItem = styled.div`
     right: -${props => props.theme.spacing.md};
     top: 50%;
     transform: translateY(-50%);
-    height: 40px;
+    height: 30px;
     width: 1px;
-    background: ${props => props.theme.colors.lightGray};
+    background: rgba(255, 255, 255, 0.2);
   }
 
   @media (max-width: 480px) {
     &:not(:last-child)::after {
       right: -${props => props.theme.spacing.sm};
-      height: 30px;
+      height: 25px;
     }
   }
 `;
 
 const StatNumber = styled.div`
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.primary};
+  color: ${props => props.theme.colors.white};
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-family: 'Playfair Display', serif;
 
   @media (max-width: 480px) {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.9rem;
-  color: ${props => props.theme.colors.darkGray};
+  font-size: 0.85rem;
+  color: ${props => props.theme.colors.white};
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  opacity: 0.9;
 
   @media (max-width: 480px) {
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
+    font-size: 0.75rem;
   }
 `;
 
@@ -437,12 +455,57 @@ const FeatureText = styled.p`
   }
 `;
 
+const SocialLinks = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.sm};
+  justify-content: center;
+  padding-top: ${props => props.theme.spacing.xs};
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+`;
+
+const SocialLink = styled.a`
+  color: ${props => props.theme.colors.white};
+  opacity: 0.8;
+  transition: ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`;
+
+const ContactButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.xs};
+  color: ${props => props.theme.colors.white};
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  transition: ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 968px) {
+    justify-content: center;
+  }
+`;
+
 const Home = () => {
   return (
     <>
       <SEO 
-        pageName="Home" 
-        description="Dan Weihmiller, Realtor® with eXp Realty - Expert real estate services in Colorado Springs and the Front Range. Over 35 years of trusted experience serving the Front Range."
+        pageName="Home"
+        title="Colorado Springs Real Estate | Dan Weihmiller, Realtor® with eXp Realty"
+        description="Expert real estate services in Colorado Springs and the Front Range. Dan Weihmiller brings over 35 years of trusted experience helping buyers and sellers in Colorado Springs, Monument, and surrounding areas."
         image="/images/og-image.jpg"
       />
       <div>
@@ -468,15 +531,40 @@ const Home = () => {
               </ImageWrapper>
               <ProfileInfo>
                 <Stats>
-                  <StatItem>
-                    <StatNumber>35+</StatNumber>
-                    <StatLabel>Years Experience</StatLabel>
-                  </StatItem>
-                  <StatItem>
-                    <StatNumber>500+</StatNumber>
-                    <StatLabel>Properties Sold</StatLabel>
-                  </StatItem>
+                  <StatsRow>
+                    <StatItem>
+                      <StatNumber>35+</StatNumber>
+                      <StatLabel>Years Experience</StatLabel>
+                    </StatItem>
+                    <StatItem>
+                      <StatNumber>500+</StatNumber>
+                      <StatLabel>Properties Sold</StatLabel>
+                    </StatItem>
+                  </StatsRow>
+                  <SocialLinks>
+                    <SocialLink href="https://www.facebook.com/danweihmillerrealtor" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                      <FaFacebookF />
+                    </SocialLink>
+                    <SocialLink href="https://www.linkedin.com/in/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                      <FaLinkedinIn />
+                    </SocialLink>
+                    <SocialLink href="https://www.instagram.com/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                      <FaInstagram />
+                    </SocialLink>
+                    <SocialLink href="mailto:buildingincolorado22@gmail.com" aria-label="Email">
+                      <FaEnvelope />
+                    </SocialLink>
+                    <SocialLink href="tel:7193018257" aria-label="Phone">
+                      <FaPhone />
+                    </SocialLink>
+                  </SocialLinks>
                 </Stats>
+                <ContactButton href="/contact">
+                  Write me a message
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginTop: '1px' }}>
+                    <path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"/>
+                  </svg>
+                </ContactButton>
               </ProfileInfo>
             </ProfileSection>
           </HeroContent>

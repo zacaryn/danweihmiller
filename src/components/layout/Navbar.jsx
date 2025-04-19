@@ -213,6 +213,7 @@ const Navbar = () => {
           <NavLinks isOpen={isOpen}>
             <NavLink to="/" onClick={handleLinkClick}>Home</NavLink>
             <NavLink to="/listings" onClick={handleLinkClick}>Listings</NavLink>
+            <NavLink to="/resources" onClick={handleLinkClick}>Resources</NavLink>
             <NavLink to="/about" onClick={handleLinkClick}>About</NavLink>
             <NavLink to="/contact" onClick={handleLinkClick}>Contact</NavLink>
           </NavLinks>

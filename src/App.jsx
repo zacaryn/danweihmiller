@@ -8,6 +8,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
+import ResourcesPage from './pages/resources';
+import MilitaryRelocation from './pages/resources/military-relocation';
+import VALoans from './pages/resources/va-loans';
+import ListingAgent from './pages/resources/listing-agent';
+import NewConstruction from './pages/resources/new-construction';
+import FirstTimeHomeBuyers from './pages/resources/first-time-home-buyers';
+import Land from './pages/resources/land';
+import SingleFamilyHome from './pages/resources/single-family-home';
 
 const App = () => {
   return (
@@ -21,6 +29,17 @@ const App = () => {
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
             <Route path="admin" element={<Admin />} />
+            
+            {/* Resources Routes */}
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path="resources/military-relocation" element={<MilitaryRelocation />} />
+            <Route path="resources/va-loans" element={<VALoans />} />
+            <Route path="resources/listing-agent" element={<ListingAgent />} />
+            <Route path="resources/new-construction" element={<NewConstruction />} />
+            <Route path="resources/first-time-home-buyers" element={<FirstTimeHomeBuyers />} />
+            <Route path="resources/land" element={<Land />} />
+            <Route path="resources/single-family-home" element={<SingleFamilyHome />} />
+            
             {/* 404 route - must be last */}
             <Route path="*" element={<NotFound />} />
           </Route>

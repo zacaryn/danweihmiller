@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Dan Weihmiller, Realtor® with eXp Realty",
+  "short_name": "Dan Weihmiller",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

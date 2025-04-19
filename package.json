@@ -21,6 +21,7 @@
     "@aws-sdk/lib-dynamodb": "^3.767.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.0.2",
     "aws-amplify": "^5.3.12",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.6.2",
