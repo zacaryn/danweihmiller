@@ -129,6 +129,7 @@ const About = () => {
     <>
       <SEO 
         pageName="About" 
+        title="Dan Weihmiller | Colorado Springs Real Estate Expert"
         description="Get to know Dan Weihmiller, dedicated real estate professional serving Colorado Springs. Learn about my experience, background, approach and commitment to excellence in real estate."
         useProfileImage={true}
       />

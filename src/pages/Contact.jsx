@@ -252,6 +252,7 @@ const Contact = () => {
     <>
       <SEO 
         pageName="Contact" 
+        title="Dan Weihmiller | Colorado Springs Real Estate Expert"
         description="Get in touch with Dan Weihmiller, expert real estate agent in Colorado Springs. Whether you're buying, selling, or have questions about the market, I'm here to help."
         useProfileImage={true}
       />

@@ -1,5 +1,7 @@
 import { Helmet } from 'react-helmet-async';
+import PropTypes from 'prop-types';
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 /**
  * SEO component for managing metadata, page titles, and Open Graph information
@@ -10,7 +12,7 @@ import { useEffect } from 'react';
  * @param {string} [props.description] - Page description for SEO
  * @param {string} [props.image] - Image URL for social sharing
  * @param {boolean} [props.useProfileImage] - Whether to use Dan's profile image instead of default background
- * @param {React.ReactNode} [props.children] - Additional meta tags
+ * @param {boolean} [props.isArticle] - Whether the page is an article
  */
 const SEO = ({ 
   pageName,
@@ -18,30 +20,31 @@ const SEO = ({
   description,
   image = '/images/og-image.jpg',
   useProfileImage = false,
-  children
+  isArticle = false
 }) => {
-  const defaultDescription = "Dan Weihmiller, Realtor® with eXp Realty - Expert real estate services in Colorado Springs. Over 35 years of trusted experience serving the Front Range.";
-  const siteTitle = "Dan Weihmiller, Realtor® with eXp Realty | Colorado Springs";
-  const profileImage = '/images/dan-weihmiller.jpg';
+  const location = useLocation();
+  const siteName = "Dan Weihmiller";
+  const defaultDescription = "Expert real estate services in Colorado Springs and the Front Range. Over 35 years of trusted experience helping buyers and sellers in Colorado Springs, Monument, and surrounding areas.";
+  const profileImage = "/images/headshot.jpg";
   
-  // Determine which title to use
-  const displayTitle = title || (pageName ? `${pageName} | ${siteTitle}` : siteTitle);
-  
-  // Determine which image to use
+  const displayTitle = title || (isArticle ? 
+    `${pageName} | Dan Weihmiller Real Estate Guide` : 
+    `${siteName} | Colorado Springs Real Estate Expert`);
+  const displayDescription = description || defaultDescription;
   const displayImage = useProfileImage ? profileImage : image;
 
-  // Update document.title immediately (improves UX when navigating between pages)
+  // Update document title immediately on route change
   useEffect(() => {
     document.title = displayTitle;
-  }, [displayTitle]);
+  }, [displayTitle, location.pathname]);
 
-  // Schema.org JSON-LD data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
-    "@id": "https://www.danweihmiller.com/#realestateagent",
-    "name": "Dan Weihmiller",
-    "url": "https://www.danweihmiller.com/",
+    "@id": "https://danweihmiller.com/#realestateagent",
+    "name": siteName,
+    "alternateName": "Dan Weihmiller Real Estate",
+    "url": "https://danweihmiller.com",
     "image": profileImage,
     "description": defaultDescription,
     "telephone": "(719) 301-8257",
@@ -67,43 +70,46 @@ const SEO = ({
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": "https://www.danweihmiller.com/#website",
-    "name": "Dan Weihmiller",
-    "url": "https://www.danweihmiller.com/",
+    "@id": "https://danweihmiller.com/#website",
+    "name": siteName,
+    "alternateName": "Dan Weihmiller Real Estate",
+    "url": "https://danweihmiller.com",
+    "description": defaultDescription,
     "publisher": {
-      "@id": "https://www.danweihmiller.com/#realestateagent"
+      "@id": "https://danweihmiller.com/#realestateagent"
     }
   };
 
   return (
     <Helmet>
-      {/* Primary Meta Tags */}
+      {/* Basic Meta Tags */}
       <title>{displayTitle}</title>
-      <meta name="title" content={displayTitle} />
-      <meta name="description" content={description || defaultDescription} />
-      <meta name="application-name" content="Dan Weihmiller" />
-      
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content="website" />
+      <meta name="description" content={displayDescription} />
+      <meta name="application-name" content={siteName} />
+
+      {/* Open Graph Meta Tags */}
       <meta property="og:title" content={displayTitle} />
-      <meta property="og:description" content={description || defaultDescription} />
+      <meta property="og:description" content={displayDescription} />
       <meta property="og:image" content={displayImage} />
-      <meta property="og:site_name" content="Dan Weihmiller" />
-      
-      {/* Twitter */}
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={siteName} />
+
+      {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={displayTitle} />
-      <meta name="twitter:description" content={description || defaultDescription} />
+      <meta name="twitter:description" content={displayDescription} />
       <meta name="twitter:image" content={displayImage} />
-      
-      {/* Geographic Tags for Real Estate */}
+
+      {/* Geographic Meta Tags */}
       <meta name="geo.region" content="US-CO" />
       <meta name="geo.placename" content="Colorado Springs" />
-      
+      <meta name="geo.position" content="38.8339;-104.8214" />
+      <meta name="ICBM" content="38.8339, -104.8214" />
+
       {/* Image Alt Text for Accessibility */}
-      <meta name="twitter:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
-      <meta property="og:image:alt" content="Dan Weihmiller, Realtor® with eXp Realty, Colorado Springs" />
-      
+      <meta name="twitter:image:alt" content="Dan Weihmiller | Colorado Springs Real Estate Expert" />
+      <meta property="og:image:alt" content="Dan Weihmiller | Colorado Springs Real Estate Expert" />
+
       {/* Schema.org JSON-LD */}
       <script type="application/ld+json">
         {JSON.stringify(jsonLd)}
@@ -111,11 +117,17 @@ const SEO = ({
       <script type="application/ld+json">
         {JSON.stringify(websiteSchema)}
       </script>
-      
-      {/* Pass through any additional meta tags */}
-      {children}
     </Helmet>
   );
+};
+
+SEO.propTypes = {
+  pageName: PropTypes.string.isRequired,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  image: PropTypes.string,
+  useProfileImage: PropTypes.bool,
+  isArticle: PropTypes.bool
 };
 
 export default SEO; 

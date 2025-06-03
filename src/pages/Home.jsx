@@ -161,6 +161,7 @@ const AgentName = styled.h1`
   line-height: 1.2;
   color: inherit;
   margin: 0;
+  font-weight: normal;
 
   @media (max-width: 768px) {
     font-size: 2.8rem;
@@ -504,7 +505,7 @@ const Home = () => {
     <>
       <SEO 
         pageName="Home"
-        title="Colorado Springs Real Estate | Dan Weihmiller, Realtor® with eXp Realty"
+        title="Dan Weihmiller | Colorado Springs Real Estate Expert"
         description="Expert real estate services in Colorado Springs and the Front Range. Dan Weihmiller brings over 35 years of trusted experience helping buyers and sellers in Colorado Springs, Monument, and surrounding areas."
         image="/images/og-image.jpg"
       />

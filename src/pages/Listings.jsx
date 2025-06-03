@@ -631,6 +631,7 @@ const Listings = () => {
     <>
       <SEO 
         pageName="Listings" 
+        title="Dan Weihmiller | Colorado Springs Real Estate Listings"
         description="Browse Dan Weihmiller's featured real estate listings in Colorado Springs. Find homes, properties, and investment opportunities in top neighborhoods."
         image="/images/og-image.jpg"
       />

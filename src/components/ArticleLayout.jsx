@@ -93,6 +93,7 @@ const ArticleLayout = ({ title, description, children }) => {
       <SEO 
         pageName={title}
         description={description}
+        isArticle={true}
       />
       <ArticleContainer>
         <ArticleHeader>

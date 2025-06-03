@@ -149,6 +149,7 @@ const ResourcesPage = () => {
     <>
       <SEO 
         pageName="Real Estate Resources & Guides"
+        title="Dan Weihmiller | Colorado Springs Real Estate Resources"
         description="Expert guidance and insights to help you make informed real estate decisions in Colorado Springs. Browse our collection of real estate guides and resources."
       />
       <ResourcesContainer>
