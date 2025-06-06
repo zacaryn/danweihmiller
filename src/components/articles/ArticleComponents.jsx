@@ -110,28 +110,32 @@ export const ButtonContainer = styled.div`
 `;
 
 export const CTAButton = styled.a`
-  display: inline-block;
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #ffffff !important;
-  background: ${props => props.theme.colors.primary};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  text-decoration: none !important;
-  transition: all 0.2s ease;
-  border: none;
-  box-shadow: ${props => props.theme.shadows.small};
+  && {
+    display: inline-block;
+    padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
+    background-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.white};
+    text-decoration: none;
+    border-radius: ${props => props.theme.borderRadius.small};
+    font-weight: 500;
+    transition: ${props => props.theme.transitions.fast};
+    text-align: center;
+    min-width: 160px;
+    border: 2px solid ${props => props.theme.colors.primary};
+    margin: 0 ${props => props.theme.spacing.sm};
 
-  &:hover {
-    transform: translateY(-2px);
-    background: ${props => props.theme.colors.secondary} !important;
-    color: #ffffff !important;
-    box-shadow: ${props => props.theme.shadows.medium};
-  }
+    &:hover {
+      background-color: transparent;
+      color: ${props => props.theme.colors.primary};
+      transform: translateY(-2px);
+      box-shadow: ${props => props.theme.shadows.medium};
+    }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(23, 51, 107, 0.3);
+    @media (max-width: 768px) {
+      width: calc(100% - ${props => props.theme.spacing.md});
+      min-width: unset;
+      margin: 0 ${props => props.theme.spacing.xs};
+    }
   }
 `;
 
