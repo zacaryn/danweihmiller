@@ -19,6 +19,7 @@ const LandPage = () => {
     <ArticleLayout
       title="Buying Land in Colorado Springs: Your Complete Guide"
       description="Everything you need to know about purchasing land in Colorado Springs - from evaluating properties to understanding zoning and development requirements."
+      keywords="land for sale Colorado Springs, vacant land, building lots, land development, zoning regulations, land evaluation, property assessment, raw land investment, land purchase process, land use restrictions Colorado Springs"
     >
       <Section>
         <Paragraph>

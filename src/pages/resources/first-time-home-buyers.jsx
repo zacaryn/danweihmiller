@@ -19,6 +19,7 @@ const FirstTimeHomeBuyersPage = () => {
     <ArticleLayout
       title="First Time Home Buyer's Guide: Colorado Springs"
       description="A comprehensive guide for first-time home buyers in Colorado Springs, covering everything from financial preparation to closing on your dream home."
+      keywords="first time home buyer Colorado Springs, home buying guide, first home purchase, mortgage preparation, down payment assistance, Colorado Springs real estate, home buying process, first time buyer programs, FHA loans Colorado Springs, home inspection tips"
     >
       <Section>
         <Paragraph>

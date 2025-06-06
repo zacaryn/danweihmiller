@@ -123,6 +123,11 @@ const articles = [
     path: '/resources/va-loans',
   },
   {
+    title: 'Building a Custom Home',
+    description: 'Expert guidance on the custom home building process, from land selection to material choices and construction methods.',
+    path: '/resources/custom-home-building',
+  },
+  {
     title: 'New Construction Homes',
     description: 'Explore the benefits and process of buying a newly constructed home in Colorado Springs.',
     path: '/resources/new-construction',

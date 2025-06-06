@@ -16,6 +16,7 @@ import NewConstruction from './pages/resources/new-construction';
 import FirstTimeHomeBuyers from './pages/resources/first-time-home-buyers';
 import Land from './pages/resources/land';
 import SingleFamilyHome from './pages/resources/single-family-home';
+import CustomHomeBuilding from './pages/resources/custom-home-building';
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="resources/va-loans" element={<VALoans />} />
             <Route path="resources/listing-agent" element={<ListingAgent />} />
             <Route path="resources/new-construction" element={<NewConstruction />} />
+            <Route path="resources/custom-home-building" element={<CustomHomeBuilding />} />
             <Route path="resources/first-time-home-buyers" element={<FirstTimeHomeBuyers />} />
             <Route path="resources/land" element={<Land />} />
             <Route path="resources/single-family-home" element={<SingleFamilyHome />} />

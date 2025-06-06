@@ -114,15 +114,24 @@ export const CTAButton = styled.a`
   padding: 1rem 2rem;
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.white};
+  color: #ffffff !important;
   background: ${props => props.theme.colors.primary};
   border-radius: ${props => props.theme.borderRadius.medium};
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  border: none;
+  box-shadow: ${props => props.theme.shadows.small};
 
   &:hover {
     transform: translateY(-2px);
+    background: ${props => props.theme.colors.secondary} !important;
+    color: #ffffff !important;
     box-shadow: ${props => props.theme.shadows.medium};
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(23, 51, 107, 0.3);
   }
 `;
 

@@ -3,27 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { InquiriesService, ListingsService } from '../../services/aws-service';
 
-const FormContainer = styled.div`
-  max-width: 800px;
-  width: 100%;
-  margin: 2rem auto;
-  padding: ${props => props.theme.spacing.lg};
-  background: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.large};
-  border: 1px solid ${props => props.theme.colors.lightGray};
-  
-  @media (max-width: 768px) {
-    margin: 1rem auto;
-    padding: ${props => props.theme.spacing.md};
-    max-width: 100%;
-    width: 100%;
-    border-radius: ${props => props.theme.borderRadius.small};
-    box-shadow: none;
-    border: none;
-  }
-`;
-
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -44,11 +23,11 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.theme.colors.lightGray};
+  border: 1px solid ${props => props.theme.colors.accent};
   border-radius: ${props => props.theme.borderRadius.small};
   font-size: 1rem;
   transition: ${props => props.theme.transitions.fast};
-  background-color: ${props => props.theme.colors.white};
+  background-color: ${props => props.theme.colors.lightGray};
   width: 100%;
   height: 50px;
 
@@ -56,6 +35,12 @@ const Input = styled.input`
     outline: none;
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
+    background-color: white;
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.darkGray};
+    opacity: 0.7;
   }
   
   @media (max-width: 768px) {
@@ -66,19 +51,25 @@ const Input = styled.input`
 
 const Textarea = styled.textarea`
   padding: ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.theme.colors.lightGray};
+  border: 1px solid ${props => props.theme.colors.accent};
   border-radius: ${props => props.theme.borderRadius.small};
   font-size: 1rem;
   min-height: 140px;
   resize: vertical;
   transition: ${props => props.theme.transitions.fast};
-  background-color: ${props => props.theme.colors.white};
+  background-color: ${props => props.theme.colors.lightGray};
   width: 100%;
 
   &:focus {
     outline: none;
     border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
+    background-color: white;
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.darkGray};
+    opacity: 0.7;
   }
   
   @media (max-width: 768px) {
@@ -281,7 +272,7 @@ const ContactForm = () => {
   };
 
   return (
-    <FormContainer>
+    <>
       {listingDetails && (
         <PropertyInfo>
           <h3>Inquiry about Property</h3>
@@ -352,7 +343,7 @@ const ContactForm = () => {
           <Message type={status.type}>{status.message}</Message>
         )}
       </Form>
-    </FormContainer>
+    </>
   );
 };
 

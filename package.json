@@ -19,6 +19,7 @@
     "@aws-sdk/client-sts": "^3.758.0",
     "@aws-sdk/credential-provider-cognito-identity": "^3.768.0",
     "@aws-sdk/lib-dynamodb": "^3.767.0",
+    "@emotion/babel-plugin": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.0.2",

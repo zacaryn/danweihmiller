@@ -19,6 +19,7 @@ const NewConstructionPage = () => {
     <ArticleLayout
       title="New Construction Homes in Colorado Springs"
       description="Your comprehensive guide to buying new construction homes in Colorado Springs - from choosing a builder to customizing your dream home."
+      keywords="new construction Colorado Springs, new homes Colorado Springs, custom home builders, new home communities, new build process, builder selection, new home upgrades, new construction inspection, new home warranty, new development Colorado Springs"
     >
       <Section>
         <Paragraph>

@@ -3,7 +3,7 @@ import sceneImg from '../assets/images/scene.jpg';
 import expLogo from '../assets/images/exp_realty_logo.png';
 import headshot from '../assets/images/headshot.jpg';
 import SEO from '../components/shared/SEO';
-import { FaFacebookF, FaLinkedinIn, FaInstagram, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaEnvelope, FaPhone, FaHome, FaSearch, FaChartLine, FaBook, FaUser } from 'react-icons/fa';
 
 const HeroSection = styled.section`
   min-height: 100vh;
@@ -391,6 +391,23 @@ const SecondaryButton = styled(BaseButton)`
 const FeaturesSection = styled.section`
   padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.lg};
   background: ${props => props.theme.colors.background};
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      ${props => props.theme.colors.primary}33,
+      transparent
+    );
+  }
 
   @media (max-width: 768px) {
     padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.sm};
@@ -416,43 +433,135 @@ const FeaturesGrid = styled.div`
   }
 `;
 
-const FeatureCard = styled.div`
+const FeatureCard = styled.a`
   background: ${props => props.theme.colors.white};
-  padding: ${props => props.theme.spacing.lg};
+  padding: ${props => props.theme.spacing.xl};
   border-radius: ${props => props.theme.borderRadius.medium};
   box-shadow: ${props => props.theme.shadows.medium};
-  transition: ${props => props.theme.transitions.default};
+  transition: all 0.4s ease;
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid ${props => props.theme.colors.primary}11;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(
+      to right,
+      ${props => props.theme.colors.primary},
+      ${props => props.theme.colors.accent}
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px);
     box-shadow: ${props => props.theme.shadows.large};
+    background: linear-gradient(
+      to bottom,
+      ${props => props.theme.colors.white},
+      ${props => props.theme.colors.background}
+    );
+
+    &::before {
+      opacity: 1;
+    }
+
+    svg {
+      transform: scale(1.1) translateY(-4px);
+      color: ${props => props.theme.colors.primary};
+    }
   }
 
   @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.md};
+    padding: ${props => props.theme.spacing.lg};
     
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
     }
   }
 `;
 
+const IconWrapper = styled.div`
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${props => props.theme.colors.background};
+  border-radius: 50%;
+  margin-bottom: ${props => props.theme.spacing.md};
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(
+      45deg,
+      ${props => props.theme.colors.primary}22,
+      ${props => props.theme.colors.accent}22
+    );
+    z-index: 0;
+  }
+
+  svg {
+    position: relative;
+    z-index: 1;
+    color: ${props => props.theme.colors.primary};
+    transition: all 0.3s ease;
+  }
+`;
+
 const FeatureTitle = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.md};
+  font-family: 'Playfair Display', serif;
+  position: relative;
+  padding-bottom: ${props => props.theme.spacing.sm};
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: ${props => props.theme.colors.accent}44;
+  }
 
   @media (max-width: 768px) {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 `;
 
 const FeatureText = styled.p`
   color: ${props => props.theme.colors.text};
-  line-height: 1.6;
+  line-height: 1.8;
+  margin: 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
 
   @media (max-width: 768px) {
-    font-size: 0.95rem;
+    font-size: 1rem;
+    line-height: 1.6;
   }
 `;
 
@@ -573,22 +682,31 @@ const Home = () => {
 
         <FeaturesSection>
           <FeaturesGrid>
-            <FeatureCard>
-              <FeatureTitle>Local Expertise</FeatureTitle>
+            <FeatureCard href="/listings">
+              <IconWrapper>
+                <FaHome size={36} />
+              </IconWrapper>
+              <FeatureTitle>Browse Listings</FeatureTitle>
               <FeatureText>
-                Deep understanding of Colorado Springs neighborhoods, market trends, and property values to help you make informed decisions.
+                Explore available properties in Colorado Springs and the Front Range. From single-family homes to new construction, find your perfect match.
               </FeatureText>
             </FeatureCard>
-            <FeatureCard>
-              <FeatureTitle>Personalized Service</FeatureTitle>
+            <FeatureCard href="/resources">
+              <IconWrapper>
+                <FaBook size={36} />
+              </IconWrapper>
+              <FeatureTitle>Real Estate Resources</FeatureTitle>
               <FeatureText>
-                Dedicated attention to your unique needs, whether you're buying your first home or selling an investment property.
+                Access comprehensive guides on VA loans, military relocation, first-time home buying, and more. Make informed decisions with expert insights.
               </FeatureText>
             </FeatureCard>
-            <FeatureCard>
-              <FeatureTitle>Proven Results</FeatureTitle>
+            <FeatureCard href="/about">
+              <IconWrapper>
+                <FaUser size={36} />
+              </IconWrapper>
+              <FeatureTitle>Meet Dan</FeatureTitle>
               <FeatureText>
-                A track record of successful transactions and satisfied clients throughout the Front Range region.
+                Learn about my 35+ years of real estate expertise in Colorado Springs. Discover how my experience and local knowledge can benefit you.
               </FeatureText>
             </FeatureCard>
           </FeaturesGrid>

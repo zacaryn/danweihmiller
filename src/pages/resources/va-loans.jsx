@@ -19,6 +19,7 @@ const VALoansPage = () => {
     <ArticleLayout
       title="VA Loans in Colorado Springs: Your Complete Guide"
       description="Everything you need to know about VA loans in Colorado Springs - eligibility requirements, benefits, and how to make the most of your military home buying benefits."
+      keywords="VA loans Colorado Springs, military home loans, veteran home buying, VA loan eligibility, VA loan benefits, zero down payment VA loan, VA loan requirements, military housing Colorado Springs, VA approved lenders, VA loan process"
     >
       <Section>
         <Paragraph>

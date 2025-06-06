@@ -19,165 +19,121 @@ const ListingAgentPage = () => {
     <ArticleLayout
       title="Why Work with a Listing Agent in Colorado Springs?"
       description="Learn how a professional listing agent can maximize your home's value and streamline the selling process in Colorado Springs' competitive market."
+      keywords="listing agent Colorado Springs, sell your home, real estate agent, home selling process, property marketing, home valuation, listing price strategy, real estate negotiation, home staging, Colorado Springs real estate market"
     >
       <Section>
         <Paragraph>
-          When selling your home in Colorado Springs, choosing the right listing agent can significantly impact your success. A professional listing agent brings market expertise, negotiation skills, and a comprehensive marketing strategy to help you achieve the best possible outcome.
+          When selling your home in Colorado Springs, choosing the right listing agent makes all the difference. With over 35 years of helping people sell their homes in this market, I bring the kind of practical experience and local knowledge that you can't get from a textbook or an app.
         </Paragraph>
 
         <Highlight>
           <HighlightText>
-            In today's competitive Colorado Springs market, having an experienced listing agent can make the difference between a good sale and a great one. Our proven track record helps sellers maximize their returns while minimizing stress.
+            I've seen every kind of market cycle in Colorado Springs, and I know what works. My approach is straightforward - I combine old-school real estate knowledge with modern marketing tools to get your home sold for the best possible price.
           </HighlightText>
         </Highlight>
       </Section>
 
       <Section>
-        <SectionTitle>Benefits of Working with a Listing Agent</SectionTitle>
-        <Paragraph>
-          Professional listing agents provide valuable services that help streamline the selling process:
-        </Paragraph>
+        <SectionTitle>Why Work With Me as Your Listing Agent</SectionTitle>
         <List>
           <ListItem>
-            <ItemTitle>Accurate Pricing Strategy</ItemTitle>
+            <ItemTitle>Local Knowledge That Matters</ItemTitle>
             <ItemDescription>
-              We conduct thorough market analysis to price your home competitively. Using current market data, recent sales, and local trends, we help you set a price that attracts buyers while maximizing your return.
+              After 35 years of selling homes in Colorado Springs, I know our neighborhoods inside and out. I understand what buyers are looking for and how to present your home to attract the right offers.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Professional Marketing</ItemTitle>
+            <ItemTitle>Straight Talk, Real Results</ItemTitle>
             <ItemDescription>
-              Our comprehensive marketing plan includes professional photography, virtual tours, targeted online advertising, and exposure on multiple listing platforms to reach qualified buyers.
+              I'll give you honest, practical advice about pricing and preparing your home for sale. No gimmicks or empty promises - just solid guidance based on what actually works in our market.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Negotiation Expertise</ItemTitle>
+            <ItemTitle>Personal Attention</ItemTitle>
             <ItemDescription>
-              We handle all negotiations on your behalf, leveraging our experience to secure the best terms and price. From initial offers to inspection negotiations, we protect your interests throughout the process.
-            </ItemDescription>
-          </ListItem>
-          <ListItem>
-            <ItemTitle>Network Access</ItemTitle>
-            <ItemDescription>
-              Access our extensive network of real estate professionals, including buyers' agents, home inspectors, contractors, and other service providers to facilitate a smooth transaction.
+              When you work with me, you get me - not a team of assistants. I handle your listing personally because I believe that's how you get the best results for my clients.
             </ItemDescription>
           </ListItem>
         </List>
       </Section>
 
       <Section>
-        <SectionTitle>Our Marketing Strategy</SectionTitle>
+        <SectionTitle>How I Market Your Home</SectionTitle>
         <Paragraph>
-          We employ a multi-faceted marketing approach to showcase your home:
+          My marketing approach combines tried-and-true methods with today's technology to get your home seen by the right buyers:
         </Paragraph>
         <List>
           <ListItem>
-            <ItemTitle>Digital Presence</ItemTitle>
+            <ItemTitle>Online Presence</ItemTitle>
             <ItemDescription>
-              Your home will be featured on major real estate websites, social media platforms, and our own high-traffic website. We use targeted digital advertising to reach potential buyers actively searching in your area.
+              I make sure your home looks great on all the major real estate websites and social media platforms. Good photos and well-written descriptions make a big difference in attracting serious buyers.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Professional Presentation</ItemTitle>
+            <ItemTitle>Quality Photography</ItemTitle>
             <ItemDescription>
-              We coordinate professional photography, videography, and 3D virtual tours to showcase your home's best features. Our listing descriptions highlight key selling points that appeal to today's buyers.
+              I work with experienced photographers who know how to showcase your home's best features. Great photos are essential in today's market where most buyers start their search online.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Traditional Marketing</ItemTitle>
+            <ItemTitle>Local Connections</ItemTitle>
             <ItemDescription>
-              Strategic use of traditional marketing methods including yard signs, open houses, and direct mail campaigns to reach all potential buyers in your target market.
+              After decades in this market, I know most of the active agents in town. When your home hits the market, I make sure they know about it - especially those who have buyers looking in your area.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Agent Network</ItemTitle>
+            <ItemTitle>Effective Open Houses</ItemTitle>
             <ItemDescription>
-              We actively promote your listing to our extensive network of buyer's agents and conduct broker open houses to maximize exposure within the real estate community.
+              When appropriate for your home, I conduct open houses that attract serious buyers. I'm there personally to highlight your home's features and follow up with interested buyers.
             </ItemDescription>
           </ListItem>
         </List>
 
         <Highlight>
           <HighlightText>
-            Our marketing strategies consistently result in faster sales and higher prices for our listings compared to market averages.
+            My approach is simple but effective - I focus on what actually sells homes in our market, not fancy gimmicks or complicated systems.
           </HighlightText>
         </Highlight>
-      </Section>
-
-      <Section>
-        <SectionTitle>Preparing Your Home for Sale</SectionTitle>
-        <Paragraph>
-          We guide you through the process of preparing your home for the market:
-        </Paragraph>
-        <List>
-          <ListItem>
-            <ItemTitle>Home Evaluation</ItemTitle>
-            <ItemDescription>
-              We conduct a thorough evaluation of your property to identify improvements that will maximize your return on investment. Our recommendations focus on cost-effective updates that appeal to today's buyers.
-            </ItemDescription>
-          </ListItem>
-          <ListItem>
-            <ItemTitle>Staging Consultation</ItemTitle>
-            <ItemDescription>
-              Professional staging advice helps present your home in its best light. Whether full staging or simple decluttering tips, we help your home make a great first impression.
-            </ItemDescription>
-          </ListItem>
-          <ListItem>
-            <ItemTitle>Pre-Listing Inspection</ItemTitle>
-            <ItemDescription>
-              Optional pre-listing inspections can identify potential issues early, allowing you to address them proactively and prevent surprises during buyer inspections.
-            </ItemDescription>
-          </ListItem>
-          <ListItem>
-            <ItemTitle>Timing Strategy</ItemTitle>
-            <ItemDescription>
-              We help you determine the optimal time to list your home based on market conditions, seasonal factors, and your personal timeline.
-            </ItemDescription>
-          </ListItem>
-        </List>
       </Section>
 
       <Section>
         <SectionTitle>The Selling Process</SectionTitle>
+        <Paragraph>
+          I keep things straightforward and focused on what matters:
+        </Paragraph>
         <List>
           <ListItem>
-            <ItemTitle>Initial Consultation</ItemTitle>
+            <ItemTitle>First Meeting</ItemTitle>
             <ItemDescription>
-              We begin with a detailed discussion of your goals, timeline, and property condition. This helps us develop a customized strategy for your specific situation.
+              We'll walk through your home together, and I'll share honest feedback about pricing and any improvements that might help it sell. You'll get clear, practical advice based on what buyers in our market are actually looking for.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Pricing and Preparation</ItemTitle>
+            <ItemTitle>Getting Ready</ItemTitle>
             <ItemDescription>
-              Based on market analysis and your home's condition, we establish a competitive price and prepare your home for market with staging and photography.
+              If your home needs any work before listing, I can recommend reliable local contractors I've worked with over the years. No need to over-improve - we'll focus on what really matters to buyers.
             </ItemDescription>
           </ListItem>
           <ListItem>
-            <ItemTitle>Active Marketing</ItemTitle>
+            <ItemTitle>Smart Pricing</ItemTitle>
             <ItemDescription>
-              Once listed, we implement our comprehensive marketing plan and actively promote your property to potential buyers and their agents.
-            </ItemDescription>
-          </ListItem>
-          <ListItem>
-            <ItemTitle>Offer Management</ItemTitle>
-            <ItemDescription>
-              We handle all aspects of offer negotiation, from evaluating terms to coordinating with title companies and lenders through closing.
+              I'll show you what similar homes have sold for and help you set a price that makes sense for the current market. No complex algorithms - just practical market knowledge and experience.
             </ItemDescription>
           </ListItem>
         </List>
       </Section>
 
       <Section>
-        <SectionTitle>Ready to List Your Home?</SectionTitle>
+        <SectionTitle>Ready to Sell Your Home?</SectionTitle>
         <Paragraph>
-          As your listing agent in Colorado Springs, I bring extensive market knowledge, proven marketing strategies, and dedicated service to help you achieve your real estate goals. Let's discuss how we can work together to sell your home quickly and for the best possible price.
+          If you're looking for an experienced agent who'll give you straight talk and personal attention throughout your home sale, let's talk. After 35 years of helping people sell their homes in Colorado Springs, I know what works and what doesn't.
         </Paragraph>
         <Paragraph>
-          Contact me today to schedule a no-obligation consultation and home evaluation.
+          Let's have a conversation about your plans and how I can help you get your home sold.
         </Paragraph>
         <ButtonContainer>
           <CTAButton href="/contact">
-            Schedule Your Listing Consultation
+            Let's Talk About Selling Your Home
           </CTAButton>
         </ButtonContainer>
       </Section>

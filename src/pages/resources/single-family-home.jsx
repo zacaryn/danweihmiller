@@ -19,6 +19,7 @@ const SingleFamilyHomePage = () => {
     <ArticleLayout
       title="Single Family Home Buying Guide: Colorado Springs"
       description="Your comprehensive guide to buying a single-family home in Colorado Springs - from house hunting to closing on your perfect property."
+      keywords="single family homes Colorado Springs, residential real estate, home buying process, house hunting tips, home inspection, mortgage options, Colorado Springs neighborhoods, home appraisal, closing process, real estate market Colorado Springs"
     >
       <Section>
         <Paragraph>
