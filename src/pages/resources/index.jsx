@@ -109,6 +109,19 @@ const ArticleDescription = styled.p`
   }
 `;
 
+const MobilePartnersHeader = styled.h3`
+  display: none;
+  
+  @media (max-width: 968px) {
+    display: block;
+    text-align: center;
+    color: ${props => props.theme.colors.primary};
+    font-size: 1.5rem;
+    margin: 0 0 ${props => props.theme.spacing.md} 0;
+    font-weight: 600;
+  }
+`;
+
 const PartnersFloatingContainer = styled.div`
   position: fixed;
   right: 20px;
@@ -149,8 +162,12 @@ const PartnerFloatingCard = styled.div`
   }
 
   @media (max-width: 968px) {
-    &:hover .partner-tooltip {
+    &:hover .partner-tooltip,
+    &:active .partner-tooltip,
+    &:focus .partner-tooltip {
       transform: translateX(50%) translateY(-10px);
+      opacity: 1;
+      visibility: visible;
     }
   }
 `;
@@ -182,9 +199,9 @@ const PartnerMiniCard = styled.a`
 `;
 
 const PartnerMiniLogo = styled.img`
-  width: 70%;
+  width: 85%;
   height: auto;
-  max-height: 70%;
+  max-height: 85%;
   object-fit: contain;
   filter: brightness(0) saturate(100%) invert(15%) sepia(46%) saturate(2916%) hue-rotate(202deg) brightness(97%) contrast(98%);
 `;
@@ -221,20 +238,27 @@ const PartnerTooltip = styled.div`
 
   @media (max-width: 968px) {
     position: absolute;
-    top: -160px;
+    top: -180px;
     right: 50%;
     transform: translateX(50%);
-    width: 280px;
+    width: 300px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+    border: 2px solid ${props => props.theme.colors.primary};
 
     &::after {
       top: 100%;
       right: 50%;
       transform: translateX(50%);
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 8px solid white;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid white;
       border-bottom: none;
     }
+  }
+
+  @media (max-width: 480px) {
+    width: 280px;
+    top: -170px;
   }
 `;
 
@@ -328,6 +352,7 @@ const ResourcesPage = () => {
           ))}
         </ArticlesGrid>
 
+        <MobilePartnersHeader>Trusted Partners</MobilePartnersHeader>
         <PartnersFloatingContainer>
           <PartnerFloatingCard>
             <PartnerMiniCard 
