@@ -135,7 +135,7 @@ const LandPage = () => {
       <Section>
         <SectionTitle>Ready to Find Your Perfect Piece of Land?</SectionTitle>
         <Paragraph>
-          As your real estate expert in Colorado Springs, I can help you navigate the complexities of purchasing land. From identifying suitable properties to conducting thorough due diligence, we'll ensure you make an informed decision.
+          As your trusted Colorado Springs Realtor, I can help you navigate the complexities of purchasing land. From identifying suitable properties to conducting thorough due diligence, we'll ensure you make an informed decision.
         </Paragraph>
         <Paragraph>
           Let's work together to find the ideal property for your future home or investment.

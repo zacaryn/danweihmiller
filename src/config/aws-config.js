@@ -16,8 +16,8 @@ const awsConfig = {
     oauth: {
       domain: 'danweihmiller.auth.us-east-1.amazoncognito.com',
       scope: ['email', 'openid', 'profile'],
-      redirectSignIn: ['http://localhost:5173/', 'https://www.danweihmiller.com'],
-      redirectSignOut: ['http://localhost:5173/', 'https://www.danweihmiller.com'],
+      redirectSignIn: ['http://localhost:5173/', 'https://danweihmiller.com'],
+      redirectSignOut: ['http://localhost:5173/', 'https://danweihmiller.com'],
       responseType: 'code'
     }
   },

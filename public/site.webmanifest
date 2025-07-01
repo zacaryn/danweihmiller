@@ -1,5 +1,5 @@
 {
-  "name": "Dan Weihmiller | Colorado Springs Real Estate Expert",
+  "name": "Dan Weihmiller | Colorado Springs Realtor",
   "short_name": "Dan Weihmiller",
   "icons": [
     {
@@ -13,7 +13,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#17336b",
-  "background_color": "#17336b",
+  "theme_color": "#17336B",
+  "background_color": "#17336B",
   "display": "standalone"
 }

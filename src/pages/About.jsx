@@ -128,9 +128,9 @@ const About = () => {
   return (
     <>
       <SEO 
-        pageName="About" 
-        title="Dan Weihmiller | Colorado Springs Real Estate Expert"
-        description="Get to know Dan Weihmiller, dedicated real estate professional serving Colorado Springs. Learn about my experience, background, approach and commitment to excellence in real estate."
+        pageName="About Dan Weihmiller"
+        title="Dan Weihmiller | Colorado Springs Realtor"
+        description="Meet Dan Weihmiller, your trusted Colorado Springs Realtor with 35+ years of experience. Licensed Realtor specializing in military relocation, VA loans, and Front Range real estate."
         useProfileImage={true}
       />
       
@@ -141,29 +141,19 @@ const About = () => {
         
         <ContentSection>
           <Paragraph>
-            A licensed real estate professional with eXp Realty serving Colorado Springs since 1987, 
-            Dan Weihmiller has established himself as a trusted name in the community. Dan is dedicated 
-            to providing exceptional service and is always happy to answer any of your real estate questions.
+            Dan Weihmiller is your trusted Colorado Springs Realtor with over 35 years of experience serving military families and residents throughout the Front Range. Licensed with eXp Realty since 1987, Dan has established himself as Colorado Springs' leading Military Relocation Professional (MRP), specializing in VA loans, military PCS moves, and expert guidance for Fort Carson, Peterson AFB, and Schriever AFB personnel.
           </Paragraph>
           
           <Paragraph>
-            Dan's approach to real estate is built on personal dedication, market knowledge, and 
-            unparalleled customer service. He understands that buying or selling a home is more than 
-            just a transaction – it's a life-changing experience that requires careful guidance and 
-            expert advice.
+            As a certified Military Relocation Professional, Dan understands the unique challenges of military moves and the importance of finding the right home quickly and efficiently. His expertise with VA loans and military benefits has helped hundreds of service members achieve homeownership with zero down payment throughout Colorado Springs, Monument, and the surrounding Front Range communities.
           </Paragraph>
 
           <Paragraph>
-            Specializing in residential real estate in Colorado Springs, Dan has 
-            developed a deep understanding of local market trends, neighborhood characteristics, 
-            and property values. This expertise allows him to provide his clients with accurate, 
-            up-to-date information and realistic expectations.
+            Dan's comprehensive knowledge of Colorado Springs neighborhoods – from the Powers corridor perfect for Peterson AFB families to the Fountain communities ideal for Fort Carson personnel – allows him to match military families with the perfect location based on base proximity, school quality, and BAH optimization. His deep understanding of local market trends, military-friendly lenders, and property values ensures clients receive accurate, up-to-date guidance throughout their real estate journey.
           </Paragraph>
 
           <Paragraph>
-            Whether you're a first-time homebuyer, looking to sell your property, or seeking 
-            investment opportunities, Dan's experience and commitment to his clients' success 
-            make him the ideal partner for all your real estate needs.
+            Whether you're a first-time military home buyer using VA loan benefits, a veteran looking to upgrade your forever home, or a civilian family relocating to Colorado Springs, Dan's Military Relocation Professional certification and decades of local expertise make him the ideal partner for achieving your real estate goals in America's premier military community.
           </Paragraph>
 
           <ContactButton href="/contact">Get in Touch</ContactButton>

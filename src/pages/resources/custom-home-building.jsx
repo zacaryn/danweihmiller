@@ -23,7 +23,7 @@ const CustomHomeBuildingPage = () => {
     >
       <Section>
         <Paragraph>
-          Building a custom home is a complex journey that requires expert guidance and strong connections with the right professionals. As your real estate expert in Colorado Springs, I'll help you navigate every step - from finding the perfect piece of land to connecting you with trusted builders, architects, and contractors who can bring your vision to life.
+          Building a custom home is a complex journey that requires expert guidance and strong connections with the right professionals. As your trusted Colorado Springs Realtor, I'll help you navigate every step - from finding the perfect piece of land to connecting you with trusted builders, architects, and contractors who can bring your vision to life.
         </Paragraph>
 
         <Highlight>
@@ -162,7 +162,7 @@ const CustomHomeBuildingPage = () => {
       <Section>
         <SectionTitle>Ready to Start Your Custom Home Journey?</SectionTitle>
         <Paragraph>
-          Building a custom home is a significant undertaking that requires careful planning and coordination with multiple professionals. As your dedicated real estate expert, I'll be your guide throughout the entire process - from finding the perfect lot to connecting you with the right professionals and ensuring everything stays on track.
+          Building a custom home is a significant undertaking that requires careful planning and coordination with multiple professionals. As your dedicated Colorado Springs Realtor, I'll be your guide throughout the entire process - from finding the perfect lot to connecting you with the right professionals and ensuring everything stays on track.
         </Paragraph>
         <Paragraph>
           Let me help you bring your dream home to life in Colorado Springs. With my network of trusted professionals and decades of local experience, you'll have the support you need at every step.

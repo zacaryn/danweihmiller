@@ -10,8 +10,8 @@ const SEO = ({
   pathname
 }) => {
   const siteUrl = 'https://danweihmiller.com';
-  const defaultTitle = 'Dan Weihmiller | Colorado Springs Real Estate Expert';
-  const defaultDescription = 'Expert real estate services in Colorado Springs and the Front Range. Over 35 years of trusted experience helping buyers and sellers in Colorado Springs, Monument, and surrounding areas.';
+  const defaultTitle = 'Dan Weihmiller | Colorado Springs Realtor';
+  const defaultDescription = 'Trusted Colorado Springs Realtor with over 35 years of experience. Specializing in military relocation, VA loans, and helping buyers and sellers throughout Colorado Springs, Monument, and the Front Range.';
 
   const seo = {
     title: title || defaultTitle,

@@ -23,6 +23,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Redirect www to non-www for canonical URLs
+app.use((req, res, next) => {
+  if (req.headers.host && req.headers.host.startsWith('www.')) {
+    const redirectUrl = `https://${req.headers.host.slice(4)}${req.url}`;
+    return res.redirect(301, redirectUrl);
+  }
+  next();
+});
+
+// Normalize trailing slashes (redirect trailing slashes to non-trailing for consistency)
+app.use((req, res, next) => {
+  if (req.path !== '/' && req.path.endsWith('/') && !req.path.includes('.')) {
+    const redirectUrl = req.protocol + '://' + req.get('host') + req.path.slice(0, -1) + req.url.slice(req.path.length);
+    return res.redirect(301, redirectUrl);
+  }
+  next();
+});
+
 // Simple rate limiting middleware
 const rateLimit = (windowMs = 60000, max = 100) => {
   const requests = new Map();

@@ -6,39 +6,47 @@ import SEO from '../components/shared/SEO';
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaEnvelope, FaPhone, FaHome, FaSearch, FaChartLine, FaBook, FaUser } from 'react-icons/fa';
 
 const HeroSection = styled.section`
-  min-height: 100vh;
-  padding-top: 80px; // Account for fixed navbar
-  background: url(${sceneImg}) center/cover no-repeat;
+  min-height: max(55vh, 500px);
+  padding-top: 80px;
+  padding-bottom: ${props => props.theme.spacing.xl};
+  background: linear-gradient(135deg, rgba(23, 51, 107, 0.6), rgba(23, 51, 107, 0.4)), url(${sceneImg}) center/cover no-repeat;
   position: relative;
   display: flex;
   align-items: center;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      to right,
-      rgba(23, 51, 107, 0.75),
-      rgba(23, 51, 107, 0.35) 50%,
-      rgba(23, 51, 107, 0.05)
-    );
+  justify-content: center;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+
+  @media (max-height: 700px) {
+    min-height: max(65vh, 480px);
+    padding-bottom: ${props => props.theme.spacing.lg};
+  }
+
+  @media (max-height: 600px) {
+    min-height: max(75vh, 450px);
+    padding-bottom: ${props => props.theme.spacing.md};
+    align-items: flex-start;
+    padding-top: 100px;
+  }
+
+  @media (max-height: 500px) {
+    min-height: 85vh;
+    padding-top: 80px;
+    padding-bottom: ${props => props.theme.spacing.lg};
+    align-items: flex-start;
+    overflow: hidden;
   }
 
   @media (max-width: 768px) {
-    min-height: calc(100vh - 60px);
-    padding: 100px 0 40px;
-    
-    &::after {
-      background: linear-gradient(
-        to bottom,
-        rgba(23, 51, 107, 0.75),
-        rgba(23, 51, 107, 0.35)
-      );
-    }
+    min-height: 55vh;
+    padding-top: 60px;
+    padding-bottom: ${props => props.theme.spacing.lg};
+  }
+
+  @media (max-width: 480px) {
+    min-height: 60vh;
+    padding-top: 60px;
+    padding-bottom: ${props => props.theme.spacing.xl};
   }
 `;
 
@@ -59,11 +67,15 @@ const HeroContent = styled.div`
     text-align: center;
     gap: ${props => props.theme.spacing.lg};
     padding: 0 ${props => props.theme.spacing.md};
+    max-width: 100%;
+    justify-items: center;
   }
 
   @media (max-width: 480px) {
     padding: 0 ${props => props.theme.spacing.sm};
     gap: ${props => props.theme.spacing.md};
+    margin: 0;
+    width: 100%;
   }
 `;
 
@@ -72,6 +84,8 @@ const IntroSection = styled.div`
 
   @media (max-width: 968px) {
     order: 2;
+    max-width: 100%;
+    margin: 0 auto;
   }
 `;
 
@@ -79,65 +93,252 @@ const ProfileSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: ${props => props.theme.spacing.lg};
   padding: ${props => props.theme.spacing.lg};
   margin-right: -2rem;
+  height: fit-content;
+  max-height: 60vh;
 
   @media (max-width: 968px) {
     order: 1;
-    flex-direction: column;
-    text-align: center;
-    max-width: 500px;
+    justify-content: center;
+    max-width: 400px;
     margin: 0 auto;
     width: 100%;
     padding: ${props => props.theme.spacing.md};
-    gap: ${props => props.theme.spacing.md};
-    justify-content: center;
-  }
-`;
-
-const ImageWrapper = styled.div`
-  flex-shrink: 0;
-  width: 180px;
-  height: 180px;
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-  }
-
-  @media (max-width: 768px) {
-    width: 150px;
-    height: 150px;
+    height: auto;
+    max-height: none;
   }
 
   @media (max-width: 480px) {
-    width: 120px;
-    height: 120px;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 `;
 
-const AgentImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid ${props => props.theme.colors.white};
-  box-shadow: ${props => props.theme.shadows.medium};
+const ProfileCard = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border-radius: ${props => props.theme.borderRadius.medium};
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: ${props => props.theme.spacing.md};
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${props => props.theme.spacing.xs};
+  width: 350px;
+
+  @media (max-height: 600px) {
+    gap: 4px;
+    padding: ${props => props.theme.spacing.sm};
+    width: 320px;
+  }
+
+  @media (max-height: 500px) {
+    gap: 2px;
+    padding: ${props => props.theme.spacing.xs};
+    width: 300px;
+  }
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.sm};
+    width: 300px;
+    gap: 6px;
+  }
+
+  @media (max-width: 480px) {
+    width: 280px;
+    padding: ${props => props.theme.spacing.sm};
+    gap: 4px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 360px) {
+    width: 260px;
+    padding: ${props => props.theme.spacing.xs};
+  }
 `;
 
-const ProfileInfo = styled.div`
-  flex: 1;
-  min-width: 0;
+const ImageContainer = styled.div`
   position: relative;
-  padding-left: ${props => props.theme.spacing.lg};
+  border-radius: ${props => props.theme.borderRadius.large};
+  padding: 4px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 
-  @media (max-width: 968px) {
-    padding-left: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: ${props => props.theme.borderRadius.large};
+    background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 3px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 2px;
+  }
+`;
+
+const ProfileImage = styled.img`
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: ${props => props.theme.borderRadius.medium};
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: ${props => props.theme.shadows.medium};
+  flex-shrink: 0;
+
+  @media (max-height: 600px) {
+    width: 200px;
+    height: 200px;
+  }
+
+  @media (max-height: 500px) {
+    width: 180px;
+    height: 180px;
+  }
+
+  @media (max-width: 768px) {
+    width: 200px;
+    height: 200px;
+  }
+
+  @media (max-width: 480px) {
+    width: 180px;
+    height: 180px;
+  }
+`;
+
+const Stats = styled.div`
+  display: flex;
+  gap: ${props => props.theme.spacing.xl};
+  padding: ${props => props.theme.spacing.xs} 0;
+  justify-content: center;
+  width: 100%;
+
+  @media (max-width: 480px) {
+    gap: ${props => props.theme.spacing.lg};
+    padding: 2px 0;
+  }
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+  position: relative;
+  
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -${props => props.theme.spacing.md};
+    top: 50%;
+    transform: translateY(-50%);
+    height: 30px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  @media (max-width: 480px) {
+    &:not(:last-child)::after {
+      right: -${props => props.theme.spacing.sm};
+      height: 25px;
+    }
+  }
+`;
+
+const StatNumber = styled.div`
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: ${props => props.theme.colors.white};
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  font-family: 'Playfair Display', serif;
+
+  @media (max-width: 768px) {
+    font-size: 1.9rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.7rem;
+  }
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.85rem;
+  color: ${props => props.theme.colors.white};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  opacity: 0.9;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
+`;
+
+const CallButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
+  background: rgba(34, 102, 46, 0.9);
+  backdrop-filter: blur(10px);
+  color: white;
+  text-decoration: none;
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(46, 125, 50, 0.9);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.md};
+    font-size: 0.95rem;
+    
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+    font-size: 0.9rem;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 `;
 
@@ -145,23 +346,36 @@ const BrandingTitle = styled.div`
   display: flex;
   align-items: center;
   gap: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.xs};
+
+  @media (max-width: 968px) {
+    justify-content: center;
+  }
 
   @media (max-width: 768px) {
     flex-direction: row;
     align-items: center;
     gap: ${props => props.theme.spacing.xs};
-    margin-bottom: ${props => props.theme.spacing.sm};
+    margin-bottom: ${props => props.theme.spacing.xs};
+  }
+
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: ${props => props.theme.spacing.xs};
   }
 `;
 
 const AgentName = styled.h1`
   font-family: 'Playfair Display', serif;
   font-size: 3.5rem;
-  line-height: 1.2;
+  line-height: 1.1;
   color: inherit;
   margin: 0;
   font-weight: normal;
+  text-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.5),
+    1px 1px 2px rgba(0, 0, 0, 0.8);
 
   @media (max-width: 768px) {
     font-size: 2.8rem;
@@ -169,6 +383,28 @@ const AgentName = styled.h1`
 
   @media (max-width: 480px) {
     font-size: 2.2rem;
+  }
+`;
+
+const AgentSubtitle = styled.h2`
+  font-size: 1.4rem;
+  color: inherit;
+  margin: 0 0 ${props => props.theme.spacing.lg} 0;
+  font-weight: 600;
+  opacity: 1;
+  text-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.6),
+    1px 1px 2px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.5px;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    margin-bottom: ${props => props.theme.spacing.md};
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+    margin-bottom: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -251,84 +487,6 @@ const Subtitle = styled.p`
   }
 `;
 
-const Stats = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.md};
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: ${props => props.theme.borderRadius.medium};
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  @media (max-width: 968px) {
-    width: 100%;
-  }
-
-  @media (max-width: 480px) {
-    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  }
-`;
-
-const StatsRow = styled.div`
-  display: flex;
-  gap: ${props => props.theme.spacing.lg};
-  justify-content: center;
-
-  @media (max-width: 480px) {
-    gap: ${props => props.theme.spacing.md};
-  }
-`;
-
-const StatItem = styled.div`
-  text-align: center;
-  position: relative;
-  
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: -${props => props.theme.spacing.md};
-    top: 50%;
-    transform: translateY(-50%);
-    height: 30px;
-    width: 1px;
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  @media (max-width: 480px) {
-    &:not(:last-child)::after {
-      right: -${props => props.theme.spacing.sm};
-      height: 25px;
-    }
-  }
-`;
-
-const StatNumber = styled.div`
-  font-size: 2.25rem;
-  font-weight: 600;
-  color: ${props => props.theme.colors.white};
-  line-height: 1;
-  margin-bottom: 0.25rem;
-  font-family: 'Playfair Display', serif;
-
-  @media (max-width: 480px) {
-    font-size: 1.75rem;
-  }
-`;
-
-const StatLabel = styled.div`
-  font-size: 0.85rem;
-  color: ${props => props.theme.colors.white};
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 400;
-  opacity: 0.9;
-
-  @media (max-width: 480px) {
-    font-size: 0.75rem;
-  }
-`;
-
 const ButtonGroup = styled.div`
   display: flex;
   gap: ${props => props.theme.spacing.sm};
@@ -336,12 +494,17 @@ const ButtonGroup = styled.div`
   
   @media (max-width: 968px) {
     justify-content: center;
+    max-width: 100%;
   }
 
   @media (max-width: 480px) {
     flex-direction: column;
     gap: ${props => props.theme.spacing.sm};
     margin-top: ${props => props.theme.spacing.md};
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
   }
 `;
 
@@ -390,7 +553,13 @@ const SecondaryButton = styled(BaseButton)`
 
 const FeaturesSection = styled.section`
   padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.lg};
-  background: ${props => props.theme.colors.background};
+  margin-top: ${props => props.theme.spacing.sm};
+  background: linear-gradient(
+    135deg,
+    #f8f9fb 0%,
+    #e8eef7 50%,
+    #f1f5fb 100%
+  );
   position: relative;
   overflow: hidden;
 
@@ -409,8 +578,39 @@ const FeaturesSection = styled.section`
     );
   }
 
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(
+      circle,
+      rgba(23, 51, 107, 0.03) 0%,
+      transparent 70%
+    );
+    border-radius: 50%;
+  }
+
+  @media (max-height: 700px) {
+    margin-top: ${props => props.theme.spacing.md};
+  }
+
   @media (max-width: 768px) {
     padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.sm};
+    margin-top: ${props => props.theme.spacing.xs};
+    
+    &::after {
+      width: 250px;
+      height: 250px;
+      top: -30%;
+      right: -20%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 0;
   }
 `;
 
@@ -435,9 +635,9 @@ const FeaturesGrid = styled.div`
 
 const FeatureCard = styled.a`
   background: ${props => props.theme.colors.white};
-  padding: ${props => props.theme.spacing.xl};
+  padding: ${props => props.theme.spacing.lg};
   border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.4s ease;
   text-decoration: none;
   cursor: pointer;
@@ -447,7 +647,7 @@ const FeatureCard = styled.a`
   text-align: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid ${props => props.theme.colors.primary}11;
+  border: 1px solid rgba(23, 51, 107, 0.08);
 
   &::before {
     content: '';
@@ -466,13 +666,9 @@ const FeatureCard = styled.a`
   }
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: ${props => props.theme.shadows.large};
-    background: linear-gradient(
-      to bottom,
-      ${props => props.theme.colors.white},
-      ${props => props.theme.colors.background}
-    );
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px rgba(23, 51, 107, 0.15);
+    background: ${props => props.theme.colors.white};
 
     &::before {
       opacity: 1;
@@ -485,83 +681,77 @@ const FeatureCard = styled.a`
   }
 
   @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.lg};
+    padding: ${props => props.theme.spacing.md};
     
     &:hover {
       transform: translateY(-4px);
     }
   }
+
+  @media (max-width: 480px) {
+    padding: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const IconWrapper = styled.div`
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${props => props.theme.colors.background};
+  background: linear-gradient(135deg, rgba(23, 51, 107, 0.08), rgba(23, 51, 107, 0.04));
   border-radius: 50%;
-  margin-bottom: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.sm};
   position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    background: linear-gradient(
-      45deg,
-      ${props => props.theme.colors.primary}22,
-      ${props => props.theme.colors.accent}22
-    );
-    z-index: 0;
-  }
+  border: 2px solid rgba(23, 51, 107, 0.1);
 
   svg {
-    position: relative;
-    z-index: 1;
     color: ${props => props.theme.colors.primary};
     transition: all 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    width: 56px;
+    height: 56px;
+  }
+
+  @media (max-width: 480px) {
+    width: 48px;
+    height: 48px;
   }
 `;
 
 const FeatureTitle = styled.h3`
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.md};
+  margin-bottom: ${props => props.theme.spacing.sm};
   font-family: 'Playfair Display', serif;
   position: relative;
-  padding-bottom: ${props => props.theme.spacing.sm};
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 2px;
-    background: ${props => props.theme.colors.accent}44;
-  }
+  font-weight: 600;
 
   @media (max-width: 768px) {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
   }
 `;
 
 const FeatureText = styled.p`
   color: ${props => props.theme.colors.text};
-  line-height: 1.8;
+  line-height: 1.6;
   margin: 0;
-  font-size: 1.1rem;
-  opacity: 0.9;
+  font-size: 1rem;
+  opacity: 0.8;
 
   @media (max-width: 768px) {
-    font-size: 1rem;
-    line-height: 1.6;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
   }
 `;
 
@@ -614,9 +804,9 @@ const Home = () => {
     <>
       <SEO 
         pageName="Home"
-        title="Dan Weihmiller | Colorado Springs Real Estate Expert"
-        description="Expert real estate services in Colorado Springs and the Front Range. Dan Weihmiller brings over 35 years of trusted experience helping buyers and sellers in Colorado Springs, Monument, and surrounding areas."
-        image="/images/og-image.jpg"
+        title="Dan Weihmiller | Colorado Springs Realtor"
+        description="Trusted Colorado Springs Realtor with 35+ years of experience. Specializing in military relocation, VA loans, and real estate throughout Colorado Springs, Monument, and the Front Range. Contact Dan today!"
+        useProfileImage={false}
       />
       <div>
         <HeroSection>
@@ -624,11 +814,10 @@ const Home = () => {
             <IntroSection>
               <BrandingTitle>
                 <AgentName>Dan Weihmiller</AgentName>
-                <Separator>|</Separator>
-                <BrokerageLogo src={expLogo} alt="eXp Realty" />
               </BrandingTitle>
+              <AgentSubtitle>Realtor, Colorado Springs</AgentSubtitle>
               <Subtitle>
-                Bringing over 35 years of trusted real estate expertise to the Front Range of Colorado Springs.
+                Bringing over 35 years of trusted real estate experience to the Front Range of Colorado Springs. Specializing in military relocation, VA loans, and helping families find their perfect home in our beautiful community.
               </Subtitle>
               <ButtonGroup>
                 <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
@@ -636,46 +825,27 @@ const Home = () => {
               </ButtonGroup>
             </IntroSection>
             <ProfileSection>
-              <ImageWrapper>
-                <AgentImage src={headshot} alt="Daniel Weihmiller" />
-              </ImageWrapper>
-              <ProfileInfo>
+              <ProfileCard>
+                <ImageContainer>
+                  <ProfileImage src={headshot} alt="Dan Weihmiller - Colorado Springs Realtor" />
+                </ImageContainer>
+                
                 <Stats>
-                  <StatsRow>
-                    <StatItem>
-                      <StatNumber>35+</StatNumber>
-                      <StatLabel>Years Experience</StatLabel>
-                    </StatItem>
-                    <StatItem>
-                      <StatNumber>500+</StatNumber>
-                      <StatLabel>Properties Sold</StatLabel>
-                    </StatItem>
-                  </StatsRow>
-                  <SocialLinks>
-                    <SocialLink href="https://www.facebook.com/danweihmillerrealtor" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                      <FaFacebookF />
-                    </SocialLink>
-                    <SocialLink href="https://www.linkedin.com/in/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                      <FaLinkedinIn />
-                    </SocialLink>
-                    <SocialLink href="https://www.instagram.com/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                      <FaInstagram />
-                    </SocialLink>
-                    <SocialLink href="mailto:buildingincolorado22@gmail.com" aria-label="Email">
-                      <FaEnvelope />
-                    </SocialLink>
-                    <SocialLink href="tel:7193018257" aria-label="Phone">
-                      <FaPhone />
-                    </SocialLink>
-                  </SocialLinks>
+                  <StatItem>
+                    <StatNumber>35+</StatNumber>
+                    <StatLabel>Years Experience</StatLabel>
+                  </StatItem>
+                  <StatItem>
+                    <StatNumber>500+</StatNumber>
+                    <StatLabel>Properties Sold</StatLabel>
+                  </StatItem>
                 </Stats>
-                <ContactButton href="/contact">
-                  Write me a message
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginTop: '1px' }}>
-                    <path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"/>
-                  </svg>
-                </ContactButton>
-              </ProfileInfo>
+
+                <CallButton href="tel:7193018257">
+                  <FaPhone />
+                  Call (719) 301-8257
+                </CallButton>
+              </ProfileCard>
             </ProfileSection>
           </HeroContent>
         </HeroSection>
@@ -688,7 +858,7 @@ const Home = () => {
               </IconWrapper>
               <FeatureTitle>Browse Listings</FeatureTitle>
               <FeatureText>
-                Explore available properties in Colorado Springs and the Front Range. From single-family homes to new construction, find your perfect match.
+                Explore Colorado Springs homes for sale throughout the Front Range. From single-family homes to new construction, find your perfect match in our premier military community.
               </FeatureText>
             </FeatureCard>
             <FeatureCard href="/resources">
@@ -697,7 +867,7 @@ const Home = () => {
               </IconWrapper>
               <FeatureTitle>Real Estate Resources</FeatureTitle>
               <FeatureText>
-                Access comprehensive guides on VA loans, military relocation, first-time home buying, and more. Make informed decisions with expert insights.
+                Expert guides on VA loans Colorado Springs, military PCS relocation, first-time buyer programs, and Fort Carson housing. Make informed decisions with local expertise.
               </FeatureText>
             </FeatureCard>
             <FeatureCard href="/about">
@@ -706,7 +876,7 @@ const Home = () => {
               </IconWrapper>
               <FeatureTitle>Meet Dan</FeatureTitle>
               <FeatureText>
-                Learn about my 35+ years of real estate expertise in Colorado Springs. Discover how my experience and local knowledge can benefit you.
+                Learn about my 35+ years of real estate experience in Colorado Springs. Discover how my proven track record and local knowledge can benefit you.
               </FeatureText>
             </FeatureCard>
           </FeaturesGrid>

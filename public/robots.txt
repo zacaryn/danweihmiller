@@ -2,9 +2,16 @@
 User-agent: *
 Allow: /
 
+# Specific rules for common crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 # Disallow admin area
 Disallow: /admin/
 Disallow: /admin/*
 
 # Sitemap
-Sitemap: https://www.danweihmiller.com/sitemap.xml 
+Sitemap: https://danweihmiller.com/sitemap.xml 
