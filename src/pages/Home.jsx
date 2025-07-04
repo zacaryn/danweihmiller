@@ -821,7 +821,7 @@ const Home = () => {
               </Subtitle>
               <ButtonGroup>
                 <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
-                <SecondaryButton href="/listings">View Listings</SecondaryButton>
+                <SecondaryButton href="/search">Search Properties</SecondaryButton>
               </ButtonGroup>
             </IntroSection>
             <ProfileSection>
@@ -852,11 +852,11 @@ const Home = () => {
 
         <FeaturesSection>
           <FeaturesGrid>
-            <FeatureCard href="/listings">
+            <FeatureCard href="/search">
               <IconWrapper>
-                <FaHome size={36} />
+                <FaSearch size={36} />
               </IconWrapper>
-              <FeatureTitle>Browse Listings</FeatureTitle>
+              <FeatureTitle>Search Properties</FeatureTitle>
               <FeatureText>
                 Explore Colorado Springs homes for sale throughout the Front Range. From single-family homes to new construction, find your perfect match in our premier military community.
               </FeatureText>

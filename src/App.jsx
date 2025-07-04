@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import Search from './pages/Search';
 import Listings from './pages/Listings';
 import ListingDetail from './pages/ListingDetail';
 import About from './pages/About';
@@ -25,6 +26,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="search" element={<Search />} />
             <Route path="listings" element={<Listings />} />
             <Route path="listings/:id" element={<ListingDetail />} />
             <Route path="about" element={<About />} />

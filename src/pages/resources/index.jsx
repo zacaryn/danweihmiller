@@ -12,7 +12,7 @@ const ResourcesContainer = styled.div`
   padding: 4rem 2rem;
 
   @media (max-width: 768px) {
-    padding: 2rem 1rem;
+    padding: 80px 1rem 2rem 1rem;
   }
 `;
 
