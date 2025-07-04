@@ -55,7 +55,7 @@ const SEO = ({
     "image": `${siteUrl}${profileImage}`,
     "description": defaultDescription,
     "telephone": "(719) 301-8257",
-    "email": "buildingincolorado22@gmail.com",
+          "email": "dan@danweihmiller.com",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Colorado Springs",

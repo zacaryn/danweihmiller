@@ -293,7 +293,7 @@ const Contact = () => {
                 </div>
                 <div className="content">
                   <h3>Email</h3>
-                  <a href="mailto:buildingincolorado22@gmail.com">buildingincolorado22@gmail.com</a>
+                  <a href="mailto:dan@danweihmiller.com">dan@danweihmiller.com</a>
                 </div>
               </ContactMethod>
 
@@ -305,7 +305,6 @@ const Contact = () => {
                   <h3>Office</h3>
                   <p>EXP Realty LLC</p>
                   <p>9800 Pyramid Ct #400, Englewood</p>
-                  <a href="tel:8884402724">(888) 440-2724</a>
                 </div>
               </ContactMethod>
 

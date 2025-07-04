@@ -148,20 +148,35 @@ const Footer = () => {
           <ServeWithLogo>
             <BrokerageLogo src={expLogo} alt="eXp Realty" />
           </ServeWithLogo>
-        </FooterSection>
-        <FooterSection>
-          <h3>Contact</h3>
-          <p>
+          <p style={{ marginTop: '1rem' }}>
             <a href="tel:7193018257">(719) 301-8257</a>
           </p>
           <p>
-            <a href="mailto:buildingincolorado22@gmail.com">buildingincolorado22@gmail.com</a>
+            <a href="mailto:dan@danweihmiller.com">dan@danweihmiller.com</a>
           </p>
         </FooterSection>
         <FooterSection>
-          <h3>Quick Links</h3>
-          <p><a href="/listings">View Listings</a></p>
+          <h3>Site Map</h3>
+          <p><a href="/">Home</a></p>
+          <p><a href="/search">Search Properties</a></p>
+          <p><a href="/listings">My Listings</a></p>
+          <p><a href="/resources">Resources</a></p>
           <p><a href="/about">About Dan</a></p>
+          <p><a href="/contact">Contact</a></p>
+        </FooterSection>
+        <FooterSection>
+          <h3>Popular Resources</h3>
+          <p><a href="/resources/military-relocation">Military Relocation</a></p>
+          <p><a href="/resources/va-loans">VA Loans</a></p>
+          <p><a href="/resources/first-time-home-buyers">First Time Buyers</a></p>
+          <p><a href="/resources/listing-agent">Listing Agent</a></p>
+        </FooterSection>
+        <FooterSection>
+          <h3>More Resources</h3>
+          <p><a href="/resources/new-construction">New Construction</a></p>
+          <p><a href="/resources/custom-home-building">Custom Homes</a></p>
+          <p><a href="/resources/land">Buying Land</a></p>
+          <p><a href="/resources/single-family-home">Single Family Homes</a></p>
         </FooterSection>
       </FooterContent>
       
