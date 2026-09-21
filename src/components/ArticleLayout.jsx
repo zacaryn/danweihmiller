@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import SEO from './shared/SEO';
 import Breadcrumbs from './Breadcrumbs';
-import headshot from '../assets/images/headshot.jpg';
+import headshot from '../assets/images/DWHeadshot.png';
 import scene from '../assets/images/scene.jpg';
 import fortcarson from '../assets/images/fortcarson.jpg';
 import coloradosprings from '../assets/images/coloradosprings.jpg';
@@ -13,6 +14,11 @@ import customhome from '../assets/images/customhome.jpg';
 import realestateagent from '../assets/images/realestateagent.jpg';
 import homebuyer from '../assets/images/homebuyer.jpg';
 import familyhome from '../assets/images/familyhome.jpg';
+import {
+  pageHeroOverlay,
+  pageHeroOverlayMobile,
+} from '../styles/heroOverlays';
+import { EngagementCTA } from './layout/PageShell';
 
 const ArticleContainer = styled.div`
   max-width: 1400px;
@@ -51,25 +57,16 @@ const HeroSection = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-      to right,
-      rgba(23, 51, 107, 0.85),
-      rgba(23, 51, 107, 0.45) 50%,
-      rgba(23, 51, 107, 0.15)
-    );
+    background: ${pageHeroOverlay};
   }
 
   @media (max-width: 768px) {
-    height: 350px;
+    height: 320px;
     margin: 0;
     border-radius: 0;
     
     &::after {
-      background: linear-gradient(
-        to bottom,
-        rgba(23, 51, 107, 0.9),
-        rgba(23, 51, 107, 0.75)
-      );
+      background: ${pageHeroOverlayMobile};
     }
   }
 `;
@@ -98,8 +95,7 @@ const Title = styled.h1`
   color: ${props => props.theme.colors.white};
   margin-bottom: 1rem;
   line-height: 1.2;
-  font-family: 'Playfair Display', serif;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: ${props => props.theme.fonts.heading};
 
   @media (max-width: 768px) {
     font-size: 1.8rem;
@@ -113,8 +109,6 @@ const Description = styled.p`
   margin: 0;
   line-height: 1.6;
   opacity: 0.9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-
   @media (max-width: 768px) {
     font-size: 1rem;
     line-height: 1.4;
@@ -171,7 +165,7 @@ const MetaText = styled.div`
 const AuthorName = styled.div`
   font-weight: 600;
   color: ${props => props.theme.colors.text};
-  font-family: 'Playfair Display', serif;
+  font-family: ${props => props.theme.fonts.heading};
 `;
 
 const DateInfo = styled.div`
@@ -229,10 +223,13 @@ const ArticleContent = styled.div`
   padding: ${props => props.theme.spacing.lg};
   background: ${props => props.theme.colors.white};
   border-radius: ${props => props.theme.borderRadius.medium};
+  border: ${props => props.theme.borders.subtle};
 
   @media (max-width: 768px) {
     padding: ${props => props.theme.spacing.md};
     border-radius: 0;
+    border-left: none;
+    border-right: none;
   }
 
   h2 {
@@ -240,7 +237,7 @@ const ArticleContent = styled.div`
     color: ${props => props.theme.colors.primary};
     margin: 2.5rem 0 1.5rem;
     line-height: 1.3;
-    font-family: 'Playfair Display', serif;
+    font-family: ${props => props.theme.fonts.heading};
 
     @media (max-width: 768px) {
       font-size: 1.6rem;
@@ -379,15 +376,12 @@ const ArticleLayout = ({ title, description, children, keywords }) => {
       "@type": "Person",
       "name": "Dan Weihmiller",
       "url": "https://danweihmiller.com/about",
-      "image": "https://danweihmiller.com/headshot.jpg"
+      "image": "https://danweihmiller.com/images/DWHeadshot.png"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Dan Weihmiller Real Estate",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://danweihmiller.com/logo.png"
-      }
+      "name": "Coldwell Banker Realty",
+      "url": "https://www.coldwellbanker.com"
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
@@ -397,16 +391,16 @@ const ArticleLayout = ({ title, description, children, keywords }) => {
 
   return (
     <>
-      <SEO 
-        title={`${title} | Dan Weihmiller Real Estate Guide`}
+      <SEO
+        pageName={title}
+        title={`${title} | Dan Weihmiller · Coldwell Banker`}
         description={description}
-        type="article"
-        article={true}
-        publishDate={new Date().toISOString()}
-        pathname={location.pathname}
-        schema={articleSchema}
-        keywords={keywords}
+        isArticle
+        useProfileImage
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+      </Helmet>
       <ArticleContainer>
         <BreadcrumbWrapper>
           <Breadcrumbs items={breadcrumbItems} />
@@ -432,6 +426,9 @@ const ArticleLayout = ({ title, description, children, keywords }) => {
         <ArticleContent>
           {children}
         </ArticleContent>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 2rem 3rem' }}>
+          <EngagementCTA />
+        </div>
       </ArticleContainer>
     </>
   );

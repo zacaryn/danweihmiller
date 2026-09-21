@@ -18,12 +18,26 @@ import FirstTimeHomeBuyers from './pages/resources/first-time-home-buyers';
 import Land from './pages/resources/land';
 import SingleFamilyHome from './pages/resources/single-family-home';
 import CustomHomeBuilding from './pages/resources/custom-home-building';
+import {
+  PrivacyPolicyPage,
+  TermsOfUsePage,
+  FairHousingPage,
+  AccessibilityPage,
+  MlsDisclaimerPage,
+  BrokerageDisclosurePage,
+} from './pages/legal/LegalPages';
+import AuthCallback from './pages/AuthCallback';
+import AdminSetPassword from './pages/AdminSetPassword';
+import SupabaseHashRedirect from './components/auth/SupabaseHashRedirect';
 
 const App = () => {
   return (
     <HelmetProvider>
       <BrowserRouter>
+        <SupabaseHashRedirect />
         <Routes>
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/admin/set-password" element={<AdminSetPassword />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="search" element={<Search />} />
@@ -31,6 +45,12 @@ const App = () => {
             <Route path="listings/:id" element={<ListingDetail />} />
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="legal/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="legal/terms" element={<TermsOfUsePage />} />
+            <Route path="legal/fair-housing" element={<FairHousingPage />} />
+            <Route path="legal/accessibility" element={<AccessibilityPage />} />
+            <Route path="legal/mls-disclaimer" element={<MlsDisclaimerPage />} />
+            <Route path="legal/brokerage-disclosure" element={<BrokerageDisclosurePage />} />
             <Route path="admin" element={<Admin />} />
             
             {/* Resources Routes */}

@@ -59,8 +59,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const theme = {
+  fonts: {
+    heading: "'Cormorant Garamond', Georgia, serif",
+    body: "'Source Sans 3', system-ui, sans-serif",
+  },
   colors: {
-    // Darker royal blue
+    // Coldwell Banker–aligned navy with Dan’s site palette
     primary: '#0E1F45',
     // Adjusted complementary blue
     secondary: '#1B3366',
@@ -94,9 +98,13 @@ const theme = {
     slow: 'all 0.4s ease'
   },
   borderRadius: {
-    small: '4px',
-    medium: '8px',
-    large: '12px'
+    small: '2px',
+    medium: '4px',
+    large: '6px'
+  },
+  borders: {
+    subtle: '1px solid rgba(14, 31, 69, 0.1)',
+    strong: '1px solid rgba(14, 31, 69, 0.18)'
   }
 }
 

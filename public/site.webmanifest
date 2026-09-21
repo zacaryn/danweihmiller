@@ -1,6 +1,7 @@
 {
-  "name": "Dan Weihmiller | Colorado Springs Realtor",
+  "name": "Dan Weihmiller · Coldwell Banker Realty",
   "short_name": "Dan Weihmiller",
+  "description": "Colorado Springs Realtor with Coldwell Banker since 1985.",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +14,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#17336B",
-  "background_color": "#17336B",
-  "display": "standalone"
+  "theme_color": "#0E1F45",
+  "background_color": "#FCFCFD",
+  "display": "standalone",
+  "start_url": "/"
 }

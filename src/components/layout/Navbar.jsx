@@ -1,16 +1,17 @@
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import expLogo from '../../assets/images/exp_realty_logo.png';
+import cbLogo from '../../assets/images/CBLogo.png';
 
 const Nav = styled.nav`
   background: ${props => props.theme.colors.primary};
-  padding: 1rem 2rem;
+  padding: 0.875rem 2rem;
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
-  box-shadow: ${props => props.theme.shadows.medium};
+  box-shadow: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 `;
 
 const NavContainer = styled.div`
@@ -21,54 +22,56 @@ const NavContainer = styled.div`
   align-items: center;
 `;
 
-const BrandingGroup = styled.div`
+const BrandingGroup = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    gap: ${props => props.theme.spacing.xs};
-  }
-`;
-
-const AgentName = styled(Link)`
-  font-family: 'Playfair Display', serif;
-  color: ${props => props.theme.colors.white};
+  gap: 0.85rem;
   text-decoration: none;
-  font-size: 1.5rem;
-  font-weight: 500;
-  
-  &:hover {
-    color: ${props => props.theme.colors.accent};
-  }
+  color: inherit;
 
-  @media (max-width: 768px) {
-    font-size: 1.25rem;
+  &:hover span:first-of-type {
+    color: rgba(255, 255, 255, 0.92);
   }
 `;
 
-const Separator = styled.span`
+const BrandText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1.1;
+`;
+
+const AgentName = styled.span`
+  font-family: ${props => props.theme.fonts.heading};
   color: ${props => props.theme.colors.white};
-  opacity: 0.8;
-  font-size: 1.5rem;
-  margin: 0 ${props => props.theme.spacing.sm};
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
-    font-size: 1.25rem;
-    margin: 0 ${props => props.theme.spacing.xs};
-    opacity: 0.6;
+    font-size: 1.05rem;
   }
+`;
+
+const BrandMeta = styled.span`
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
 `;
 
 const BrokerageLogo = styled.img`
-  height: 20px;
+  height: 36px;
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1);
-  opacity: 0.9;
+  display: block;
+  background: transparent;
+  flex-shrink: 0;
+  opacity: 0.95;
 
   @media (max-width: 768px) {
-    height: 16px;
+    height: 30px;
   }
 `;
 
@@ -93,28 +96,17 @@ const NavLinks = styled.div`
 `;
 
 const NavLink = styled(Link)`
-  color: ${props => props.theme.colors.white};
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
   position: relative;
 
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: ${props => props.theme.colors.accent};
-    transition: width 0.2s ease;
-  }
-
   &:hover {
-    color: ${props => props.theme.colors.accent};
-    &::after {
-      width: 100%;
-    }
+    color: ${props => props.theme.colors.white};
   }
 
   @media (max-width: 768px) {
@@ -196,10 +188,12 @@ const Navbar = () => {
     <>
       <Nav>
         <NavContainer>
-          <BrandingGroup>
-            <AgentName to="/" onClick={handleLinkClick}>Dan Weihmiller</AgentName>
-            <Separator>|</Separator>
-            <BrokerageLogo src={expLogo} alt="eXp Realty" />
+          <BrandingGroup to="/" onClick={handleLinkClick}>
+            <BrokerageLogo src={cbLogo} alt="" aria-hidden />
+            <BrandText>
+              <AgentName>Dan Weihmiller</AgentName>
+              <BrandMeta>Colorado Springs Realtor</BrandMeta>
+            </BrandText>
           </BrandingGroup>
           
           <MenuButton 

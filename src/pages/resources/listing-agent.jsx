@@ -23,7 +23,7 @@ const ListingAgentPage = () => {
     >
       <Section>
         <Paragraph>
-          When selling your home in Colorado Springs, choosing the right listing agent makes all the difference. With over 35 years of helping people sell their homes in this market, I bring the kind of practical experience and local knowledge that you can't get from a textbook or an app.
+          When selling your home in Colorado Springs, choosing the right listing agent makes all the difference. With over 40 years of helping people sell their homes in this market, I bring the kind of practical experience and local knowledge that you can't get from a textbook or an app.
         </Paragraph>
 
         <Highlight>
@@ -39,7 +39,7 @@ const ListingAgentPage = () => {
           <ListItem>
             <ItemTitle>Local Knowledge That Matters</ItemTitle>
             <ItemDescription>
-              After 35 years of selling homes in Colorado Springs, I know our neighborhoods inside and out. I understand what buyers are looking for and how to present your home to attract the right offers.
+              After 40 years of selling homes in Colorado Springs, I know our neighborhoods inside and out. I understand what buyers are looking for and how to present your home to attract the right offers.
             </ItemDescription>
           </ListItem>
           <ListItem>
@@ -126,7 +126,7 @@ const ListingAgentPage = () => {
       <Section>
         <SectionTitle>Ready to Sell Your Home?</SectionTitle>
         <Paragraph>
-          If you're looking for an experienced agent who'll give you straight talk and personal attention throughout your home sale, let's talk. After 35 years of helping people sell their homes in Colorado Springs, I know what works and what doesn't.
+          If you're looking for an experienced agent who'll give you straight talk and personal attention throughout your home sale, let's talk. After 40 years of helping people sell their homes in Colorado Springs, I know what works and what doesn't.
         </Paragraph>
         <Paragraph>
           Let's have a conversation about your plans and how I can help you get your home sold.

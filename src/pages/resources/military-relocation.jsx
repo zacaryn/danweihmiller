@@ -28,7 +28,7 @@ const MilitaryRelocationPage = () => {
 
         <Highlight>
           <HighlightText>
-            As a Military Relocation Professional with 35+ years of Colorado Springs real estate experience, I understand PCS timelines, BAH optimization, and VA loan benefits. I've helped over 500 military families find their perfect home in Colorado Springs – let me help you too.
+            As a Military Relocation Professional with 40+ years of Colorado Springs real estate experience, I understand PCS timelines, BAH optimization, and VA loan benefits. I've helped over 500 military families find their perfect home in Colorado Springs – let me help you too.
           </HighlightText>
         </Highlight>
       </Section>
@@ -132,7 +132,7 @@ const MilitaryRelocationPage = () => {
           As Colorado Springs' trusted Military Relocation Professional, I've successfully relocated hundreds of service members from all branches to our beautiful military community. From Fort Carson to Peterson AFB, from Schriever to the Air Force Academy, I understand the unique needs of each installation.
         </Paragraph>
         <Paragraph>
-          Let me put my military relocation expertise and 35+ years of Colorado Springs knowledge to work for your PCS. I provide virtual consultations, remote home searches, and complete relocation support to make your move to Colorado Springs stress-free and successful.
+          Let me put my military relocation expertise and 40+ years of Colorado Springs knowledge to work for your PCS. I provide virtual consultations, remote home searches, and complete relocation support to make your move to Colorado Springs stress-free and successful.
         </Paragraph>
         <ButtonContainer>
           <CTAButton href="/contact">

@@ -1,366 +1,302 @@
 import styled from '@emotion/styled';
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AuthService } from '../services/aws-service';
-import AdminInquiries from './AdminInquiries';
-import AdminListings from './AdminListings';
-import { FaHome, FaList, FaEnvelope, FaCog } from 'react-icons/fa';
+import { Link, useSearchParams } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import AdminMessages from './AdminMessages';
 import SEO from '../components/shared/SEO';
 
-const AdminContainer = styled.div`
-  max-width: 1200px;
+const Shell = styled.div`
+  min-height: 100vh;
+  padding: calc(72px + 2rem) clamp(1.25rem, 4vw, 2.5rem) 3rem;
+  background: ${props => props.theme.colors.background};
+
+  @media (max-width: 768px) {
+    padding-top: calc(68px + 1.25rem);
+  }
+`;
+
+const Inner = styled.div`
+  max-width: 820px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.md};
 `;
 
-const AdminHeader = styled.div`
+const Header = styled.header`
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${props => props.theme.spacing.lg};
-  padding-bottom: ${props => props.theme.spacing.md};
-  border-bottom: 1px solid ${props => props.theme.colors.lightGray};
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: ${props => props.theme.borders.subtle};
 `;
 
-const AdminTitle = styled.h1`
-  font-size: 2rem;
+const TitleBlock = styled.div``;
+
+const Eyebrow = styled.p`
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(14, 31, 69, 0.55);
+`;
+
+const Title = styled.h1`
+  margin: 0;
+  font-family: ${props => props.theme.fonts.heading};
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
   color: ${props => props.theme.colors.primary};
 `;
 
-const LogoutButton = styled.button`
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.md};
-  background-color: transparent;
+const Subtitle = styled.p`
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
   color: ${props => props.theme.colors.darkGray};
-  border: 1px solid ${props => props.theme.colors.darkGray};
+  max-width: 42ch;
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+`;
+
+const TextButton = styled.button`
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.darkGray};
+  background: transparent;
+  border: 1px solid rgba(14, 31, 69, 0.2);
   border-radius: ${props => props.theme.borderRadius.small};
   cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
 
   &:hover {
-    background-color: ${props => props.theme.colors.lightGray};
+    background: ${props => props.theme.colors.lightGray};
     color: ${props => props.theme.colors.primary};
   }
 `;
 
-const LoginForm = styled.form`
+const SiteLink = styled(Link)`
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.secondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const LoginCard = styled.form`
   max-width: 400px;
-  margin: 4rem auto;
-  padding: ${props => props.theme.spacing.lg};
+  margin: 3rem auto;
+  padding: 2rem;
   background: ${props => props.theme.colors.white};
+  border: ${props => props.theme.borders.subtle};
   border-radius: ${props => props.theme.borderRadius.medium};
   box-shadow: ${props => props.theme.shadows.medium};
 `;
 
 const FormTitle = styled.h2`
-  font-size: 1.75rem;
+  margin: 0 0 0.35rem;
+  font-family: ${props => props.theme.fonts.heading};
+  font-size: 1.65rem;
   color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.lg};
+  text-align: center;
+`;
+
+const FormHint = styled.p`
+  margin: 0 0 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: ${props => props.theme.colors.darkGray};
   text-align: center;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.marginBottom ? props.theme.spacing.md : 0};
-  border: 1px solid ${props => props.theme.colors.darkGray};
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(14, 31, 69, 0.2);
   border-radius: ${props => props.theme.borderRadius.small};
   font-size: 1rem;
 
   &:focus {
     outline: none;
     border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(74, 64, 54, 0.1);
+    box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.12);
   }
 `;
 
-const Button = styled.button`
-  ${props => props.fullWidth ? 'width: 100%;' : ''}
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  background: ${props => props.primary ? props.theme.colors.primary : 'transparent'};
-  color: ${props => props.primary ? props.theme.colors.white : props.theme.colors.primary};
-  border: ${props => props.primary && !props.bordered ? 'none' : `1px solid ${props.theme.colors.primary}`};
+const SubmitButton = styled.button`
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: ${props => props.theme.colors.primary};
+  border: none;
   border-radius: ${props => props.theme.borderRadius.small};
   cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
-  display: flex;
-  align-items: center;
-  justify-content: ${props => props.center ? 'center' : 'flex-start'};
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 500;
 
-  &:hover {
-    background: ${props => props.primary ? props.theme.colors.secondary : props.theme.colors.lightGray};
-    transform: translateY(-2px);
-    box-shadow: ${props => props.theme.shadows.small};
+  &:hover:not(:disabled) {
+    background: ${props => props.theme.colors.secondary};
   }
 
   &:disabled {
-    background: #cccccc;
+    opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 `;
 
 const ErrorMessage = styled.div`
-  padding: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.md};
-  background-color: #f8d7da;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 1rem;
+  background: #f8d7da;
   color: #721c24;
   border-radius: ${props => props.theme.borderRadius.small};
+  font-size: 0.88rem;
+`;
+
+const ConfigWarning = styled.div`
+  padding: 1rem;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: ${props => props.theme.borderRadius.small};
   font-size: 0.9rem;
+  line-height: 1.5;
 `;
-
-const AdminNavigation = styled.div`
-  display: flex;
-  margin-bottom: ${props => props.theme.spacing.lg};
-  border-bottom: 1px solid ${props => props.theme.colors.lightGray};
-  flex-wrap: wrap;
-`;
-
-const NavLink = styled.button`
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.lg};
-  background: transparent;
-  border: none;
-  color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.darkGray};
-  font-weight: ${props => props.active ? '600' : '400'};
-  cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: ${props => props.active ? props.theme.colors.primary : 'transparent'};
-    transition: ${props => props.theme.transitions.fast};
-  }
-
-  &:hover {
-    color: ${props => props.theme.colors.primary};
-    
-    &::after {
-      background-color: ${props => props.theme.colors.primary};
-    }
-  }
-`;
-
-const DashboardGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: ${props => props.theme.spacing.lg};
-  margin-top: ${props => props.theme.spacing.lg};
-`;
-
-const DashboardCard = styled.div`
-  background: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
-  overflow: hidden;
-  transition: ${props => props.theme.transitions.default};
-  
-  &:hover {
-    box-shadow: ${props => props.theme.shadows.large};
-    transform: translateY(-2px);
-  }
-`;
-
-const DashboardCardHeader = styled.div`
-  padding: ${props => props.theme.spacing.md};
-  background: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  
-  h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-`;
-
-const DashboardContent = styled.div`
-  padding: ${props => props.theme.spacing.md};
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${props => props.theme.spacing.sm} 0;
-  border-bottom: 1px solid ${props => props.theme.colors.lightGray};
-  
-  &:last-of-type {
-    border-bottom: none;
-  }
-`;
-
-const StatLabel = styled.div`
-  font-weight: 500;
-  color: ${props => props.theme.colors.darkGray};
-`;
-
-const StatValue = styled.div`
-  font-weight: 600;
-  color: ${props => props.theme.colors.primary};
-`;
-
-const ActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  background: ${props => props.theme.colors.white};
-  color: ${props => props.theme.colors.primary};
-  border: 1px solid ${props => props.theme.colors.primary};
-  border-radius: ${props => props.theme.borderRadius.small};
-  cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
-  
-  &:hover {
-    background: ${props => props.theme.colors.primary};
-    color: ${props => props.theme.colors.white};
-    transform: translateY(-2px);
-  }
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const Card = styled.div`
-  background: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
-  padding: ${props => props.theme.spacing.lg};
-  margin-bottom: ${props => props.theme.spacing.lg};
-  overflow: hidden;
-`;
-
-const SettingsInfo = styled.div`
-  background: ${props => props.theme.colors.accent};
-  padding: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.borderRadius.small};
-  margin-bottom: ${props => props.theme.spacing.md};
-  border-left: 3px solid ${props => props.theme.colors.primary};
-  
-  p {
-    margin: 0;
-    color: ${props => props.theme.colors.text};
-  }
-`;
-
-const authenticate = async (username, password) => {
-  return AuthService.login(username, password);
-};
 
 const Admin = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const authErrorFromUrl = searchParams.get('auth_error');
+
+  const [session, setSession] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Check URL parameters for active tab
   useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['dashboard', 'inquiries', 'settings'].includes(tabParam)) {
-      setActiveTab(tabParam);
+    if (authErrorFromUrl) {
+      setError(decodeURIComponent(authErrorFromUrl.replace(/\+/g, ' ')));
+      setSearchParams({}, { replace: true });
     }
-  }, [searchParams]);
+  }, [authErrorFromUrl, setSearchParams]);
 
-  // Update checkLoggedIn to use AuthService
   useEffect(() => {
-    const checkLoggedIn = async () => {
-      const isAuthenticated = await AuthService.isAuthenticated();
-      setIsLoggedIn(isAuthenticated);
-    };
+    if (!supabase) {
+      setCheckingSession(false);
+      return;
+    }
 
-    checkLoggedIn();
+    supabase.auth.getSession().then(({ data: { session: current } }) => {
+      setSession(current);
+      setCheckingSession(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async e => {
     e.preventDefault();
+    if (!supabase) return;
     setIsLoading(true);
     setError(null);
 
-    try {
-      const result = await authenticate(username, password);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
 
-      if (result.success) {
-        setIsLoggedIn(true);
-        localStorage.setItem('isAdminLoggedIn', 'true');
-      } else {
-        setError(result.error || 'Invalid username or password');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('An error occurred while logging in');
-    } finally {
-      setIsLoading(false);
+    if (signInError) {
+      setError(signInError.message);
     }
+    setIsLoading(false);
   };
 
   const handleLogout = async () => {
-    try {
-      await AuthService.logout();
-      setIsLoggedIn(false);
-      localStorage.removeItem('isAdminLoggedIn');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    if (supabase) await supabase.auth.signOut();
+    setSession(null);
   };
 
-  const navigateToSection = (section) => {
-    navigate(`/admin?tab=${section}`);
-    setActiveTab(section);
-  };
+  if (!supabase) {
+    return (
+      <Shell>
+        <Inner>
+          <ConfigWarning>
+            Admin login requires <code>VITE_SUPABASE_URL</code> and{' '}
+            <code>VITE_SUPABASE_ANON_KEY</code> in your environment, then rebuild or restart
+            the dev server.
+          </ConfigWarning>
+        </Inner>
+      </Shell>
+    );
+  }
 
-  if (!isLoggedIn) {
+  if (checkingSession) {
+    return (
+      <Shell>
+        <Inner>
+          <Subtitle style={{ textAlign: 'center' }}>Checking session…</Subtitle>
+        </Inner>
+      </Shell>
+    );
+  }
+
+  if (!session) {
     return (
       <>
         <SEO pageName="Admin Portal">
           <meta name="robots" content="noindex, nofollow" />
         </SEO>
-        
-        <AdminContainer>
-          <LoginForm onSubmit={handleLogin}>
-            <FormTitle>Admin Login</FormTitle>
-            
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-            
+        <Shell>
+          <LoginCard onSubmit={handleLogin}>
+            <FormTitle>Message portal</FormTitle>
+            <FormHint>
+              Sign in with the Supabase account your developer created for you. There is no public
+              sign-up on this site.
+            </FormHint>
+            {error && (
+              <ErrorMessage>
+                {error}
+                {error.toLowerCase().includes('expired') || error.toLowerCase().includes('invalid') ? (
+                  <> Invite links are one-time and expire — send a new invite or create the user with a password in Supabase (Auto Confirm).</>
+                ) : null}
+              </ErrorMessage>
+            )}
             <Input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              marginBottom
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
-            
             <Input
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              marginBottom
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
-            
-            <Button type="submit" disabled={isLoading} primary fullWidth center>
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-          </LoginForm>
-        </AdminContainer>
+            <SubmitButton type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing in…' : 'Sign in'}
+            </SubmitButton>
+          </LoginCard>
+        </Shell>
       </>
     );
   }
@@ -370,117 +306,28 @@ const Admin = () => {
       <SEO pageName="Admin Portal">
         <meta name="robots" content="noindex, nofollow" />
       </SEO>
-      
-      <AdminContainer>
-        <AdminHeader>
-          <AdminTitle>Admin Dashboard</AdminTitle>
-          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
-        </AdminHeader>
-
-        <AdminNavigation>
-          <NavLink 
-            active={activeTab === 'dashboard'} 
-            onClick={() => setActiveTab('dashboard')}
-          >
-            <FaHome /> Dashboard
-          </NavLink>
-          <NavLink 
-            active={activeTab === 'listings'} 
-            onClick={() => setActiveTab('listings')}
-          >
-            <FaList /> Listings
-          </NavLink>
-          <NavLink 
-            active={activeTab === 'inquiries'} 
-            onClick={() => setActiveTab('inquiries')}
-          >
-            <FaEnvelope /> Inquiries
-          </NavLink>
-          <NavLink 
-            active={activeTab === 'settings'} 
-            onClick={() => setActiveTab('settings')}
-          >
-            <FaCog /> Settings
-          </NavLink>
-        </AdminNavigation>
-
-        {activeTab === 'dashboard' && (
-          <div>
-            <h2>Welcome to the Admin Dashboard</h2>
-            <p>Manage your real estate website with these tools.</p>
-            
-            <DashboardGrid>
-              <DashboardCard>
-                <DashboardCardHeader>
-                  <h3>Quick Stats</h3>
-                </DashboardCardHeader>
-                <DashboardContent>
-                  <StatItem>
-                    <StatLabel>Active Listings</StatLabel>
-                    <StatValue>0</StatValue>
-                  </StatItem>
-                  <StatItem>
-                    <StatLabel>Pending Inquiries</StatLabel>
-                    <StatValue>0</StatValue>
-                  </StatItem>
-                  <StatItem>
-                    <StatLabel>Last Website Update</StatLabel>
-                    <StatValue>{new Date().toLocaleDateString()}</StatValue>
-                  </StatItem>
-                </DashboardContent>
-              </DashboardCard>
-              
-              <DashboardCard>
-                <DashboardCardHeader>
-                  <h3>Quick Actions</h3>
-                </DashboardCardHeader>
-                <DashboardContent>
-                  <ActionButton onClick={() => navigateToSection('listings')}>
-                    <FaList /> Manage Listings
-                  </ActionButton>
-                  <ActionButton onClick={() => setActiveTab('inquiries')}>
-                    <FaEnvelope /> View Inquiries
-                  </ActionButton>
-                  <ActionButton onClick={() => window.open('/', '_blank')}>
-                    <FaHome /> View Website
-                  </ActionButton>
-                </DashboardContent>
-              </DashboardCard>
-            </DashboardGrid>
-          </div>
-        )}
-
-        {activeTab === 'listings' && (
-          <div>
-            <h2>Manage Listings</h2>
-            <p>Add, edit, and remove property listings.</p>
-            <AdminListings />
-          </div>
-        )}
-
-        {activeTab === 'inquiries' && (
-          <AdminInquiries />
-        )}
-
-        {activeTab === 'settings' && (
-          <div>
-            <h2>Admin Settings</h2>
-            <p>Configure AWS permissions and database access.</p>
-            
-            <SettingsInfo>
-              <p>DynamoDB services require appropriate IAM permissions. Please contact your administrator if you need help configuring AWS access.</p>
-            </SettingsInfo>
-            
-            <Card>
-              <h3>Security</h3>
-              <p>For security reasons, please remember to log out when you're finished managing your website.</p>
-              <Button primary onClick={handleLogout}>Log Out</Button>
-            </Card>
-          </div>
-        )}
-      </AdminContainer>
+      <Shell>
+        <Inner>
+          <Header>
+            <TitleBlock>
+              <Eyebrow>Dan Weihmiller · Admin</Eyebrow>
+              <Title>Messages</Title>
+              <Subtitle>
+                Contact form submissions. Listings sync from Coldwell Banker on the public site.
+              </Subtitle>
+            </TitleBlock>
+            <HeaderActions>
+              <SiteLink to="/">View website</SiteLink>
+              <TextButton type="button" onClick={handleLogout}>
+                Sign out
+              </TextButton>
+            </HeaderActions>
+          </Header>
+          <AdminMessages />
+        </Inner>
+      </Shell>
     </>
   );
 };
 
-export default Admin; 
+export default Admin;

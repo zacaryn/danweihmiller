@@ -28,7 +28,7 @@ const CustomHomeBuildingPage = () => {
 
         <Highlight>
           <HighlightText>
-            With over 35 years of experience in Colorado Springs real estate, I've built strong relationships with the region's top builders, contractors, and design professionals. I'll leverage these connections to ensure your custom home building journey is smooth and successful.
+            With over 40 years of experience in Colorado Springs real estate, I've built strong relationships with the region's top builders, contractors, and design professionals. I'll leverage these connections to ensure your custom home building journey is smooth and successful.
           </HighlightText>
         </Highlight>
       </Section>

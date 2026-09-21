@@ -3,52 +3,18 @@ import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import SEO from '../../components/shared/SEO';
 import { useTheme } from '@emotion/react';
+import {
+  PageRoot,
+  PageHeader,
+  PageMain,
+  EngagementCTA,
+} from '../../components/layout/PageShell';
 import bluebirdLogo from '../../assets/images/bluebird.png';
 import creditUnlimitedLogo from '../../assets/images/creditunlimited.png';
 
 const ResourcesContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 4rem 2rem;
-
-  @media (max-width: 768px) {
-    padding: 80px 1rem 2rem 1rem;
-  }
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 3rem;
-
-  @media (max-width: 768px) {
-    margin-bottom: 2rem;
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: 1rem;
-  text-align: center;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.25rem;
-  color: ${props => props.theme.colors.darkGray};
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    max-width: 100%;
-    padding: 0 1rem;
-  }
 `;
 
 const ArticlesGrid = styled.div`
@@ -70,13 +36,13 @@ const ArticleCard = styled(Link)`
   border-radius: ${props => props.theme.borderRadius.medium};
   padding: 1.5rem;
   text-decoration: none;
-  box-shadow: ${props => props.theme.shadows.medium};
+  border: ${props => props.theme.borders.subtle};
   transition: ${props => props.theme.transitions.default};
   text-align: left;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${props => props.theme.shadows.large};
+    transform: translateY(-2px);
+    border-color: rgba(14, 31, 69, 0.22);
   }
 
   @media (max-width: 768px) {
@@ -88,6 +54,7 @@ const ArticleCard = styled(Link)`
 `;
 
 const ArticleTitle = styled.h2`
+  font-family: ${props => props.theme.fonts.heading};
   font-size: 1.25rem;
   color: ${props => props.theme.colors.primary};
   margin-bottom: 0.75rem;
@@ -128,6 +95,11 @@ const PartnersFloatingContainer = styled.div`
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
+  pointer-events: none;
+
+  & > * {
+    pointer-events: auto;
+  }
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.sm};
@@ -335,15 +307,17 @@ const ResourcesPage = () => {
         title="Colorado Springs Real Estate Guide | Expert Resources & Tips"
         description="Comprehensive Colorado Springs real estate guides from your trusted local Realtor. Expert resources on VA loans, military relocation, first-time buying, and Colorado Springs neighborhoods."
       />
-      <ResourcesContainer>
-        <Header>
-          <Title>Colorado Springs Real Estate Guide & Resources</Title>
-          <Subtitle>
-            Expert Colorado Springs real estate guidance from your trusted local Realtor. Comprehensive resources for military families, first-time buyers, and all your Colorado Springs real estate needs.
-          </Subtitle>
-        </Header>
-        
-        <ArticlesGrid>
+      <PageRoot>
+        <PageHeader
+          eyebrow="Guides & education"
+          title="Colorado Springs Real Estate Resources"
+          lead="Practical guides from a local Coldwell Banker agent — military PCS, VA loans, first-time buying, new construction, and more."
+          primaryAction={{ to: '/contact', label: 'Ask a Question' }}
+          secondaryAction={{ to: '/search', label: 'Search MLS' }}
+        />
+        <PageMain>
+          <ResourcesContainer>
+            <ArticlesGrid>
           {articles.map((article) => (
             <ArticleCard to={article.path} key={article.path}>
               <ArticleTitle>{article.title}</ArticleTitle>
@@ -421,8 +395,11 @@ const ResourcesPage = () => {
           </PartnerFloatingCard>
         </PartnersFloatingContainer>
 
-        <PartnersBadge>Trusted Partners</PartnersBadge>
-      </ResourcesContainer>
+            <PartnersBadge>Trusted Partners</PartnersBadge>
+            <EngagementCTA />
+          </ResourcesContainer>
+        </PageMain>
+      </PageRoot>
     </>
   );
 };

@@ -2,46 +2,25 @@ import styled from '@emotion/styled';
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 import ContactForm from '../components/contact/ContactForm';
 import SEO from '../components/shared/SEO';
+import {
+  PageRoot,
+  PageHeader,
+  PageMain,
+} from '../components/layout/PageShell';
+import {
+  AGENT_EMAIL,
+  AGENT_EMAIL_HREF,
+  AGENT_PHONE_HREF,
+  BROKERAGE_NAME,
+  OFFICE_ADDRESS,
+  OFFICE_PHONE,
+  OFFICE_PHONE_HREF,
+  CB_AGENT_PROFILE_URL,
+} from '../config/agent';
 
 const ContactContainer = styled.div`
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.lg};
-  padding-top: calc(80px + ${props => props.theme.spacing.md}); // Reduced desktop padding
-
-  @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.md} 0;
-    padding-top: calc(60px + ${props => props.theme.spacing.md}); // Keep mobile padding the same
-  }
-`;
-
-const ContactHeader = styled.div`
-  text-align: center;
-  margin-bottom: ${props => props.theme.spacing.xl};
-  padding: 0 ${props => props.theme.spacing.sm};
-  
-  h1 {
-    font-size: 2.5rem;
-    color: ${props => props.theme.colors.primary};
-    margin-bottom: ${props => props.theme.spacing.md};
-
-    @media (max-width: 768px) {
-      font-size: 2rem;
-      margin-bottom: ${props => props.theme.spacing.sm};
-    }
-  }
-  
-  p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    max-width: 800px;
-    margin: 0 auto;
-    color: ${props => props.theme.colors.text};
-
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-  }
 `;
 
 const ContactGrid = styled.div`
@@ -149,24 +128,15 @@ const ContactCard = styled.div`
   background: ${props => props.theme.colors.white};
   padding: ${props => props.theme.spacing.lg};
   border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
+  border: ${props => props.theme.borders.subtle};
   transition: ${props => props.theme.transitions.default};
   overflow: hidden;
-
-  &:hover {
-    box-shadow: ${props => props.theme.shadows.large};
-    transform: translateY(-2px);
-  }
 
   @media (max-width: 768px) {
     padding: ${props => props.theme.spacing.md};
     border-radius: 0;
-    box-shadow: none;
-    
-    &:hover {
-      transform: none;
-      box-shadow: none;
-    }
+    border-left: none;
+    border-right: none;
   }
 `;
 
@@ -252,27 +222,26 @@ const Contact = () => {
     <>
       <SEO 
         pageName="Contact"
-        title="Dan Weihmiller | Colorado Springs Realtor"
-        description="Contact Dan Weihmiller, your trusted Colorado Springs Realtor. Get expert guidance on buying, selling, or relocating to Colorado Springs. Call (719) 301-8257 today!"
+        title="Contact Dan Weihmiller | Coldwell Banker · Colorado Springs"
+        description="Contact Dan Weihmiller, Broker with Coldwell Banker Realty. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920. Call (719) 301-8257 for buying, selling, or military relocation."
         useProfileImage={true}
       />
       
-      <ContactContainer>
-        <ContactHeader>
-          <h1>Get in Touch</h1>
-          <p>
-            Looking to buy or sell property in Colorado Springs? 
-            I'm here to help answer any of your real estate questions and guide you 
-            through the process.
-          </p>
-        </ContactHeader>
-        
-        {/* Inquiry Form with Card - Front and Center */}
-        <ContactCard style={{ marginBottom: '3rem' }}>
-          <ContactForm />
-        </ContactCard>
-        
-        <ContactGrid>
+      <PageRoot>
+        <PageHeader
+          eyebrow="Contact · Colorado Springs"
+          title="Get in Touch"
+          lead="Questions about buying, selling, or relocating? Send a message or call — Dan typically responds within one business day."
+          primaryAction={{ to: '/contact', label: 'Send a Message' }}
+          secondaryAction={{ to: '/search', label: 'Search Homes' }}
+        />
+        <PageMain>
+          <ContactContainer>
+            <ContactCard style={{ marginBottom: '2rem' }}>
+              <ContactForm />
+            </ContactCard>
+
+            <ContactGrid>
           <ContactInfo>
             <h2>Contact Information</h2>
             
@@ -283,7 +252,7 @@ const Contact = () => {
                 </div>
                 <div className="content">
                   <h3>Phone</h3>
-                  <a href="tel:7193018257">(719) 301-8257</a>
+                  <a href={AGENT_PHONE_HREF}>(719) 301-8257</a>
                 </div>
               </ContactMethod>
 
@@ -293,7 +262,7 @@ const Contact = () => {
                 </div>
                 <div className="content">
                   <h3>Email</h3>
-                  <a href="mailto:dan@danweihmiller.com">dan@danweihmiller.com</a>
+                  <a href={AGENT_EMAIL_HREF}>{AGENT_EMAIL}</a>
                 </div>
               </ContactMethod>
 
@@ -303,18 +272,16 @@ const Contact = () => {
                 </div>
                 <div className="content">
                   <h3>Office</h3>
-                  <p>EXP Realty LLC</p>
-                  <p>9800 Pyramid Ct #400, Englewood</p>
-                </div>
-              </ContactMethod>
-
-              <ContactMethod>
-                <div className="icon">
-                  <FaMapMarkerAlt />
-                </div>
-                <div className="content">
-                  <h3>Location</h3>
-                  <p>Colorado Springs, CO</p>
+                  <p>{BROKERAGE_NAME}</p>
+                  <p>{OFFICE_ADDRESS}</p>
+                  <p>
+                    <a href={OFFICE_PHONE_HREF}>{OFFICE_PHONE}</a>
+                  </p>
+                  <p>
+                    <a href={CB_AGENT_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                      Official Coldwell Banker profile
+                    </a>
+                  </p>
                 </div>
               </ContactMethod>
             </ContactCard>
@@ -347,8 +314,10 @@ const Contact = () => {
               </SocialLinks>
             </SocialCard>
           </div>
-        </ContactGrid>
-      </ContactContainer>
+            </ContactGrid>
+          </ContactContainer>
+        </PageMain>
+      </PageRoot>
     </>
   );
 };

@@ -1,67 +1,87 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
-import ListingCard from '../components/listings/ListingCard';
-import { ListingsService } from '../services/aws-service';
+import BrokerageListingCard from '../components/listings/BrokerageListingCard';
+import { fetchCbAgentListings } from '../services/cb-listings-service';
+import { CB_AGENT_PROFILE_URL } from '../config/agent';
 import SEO from '../components/shared/SEO';
-import { FaHome } from 'react-icons/fa';
+import {
+  PageRoot,
+  PageHeader,
+  PageMain,
+  EngagementCTA,
+} from '../components/layout/PageShell';
 
 const ListingsContainer = styled.div`
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.lg} 0;
-  
-  @media (max-width: 768px) {
-    padding: 80px ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  }
 `;
 
-const ListingsHeader = styled.div`
-  text-align: center;
+const ResultsBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: ${props => props.theme.spacing.lg};
   padding: 0 ${props => props.theme.spacing.md};
-  
+
   @media (max-width: 768px) {
-    margin-bottom: ${props => props.theme.spacing.md};
+    padding: 0;
+    flex-direction: column;
+    align-items: stretch;
   }
 `;
 
-const Title = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  font-size: 2.5rem;
-  
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
+const ResultsHeading = styled.div``;
+
+const ResultsCount = styled.h2`
+  font-family: ${props => props.theme.fonts.heading};
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: ${props => props.theme.colors.primary};
+  margin: 0 0 0.35rem;
 `;
 
-const Subtitle = styled.p`
+const SyncNote = styled.p`
+  margin: 0;
+  font-size: 0.88rem;
   color: ${props => props.theme.colors.darkGray};
-  font-size: 1.125rem;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.5;
+`;
+
+const ProfileLink = styled.a`
+  font-weight: 600;
+  color: ${props => props.theme.colors.secondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const InlineLink = styled(Link)`
+  font-weight: 600;
+  color: ${props => props.theme.colors.secondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const FilterBar = styled.div`
   display: flex;
-  justify-content: center;
   gap: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.xl};
-  padding: 0 ${props => props.theme.spacing.md};
-  
+
   @media (max-width: 768px) {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: ${props => props.theme.spacing.sm};
-    padding: 0 ${props => props.theme.spacing.sm};
-    margin-bottom: ${props => props.theme.spacing.lg};
+    grid-template-columns: repeat(3, 1fr);
   }
-  
+
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing.xs};
   }
 `;
 
@@ -69,282 +89,202 @@ const FilterButton = styled.button`
   padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
   background: ${props => props.active ? props.theme.colors.primary : 'transparent'};
   color: ${props => props.active ? 'white' : props.theme.colors.text};
-  border: 2px solid ${props => props.theme.colors.primary};
+  border: 1px solid ${props => props.theme.colors.primary};
   border-radius: ${props => props.theme.borderRadius.small};
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: ${props => props.theme.transitions.default};
-  
+
   &:hover {
     background: ${props => props.active ? props.theme.colors.secondary : props.theme.colors.lightGray};
   }
-  
+
   @media (max-width: 768px) {
     width: 100%;
     text-align: center;
-    padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.sm};
   }
 `;
 
 const ListingsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: ${props => props.theme.spacing.lg};
   padding: 0 ${props => props.theme.spacing.md};
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing.md};
     padding: 0;
   }
 `;
 
-const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  color: ${props => props.theme.colors.primary};
-  font-size: 1.5rem;
-`;
-
-const ErrorMessage = styled.div`
+const StateMessage = styled.div`
   text-align: center;
-  color: red;
   padding: ${props => props.theme.spacing.xl};
-`;
-
-const EmptyMessage = styled.div`
-  text-align: center;
-  color: ${props => props.theme.colors.darkGray};
-  padding: ${props => props.theme.spacing.xl};
-  font-size: 1.125rem;
-`;
-
-
-
-
-
-const ValuationContainer = styled.div`
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 ${props => props.theme.spacing.md};
-
-  @media (max-width: 768px) {
-    padding: 0 ${props => props.theme.spacing.sm};
-  }
-`;
-
-const ValuationContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.lg};
-  background: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  padding: ${props => props.theme.spacing.lg};
-  box-shadow: ${props => props.theme.shadows.medium};
-
-  @media (max-width: 768px) {
-    gap: ${props => props.theme.spacing.md};
-    padding: ${props => props.theme.spacing.md};
-  }
-`;
-
-const ValuationHeader = styled.div`
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  margin-bottom: ${props => props.theme.spacing.md};
-`;
-
-const ValuationTitle = styled.h2`
-  font-size: 2rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  
-  @media (max-width: 768px) {
-    font-size: 1.75rem;
-  }
-`;
-
-const ValuationDescription = styled.p`
-  color: ${props => props.theme.colors.darkGray};
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.6;
-  
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-`;
-
-const ValuationFeatures = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: ${props => props.theme.spacing.md};
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing.sm};
-  }
-`;
-
-const ValuationFeature = styled.div`
-  text-align: center;
-  padding: ${props => props.theme.spacing.md};
-  background: ${props => props.theme.colors.white};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: ${props => props.theme.shadows.medium};
-`;
-
-const FeatureIcon = styled.div`
-  font-size: 2rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.sm};
-`;
-
-const FeatureTitle = styled.h3`
-  font-size: 1.2rem;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.xs};
-`;
-
-const FeatureDescription = styled.p`
   color: ${props => props.theme.colors.darkGray};
-  font-size: 0.9rem;
-  line-height: 1.5;
-`;
 
-const ValuationIframeContainer = styled.div`
-  width: 100%;
-  background: ${props => props.theme.colors.background};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  overflow: hidden;
-  height: 450px;
-  margin-bottom: ${props => props.theme.spacing.lg};
-  
-  @media (max-width: 1024px) {
-    height: 400px;
-  }
-
-  @media (max-width: 768px) {
-    height: 350px;
-    margin-bottom: ${props => props.theme.spacing.md};
-  }
-
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
+  &[data-variant='error'] {
+    color: ${props => props.theme.colors.primary};
   }
 `;
+
+const MlsDisclaimer = styled.p`
+  margin: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.md} 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: ${props => props.theme.colors.darkGray};
+  opacity: 0.85;
+`;
+
+const stripDisclaimerHtml = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+function formatResultsLabel(filter, count) {
+  if (count === 0) {
+    if (filter === 'sold') return 'No sold listings';
+    if (filter === 'all') return 'No listings';
+    return 'No active listings';
+  }
+  if (filter === 'sold') {
+    return count === 1 ? '1 Sold listing' : `${count} Sold listings`;
+  }
+  if (filter === 'all') {
+    return count === 1 ? '1 Listing' : `${count} Listings`;
+  }
+  return count === 1 ? '1 Home for Sale' : `${count} Homes for Sale`;
+}
 
 const Listings = () => {
-  const [listings, setListings] = useState([]);
+  const [cbData, setCbData] = useState(null);
+  const [loadError, setLoadError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');
-  
+  const [filter, setFilter] = useState('active');
+
   useEffect(() => {
-    const fetchListings = async () => {
+    let cancelled = false;
+
+    (async () => {
+      setIsLoading(true);
+      setLoadError(null);
       try {
-        setIsLoading(true);
-        setError(null);
-        const data = await ListingsService.getAllListings();
-        setListings(data);
+        const data = await fetchCbAgentListings();
+        if (!cancelled) setCbData(data);
       } catch (err) {
-        console.error('Error fetching listings:', err);
-        setError('Failed to load listings. Please try again later.');
+        console.error('CB listings sync failed:', err);
+        if (!cancelled) setLoadError('Listings could not be loaded right now.');
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    
-    fetchListings();
   }, []);
-  
-  const filteredListings = listings.filter(listing => {
-    if (filter === 'all') return true;
-    return listing.status === filter;
-  });
-  
 
+  const listings = useMemo(() => {
+    if (!cbData) return [];
+    if (filter === 'sold') return cbData.sold || [];
+    if (filter === 'all') return [...(cbData.active || []), ...(cbData.sold || [])];
+    return cbData.active || [];
+  }, [cbData, filter]);
 
-  if (isLoading) {
-    return (
-      <ListingsContainer>
-        <LoadingSpinner>Loading listings...</LoadingSpinner>
-      </ListingsContainer>
-    );
-  }
-  
-  if (error) {
-    return (
-      <ListingsContainer>
-        <ErrorMessage>{error}</ErrorMessage>
-      </ListingsContainer>
-    );
-  }
-  
+  const mlsDisclaimer = stripDisclaimerHtml(
+    cbData?.active?.[0]?.disclaimer || cbData?.sold?.[0]?.disclaimer
+  );
+
+  const syncedLabel = cbData?.syncedAt
+    ? `Updated ${new Date(cbData.syncedAt).toLocaleString()}`
+    : null;
+
   return (
     <>
-      <SEO 
-        pageName="Listings" 
-        title="Dan Weihmiller | Colorado Springs Real Estate Listings"
-        description="Browse Dan Weihmiller's featured real estate listings in Colorado Springs. Find homes, properties, and investment opportunities in top neighborhoods."
+      <SEO
+        pageName="Listings"
+        title="Dan Weihmiller Listings | Coldwell Banker · Colorado Springs"
+        description="Current MLS listings for Dan Weihmiller, Broker with Coldwell Banker Realty. Synced from his official Colorado Springs agent profile."
         image="/images/og-image.jpg"
       />
-      
-      <ListingsContainer>
-        <ListingsHeader>
-          <Title>My Listings</Title>
-          <Subtitle>
-            Explore exclusive properties I'm representing for clients throughout Colorado Springs and surrounding areas.
-          </Subtitle>
-        </ListingsHeader>
-        
-        <FilterBar>
-          <FilterButton
-            active={filter === 'all'}
-            onClick={() => setFilter('all')}
-          >
-            All Properties
-          </FilterButton>
-          <FilterButton
-            active={filter === 'active'}
-            onClick={() => setFilter('active')}
-          >
-            Active
-          </FilterButton>
-          <FilterButton
-            active={filter === 'pending'}
-            onClick={() => setFilter('pending')}
-          >
-            Pending
-          </FilterButton>
-          <FilterButton
-            active={filter === 'sold'}
-            onClick={() => setFilter('sold')}
-          >
-            Sold
-          </FilterButton>
-        </FilterBar>
-        
-        {filteredListings.length === 0 ? (
-          <EmptyMessage>
-            No {filter !== 'all' ? filter : ''} properties available at the moment.
-          </EmptyMessage>
-        ) : (
-          <ListingsGrid>
-            {filteredListings.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </ListingsGrid>
-        )}
-      </ListingsContainer>
+      <PageRoot>
+        <PageHeader
+          eyebrow="Coldwell Banker · MLS"
+          title="My Listings"
+          lead="Properties Dan represents are pulled automatically from his Coldwell Banker profile—always current, with full details and photos on Coldwell Banker."
+          primaryAction={{ to: '/contact', label: 'Request a Showing' }}
+          secondaryAction={{ to: '/search', label: 'Search All MLS' }}
+        />
+        <PageMain>
+          <ListingsContainer>
+            {isLoading && (
+              <StateMessage>Loading listings…</StateMessage>
+            )}
+
+            {!isLoading && loadError && (
+              <StateMessage data-variant="error">
+                {loadError}{' '}
+                <ProfileLink href={CB_AGENT_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                  View on Coldwell Banker
+                </ProfileLink>
+              </StateMessage>
+            )}
+
+            {!isLoading && !loadError && (
+              <>
+                <ResultsBar>
+                  <ResultsHeading>
+                    <ResultsCount>{formatResultsLabel(filter, listings.length)}</ResultsCount>
+                    <SyncNote>
+                      Synced from{' '}
+                      <ProfileLink href={CB_AGENT_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                        Dan&apos;s Coldwell Banker profile
+                      </ProfileLink>
+                      {syncedLabel ? ` · ${syncedLabel}` : ''}
+                    </SyncNote>
+                  </ResultsHeading>
+                  <FilterBar>
+                    <FilterButton active={filter === 'active'} onClick={() => setFilter('active')}>
+                      Active
+                    </FilterButton>
+                    <FilterButton active={filter === 'sold'} onClick={() => setFilter('sold')}>
+                      Sold
+                    </FilterButton>
+                    <FilterButton active={filter === 'all'} onClick={() => setFilter('all')}>
+                      All
+                    </FilterButton>
+                  </FilterBar>
+                </ResultsBar>
+
+                {listings.length === 0 ? (
+                  <StateMessage>
+                    Nothing in this category at the moment.{' '}
+                    <ProfileLink href={CB_AGENT_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                      Check Coldwell Banker
+                    </ProfileLink>{' '}
+                    or <InlineLink to="/contact">contact Dan</InlineLink> for off-market opportunities.
+                  </StateMessage>
+                ) : (
+                  <ListingsGrid>
+                    {listings.map((listing) => (
+                      <BrokerageListingCard key={listing.id} listing={listing} />
+                    ))}
+                  </ListingsGrid>
+                )}
+
+                {mlsDisclaimer && <MlsDisclaimer>{mlsDisclaimer}</MlsDisclaimer>}
+              </>
+            )}
+          </ListingsContainer>
+          {!isLoading && <EngagementCTA />}
+        </PageMain>
+      </PageRoot>
     </>
   );
 };
 
-export default Listings; 
+export default Listings;
