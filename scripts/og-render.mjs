@@ -1,6 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import satori from 'satori';
 import sharp from 'sharp';
 import React from 'react';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(__dirname, '..');
 
 const COLORS = {
   navy: '#0E1F45',
@@ -10,8 +16,6 @@ const COLORS = {
   faint: 'rgba(255, 255, 255, 0.45)',
   line: 'rgba(255, 255, 255, 0.14)',
 };
-
-const PRODUCTION_ORIGIN = 'https://danweihmiller.com';
 
 const NOTO_WOFF =
   'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans@latest/latin-500-normal.woff';
@@ -24,41 +28,36 @@ async function loadGoogleFont(family, weight) {
   const match = css.match(/src: url\((.+?)\) format\('woff2'\)/);
   if (!match) throw new Error(`Could not load font ${family}`);
   const data = await fetch(match[1]).then(res => res.arrayBuffer());
-  const name = family.replace(/\+/g, ' ');
-  return { name, data, weight, style: 'normal' };
+  return { name: family.replace(/\+/g, ' '), data, weight, style: 'normal' };
 }
 
-async function loadFonts() {
-  try {
-    const [heading, body] = await Promise.all([
-      loadGoogleFont('Cormorant+Garamond', 600),
-      loadGoogleFont('Source+Sans+3', 500),
-    ]);
-    return [heading, body];
-  } catch (err) {
-    console.warn('OG custom fonts failed, using Noto Sans fallback:', err?.message);
-    const data = await fetch(NOTO_WOFF).then(res => res.arrayBuffer());
-    const fallback = { name: 'Noto Sans', data, weight: 500, style: 'normal' };
-    return [fallback, { ...fallback, weight: 600 }];
+let fontsPromise;
+
+export async function loadOgFonts() {
+  if (!fontsPromise) {
+    fontsPromise = (async () => {
+      try {
+        const [heading, body] = await Promise.all([
+          loadGoogleFont('Cormorant+Garamond', 600),
+          loadGoogleFont('Source+Sans+3', 500),
+        ]);
+        return { fonts: [heading, body], custom: true };
+      } catch {
+        const data = await fetch(NOTO_WOFF).then(res => res.arrayBuffer());
+        const fallback = { name: 'Noto Sans', data, weight: 500, style: 'normal' };
+        return {
+          fonts: [fallback, { ...fallback, weight: 600 }],
+          custom: false,
+        };
+      }
+    })();
   }
+  return fontsPromise;
 }
 
-function siteOrigin(req) {
-  const forwarded = req.headers['x-forwarded-host'];
-  const host = (forwarded || req.headers.host || '').split(',')[0].trim();
-  if (host && !host.includes('localhost')) {
-    const protocol = req.headers['x-forwarded-proto'] || 'https';
-    return `${protocol}://${host}`;
-  }
-  return PRODUCTION_ORIGIN;
-}
-
-async function loadLogoDataUrl(origin) {
-  const res = await fetch(`${origin}/images/CBLogo.png`, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OG/1.0)' },
-  });
-  if (!res.ok) throw new Error(`Logo fetch failed: ${res.status}`);
-  const buf = Buffer.from(await res.arrayBuffer());
+function logoDataUrl() {
+  const logoPath = path.join(ROOT, 'public', 'images', 'CBLogo.png');
+  const buf = fs.readFileSync(logoPath);
   return `data:image/png;base64,${buf.toString('base64')}`;
 }
 
@@ -66,12 +65,12 @@ function el(type, props, ...children) {
   return React.createElement(type, props, ...children);
 }
 
-function buildOgElement({ title, description, eyebrow, logoSrc, fontsLoaded }) {
+function buildElement({ title, description, eyebrow, logoSrc, customFonts }) {
   const descText =
     description.length > 140 ? `${description.slice(0, 137)}…` : description;
   const titleSize = title.length > 40 ? 56 : 68;
-  const headingFont = fontsLoaded ? 'Cormorant Garamond' : 'Noto Sans';
-  const bodyFont = fontsLoaded ? 'Source Sans 3' : 'Noto Sans';
+  const headingFont = customFonts ? 'Cormorant Garamond' : 'Noto Sans';
+  const bodyFont = customFonts ? 'Source Sans 3' : 'Noto Sans';
 
   return el(
     'div',
@@ -208,62 +207,21 @@ function buildOgElement({ title, description, eyebrow, logoSrc, fontsLoaded }) {
   );
 }
 
-let fontsPromise;
-
-function getFonts() {
-  if (!fontsPromise) {
-    fontsPromise = loadFonts();
-  }
-  return fontsPromise;
+export async function renderOgPng({ title, description, eyebrow }) {
+  const { fonts, custom } = await loadOgFonts();
+  const logoSrc = logoDataUrl();
+  const element = buildElement({
+    title,
+    description,
+    eyebrow,
+    logoSrc,
+    customFonts: custom,
+  });
+  const svg = await satori(element, { width: 1200, height: 630, fonts });
+  return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).end('Method not allowed');
-  }
-
-  try {
-    const protocol = req.headers['x-forwarded-proto'] || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host || 'danweihmiller.com';
-    const { searchParams } = new URL(req.url, `${protocol}://${host}`);
-
-    const title = searchParams.get('title')?.trim() || 'Dan Weihmiller';
-    const description =
-      searchParams.get('description')?.trim() ||
-      'Broker with Coldwell Banker Realty · Colorado Springs · Since 1985';
-    const eyebrow =
-      searchParams.get('eyebrow')?.trim() || 'Coldwell Banker · Colorado Springs';
-
-    const origin = siteOrigin(req);
-    const [fonts, logoSrc] = await Promise.all([
-      getFonts(),
-      loadLogoDataUrl(origin),
-    ]);
-
-    const element = buildOgElement({
-      title,
-      description,
-      eyebrow,
-      logoSrc,
-      fontsLoaded: fonts.some(f => f.name === 'Cormorant Garamond'),
-    });
-
-    const svg = await satori(element, {
-      width: 1200,
-      height: 630,
-      fonts,
-    });
-
-    const png = await sharp(Buffer.from(svg)).png().toBuffer();
-
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-    res.status(200).end(png);
-  } catch (error) {
-    console.error('OG image error:', error);
-    if (!res.headersSent) {
-      res.status(500).end('Failed to generate image');
-    }
-  }
+export function ogSlugForPath(routePath) {
+  if (routePath === '/') return 'home';
+  return routePath.replace(/^\//, '').replace(/\//g, '-');
 }

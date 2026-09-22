@@ -60,19 +60,8 @@ const SEO = ({
       const staticPath = image || (useProfileImage ? profileImage : '/images/og-image.jpg');
       return staticPath.startsWith('http') ? staticPath : `${SITE_URL}${staticPath}`;
     }
-    return buildOgImageUrl({
-      title: ogImageHeadline,
-      description: ogImageDescription,
-      eyebrow: ogImageEyebrow,
-    });
-  }, [
-    useDynamicOg,
-    image,
-    useProfileImage,
-    ogImageHeadline,
-    ogImageDescription,
-    ogImageEyebrow,
-  ]);
+    return buildOgImageUrl({ pathname: location.pathname });
+  }, [useDynamicOg, image, useProfileImage, location.pathname]);
 
   const ogImageAlt = `${ogImageHeadline} · ${AGENT_NAME} · ${BROKERAGE_NAME}`;
 

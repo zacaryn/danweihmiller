@@ -7,12 +7,13 @@ export const SEO_DEFAULT_TITLE =
 export const SEO_DEFAULT_DESCRIPTION =
   'Dan Weihmiller, Broker with Coldwell Banker Realty in Colorado Springs since 1985. Military relocation, VA loans, and Front Range real estate. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920.';
 
-export function buildOgImageUrl({ title, description, eyebrow }) {
-  const params = new URLSearchParams();
-  params.set('title', (title || 'Dan Weihmiller').slice(0, 100));
-  if (description) params.set('description', description.slice(0, 180));
-  if (eyebrow) params.set('eyebrow', eyebrow.slice(0, 60));
-  return `${SITE_URL}/api/og?${params.toString()}`;
+export function ogImageSlug(routePath) {
+  if (routePath === '/') return 'home';
+  return routePath.replace(/^\//, '').replace(/\//g, '-');
+}
+
+export function buildOgImageUrlForPath(routePath) {
+  return `${SITE_URL}/og/${ogImageSlug(routePath)}.png`;
 }
 
 function route(path, meta) {
@@ -20,11 +21,7 @@ function route(path, meta) {
   const ogTitle = meta.ogTitle || meta.title.split('|')[0].trim();
   const ogDescription = meta.ogDescription || meta.description;
   const ogEyebrow = meta.ogEyebrow || meta.eyebrow || 'Dan Weihmiller · Colorado Springs';
-  const ogImage = buildOgImageUrl({
-    title: ogTitle,
-    description: ogDescription,
-    eyebrow: ogEyebrow,
-  });
+  const ogImage = buildOgImageUrlForPath(path);
   return {
     path,
     ...meta,

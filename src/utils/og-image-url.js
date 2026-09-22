@@ -1,23 +1,25 @@
 import { SITE_URL } from '../config/agent';
 
+/** Static OG PNG slug (matches scripts/generate-og-images.mjs). */
+export function ogImageSlug(pathname) {
+  const path = (pathname || '/').replace(/\/+$/, '') || '/';
+  if (path === '/') return 'home';
+  const slug = path.slice(1).replace(/\//g, '-');
+  if (slug.startsWith('listings-')) return 'listings';
+  return slug;
+}
+
 /**
- * Dynamic OG image URL (served by /api/og on Vercel).
+ * Pre-rendered OG image URL (built to /og/{slug}.png at deploy time).
  * Always absolute for crawlers (Discord, iMessage, etc.).
  */
-export function buildOgImageUrl({ title, description, eyebrow }) {
-  const params = new URLSearchParams();
-  params.set('title', (title || 'Dan Weihmiller').slice(0, 100));
-  if (description) {
-    params.set('description', description.slice(0, 180));
-  }
-  if (eyebrow) {
-    params.set('eyebrow', eyebrow.slice(0, 60));
-  }
+export function buildOgImageUrl({ pathname }) {
   const base =
     import.meta.env.VITE_SITE_URL ||
     import.meta.env.VITE_OG_IMAGE_ORIGIN ||
     SITE_URL;
-  return `${base.replace(/\/$/, '')}/api/og?${params.toString()}`;
+  const slug = ogImageSlug(pathname);
+  return `${base.replace(/\/$/, '')}/og/${slug}.png`;
 }
 
 export function eyebrowForPath(pathname) {
