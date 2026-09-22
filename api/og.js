@@ -1,4 +1,5 @@
-import { unstable_createNodejsStream } from '@vercel/og';
+import satori from 'satori';
+import sharp from 'sharp';
 import React from 'react';
 
 const COLORS = {
@@ -12,14 +13,34 @@ const COLORS = {
 
 const PRODUCTION_ORIGIN = 'https://danweihmiller.com';
 
-async function loadFont(family, weight) {
+const NOTO_WOFF =
+  'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans@latest/latin-500-normal.woff';
+
+async function loadGoogleFont(family, weight) {
   const cssUrl = `https://fonts.googleapis.com/css2?family=${family}:wght@${weight}&display=swap`;
-  const css = await fetch(cssUrl).then(res => res.text());
+  const css = await fetch(cssUrl, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OG/1.0)' },
+  }).then(res => res.text());
   const match = css.match(/src: url\((.+?)\) format\('woff2'\)/);
-  if (!match) {
-    throw new Error(`Could not load font ${family}`);
+  if (!match) throw new Error(`Could not load font ${family}`);
+  const data = await fetch(match[1]).then(res => res.arrayBuffer());
+  const name = family.replace(/\+/g, ' ');
+  return { name, data, weight, style: 'normal' };
+}
+
+async function loadFonts() {
+  try {
+    const [heading, body] = await Promise.all([
+      loadGoogleFont('Cormorant+Garamond', 600),
+      loadGoogleFont('Source+Sans+3', 500),
+    ]);
+    return [heading, body];
+  } catch (err) {
+    console.warn('OG custom fonts failed, using Noto Sans fallback:', err?.message);
+    const data = await fetch(NOTO_WOFF).then(res => res.arrayBuffer());
+    const fallback = { name: 'Noto Sans', data, weight: 500, style: 'normal' };
+    return [fallback, { ...fallback, weight: 600 }];
   }
-  return fetch(match[1]).then(res => res.arrayBuffer());
 }
 
 function siteOrigin(req) {
@@ -32,16 +53,25 @@ function siteOrigin(req) {
   return PRODUCTION_ORIGIN;
 }
 
+async function loadLogoDataUrl(origin) {
+  const res = await fetch(`${origin}/images/CBLogo.png`, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OG/1.0)' },
+  });
+  if (!res.ok) throw new Error(`Logo fetch failed: ${res.status}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  return `data:image/png;base64,${buf.toString('base64')}`;
+}
+
 function el(type, props, ...children) {
   return React.createElement(type, props, ...children);
 }
 
-function buildOgElement({ title, description, eyebrow, logoUrl, fonts }) {
+function buildOgElement({ title, description, eyebrow, logoSrc, fontsLoaded }) {
   const descText =
     description.length > 140 ? `${description.slice(0, 137)}…` : description;
   const titleSize = title.length > 40 ? 56 : 68;
-  const headingFont = fonts.length ? 'Cormorant Garamond' : 'serif';
-  const bodyFont = fonts.length ? 'Source Sans 3' : 'sans-serif';
+  const headingFont = fontsLoaded ? 'Cormorant Garamond' : 'Noto Sans';
+  const bodyFont = fontsLoaded ? 'Source Sans 3' : 'Noto Sans';
 
   return el(
     'div',
@@ -77,7 +107,7 @@ function buildOgElement({ title, description, eyebrow, logoUrl, fonts }) {
         },
       },
       el('img', {
-        src: logoUrl,
+        src: logoSrc,
         width: 72,
         height: 72,
         alt: '',
@@ -178,6 +208,15 @@ function buildOgElement({ title, description, eyebrow, logoUrl, fonts }) {
   );
 }
 
+let fontsPromise;
+
+function getFonts() {
+  if (!fontsPromise) {
+    fontsPromise = loadFonts();
+  }
+  return fontsPromise;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -197,40 +236,30 @@ export default async function handler(req, res) {
       searchParams.get('eyebrow')?.trim() || 'Coldwell Banker · Colorado Springs';
 
     const origin = siteOrigin(req);
-    const logoUrl = `${origin}/images/CBLogo.png`;
+    const [fonts, logoSrc] = await Promise.all([
+      getFonts(),
+      loadLogoDataUrl(origin),
+    ]);
 
-    let fonts = [];
-    try {
-      const [headingFont, bodyFont] = await Promise.all([
-        loadFont('Cormorant+Garamond', 600),
-        loadFont('Source+Sans+3', 500),
-      ]);
-      fonts = [
-        { name: 'Cormorant Garamond', data: headingFont, weight: 600, style: 'normal' },
-        { name: 'Source Sans 3', data: bodyFont, weight: 500, style: 'normal' },
-      ];
-    } catch (fontError) {
-      console.warn('OG fonts unavailable, using fallbacks:', fontError?.message);
-    }
+    const element = buildOgElement({
+      title,
+      description,
+      eyebrow,
+      logoSrc,
+      fontsLoaded: fonts.some(f => f.name === 'Cormorant Garamond'),
+    });
 
-    const element = buildOgElement({ title, description, eyebrow, logoUrl, fonts });
-    const stream = await unstable_createNodejsStream(element, {
+    const svg = await satori(element, {
       width: 1200,
       height: 630,
       fonts,
     });
 
+    const png = await sharp(Buffer.from(svg)).png().toBuffer();
+
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-    res.statusCode = 200;
-    res.statusMessage = 'OK';
-
-    await new Promise((resolve, reject) => {
-      stream.on('error', reject);
-      res.on('error', reject);
-      res.on('finish', resolve);
-      stream.pipe(res);
-    });
+    res.status(200).end(png);
   } catch (error) {
     console.error('OG image error:', error);
     if (!res.headersSent) {
