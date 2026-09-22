@@ -10,12 +10,15 @@ const ROOT = path.join(__dirname, '..');
 
 const COLORS = {
   navy: '#0E1F45',
-  navyMid: '#1B3366',
   white: '#FFFFFF',
-  muted: 'rgba(255, 255, 255, 0.72)',
-  faint: 'rgba(255, 255, 255, 0.45)',
-  line: 'rgba(255, 255, 255, 0.14)',
+  muted: 'rgba(255, 255, 255, 0.85)',
+  faint: 'rgba(255, 255, 255, 0.55)',
+  line: 'rgba(255, 255, 255, 0.22)',
 };
+
+/** Matches site page hero overlay — slightly stronger for OG text legibility */
+const HERO_PHOTO_OVERLAY =
+  'linear-gradient(120deg, rgba(14, 31, 69, 0.68) 0%, rgba(14, 31, 69, 0.48) 52%, rgba(14, 31, 69, 0.62) 100%)';
 
 const NOTO_WOFF =
   'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans@latest/latin-500-normal.woff';
@@ -61,11 +64,18 @@ function logoDataUrl() {
   return `data:image/png;base64,${buf.toString('base64')}`;
 }
 
+/** Garden of the Gods hero (same as Home / PageShell default) */
+function heroSceneDataUrl() {
+  const heroPath = path.join(ROOT, 'src', 'assets', 'images', 'scene.jpg');
+  const buf = fs.readFileSync(heroPath);
+  return `data:image/jpeg;base64,${buf.toString('base64')}`;
+}
+
 function el(type, props, ...children) {
   return React.createElement(type, props, ...children);
 }
 
-function buildElement({ title, description, eyebrow, logoSrc, customFonts }) {
+function buildElement({ title, description, eyebrow, logoSrc, heroSrc, customFonts }) {
   const descText =
     description.length > 140 ? `${description.slice(0, 137)}…` : description;
   const titleSize = title.length > 40 ? 56 : 68;
@@ -80,21 +90,14 @@ function buildElement({ title, description, eyebrow, logoSrc, customFonts }) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: `linear-gradient(135deg, ${COLORS.navy} 0%, ${COLORS.navyMid} 52%, ${COLORS.navy} 100%)`,
         padding: '56px 64px',
         fontFamily: bodyFont,
         color: COLORS.white,
-        position: 'relative',
+        backgroundImage: `${HERO_PHOTO_OVERLAY}, url(${heroSrc})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       },
     },
-    el('div', {
-      style: {
-        position: 'absolute',
-        inset: 0,
-        background:
-          'radial-gradient(circle at 85% 20%, rgba(255,255,255,0.08) 0%, transparent 45%)',
-      },
-    }),
     el(
       'div',
       {
@@ -102,7 +105,6 @@ function buildElement({ title, description, eyebrow, logoSrc, customFonts }) {
           display: 'flex',
           alignItems: 'center',
           gap: 24,
-          position: 'relative',
         },
       },
       el('img', {
@@ -210,11 +212,13 @@ function buildElement({ title, description, eyebrow, logoSrc, customFonts }) {
 export async function renderOgPng({ title, description, eyebrow }) {
   const { fonts, custom } = await loadOgFonts();
   const logoSrc = logoDataUrl();
+  const heroSrc = heroSceneDataUrl();
   const element = buildElement({
     title,
     description,
     eyebrow,
     logoSrc,
+    heroSrc,
     customFonts: custom,
   });
   const svg = await satori(element, { width: 1200, height: 630, fonts });
