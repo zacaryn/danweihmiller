@@ -21,7 +21,7 @@ const About = () => {
         pageName="About Dan Weihmiller"
         title="About Dan Weihmiller | Colorado Springs Realtor"
         description="Meet Dan Weihmiller, your trusted Colorado Springs Realtor with Coldwell Banker since 1985. Specializing in military relocation, VA loans, and Front Range real estate."
-        useProfileImage={true}
+        ogTitle="About Dan"
       />
 
       <PageRoot>

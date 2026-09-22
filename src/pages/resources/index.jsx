@@ -306,6 +306,8 @@ const ResourcesPage = () => {
         pageName="Real Estate Resources & Guides"
         title="Colorado Springs Real Estate Guide | Expert Resources & Tips"
         description="Comprehensive Colorado Springs real estate guides from your trusted local Realtor. Expert resources on VA loans, military relocation, first-time buying, and Colorado Springs neighborhoods."
+        ogTitle="Resources & Guides"
+        ogEyebrow="Colorado Springs Real Estate"
       />
       <PageRoot>
         <PageHeader

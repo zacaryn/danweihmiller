@@ -396,7 +396,9 @@ const ArticleLayout = ({ title, description, children, keywords }) => {
         title={`${title} | Dan Weihmiller · Coldwell Banker`}
         description={description}
         isArticle
-        useProfileImage
+        ogTitle={title}
+        ogEyebrow="Resources · Colorado Springs"
+        ogDescription={description}
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>

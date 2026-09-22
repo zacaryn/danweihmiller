@@ -119,9 +119,7 @@ const AdminSetPassword = () => {
 
   return (
     <>
-      <SEO pageName="Set password">
-        <meta name="robots" content="noindex, nofollow" />
-      </SEO>
+      <SEO pageName="Set password" useDynamicOg={false} noIndex />
       <Shell>
         <Card onSubmit={handleSubmit}>
           <Title>Set your password</Title>

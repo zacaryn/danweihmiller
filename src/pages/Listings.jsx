@@ -209,6 +209,7 @@ const Listings = () => {
         pageName="Listings"
         title="Dan Weihmiller Listings | Coldwell Banker · Colorado Springs"
         description="Current MLS listings for Dan Weihmiller, Broker with Coldwell Banker Realty. Synced from his official Colorado Springs agent profile."
+        ogTitle="My Listings"
         image="/images/og-image.jpg"
       />
       <PageRoot>

@@ -258,9 +258,7 @@ const Admin = () => {
   if (!session) {
     return (
       <>
-        <SEO pageName="Admin Portal">
-          <meta name="robots" content="noindex, nofollow" />
-        </SEO>
+        <SEO pageName="Admin Portal" useDynamicOg={false} noIndex />
         <Shell>
           <LoginCard onSubmit={handleLogin}>
             <FormTitle>Message portal</FormTitle>
@@ -303,9 +301,7 @@ const Admin = () => {
 
   return (
     <>
-      <SEO pageName="Admin Portal">
-        <meta name="robots" content="noindex, nofollow" />
-      </SEO>
+      <SEO pageName="Admin Portal" useDynamicOg={false} noIndex />
       <Shell>
         <Inner>
           <Header>

@@ -224,7 +224,7 @@ const Contact = () => {
         pageName="Contact"
         title="Contact Dan Weihmiller | Coldwell Banker · Colorado Springs"
         description="Contact Dan Weihmiller, Broker with Coldwell Banker Realty. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920. Call (719) 301-8257 for buying, selling, or military relocation."
-        useProfileImage={true}
+        ogTitle="Get in Touch"
       />
       
       <PageRoot>

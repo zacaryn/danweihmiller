@@ -110,6 +110,7 @@ const Search = () => {
         pageName="Search"
         title="MLS Property Search | Dan Weihmiller · Coldwell Banker"
         description="Search Pikes Peak region MLS homes with Dan Weihmiller, Coldwell Banker Realty. Or view Dan's listings synced from his Coldwell Banker profile."
+        ogTitle="Search Homes"
         image="/images/og-image.jpg"
       />
 

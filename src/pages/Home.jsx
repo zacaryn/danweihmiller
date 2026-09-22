@@ -461,7 +461,8 @@ const Home = () => {
     <>
       <SEO
         pageName="Home"
-        useProfileImage={false}
+        ogTitle="Colorado Springs Realtor"
+        ogDescription="Broker with Coldwell Banker since 1985 — military relocation, VA loans, and Front Range real estate."
       />
       <div>
         <HeroSection>

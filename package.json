@@ -24,6 +24,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.0.2",
     "@supabase/supabase-js": "^2.116.0",
+    "@vercel/og": "^1.0.2",
     "aws-amplify": "^5.3.12",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.6.2",
