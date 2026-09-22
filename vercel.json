@@ -3,10 +3,5 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
-  "functions": {
-    "api/og.jsx": {
-      "runtime": "edge"
-    }
-  }
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
