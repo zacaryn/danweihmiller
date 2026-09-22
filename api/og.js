@@ -1,9 +1,5 @@
-import { ImageResponse } from '@vercel/og';
+import { unstable_createNodejsStream } from '@vercel/og';
 import React from 'react';
-
-export const config = {
-  runtime: 'edge',
-};
 
 const COLORS = {
   navy: '#0E1F45',
@@ -26,11 +22,12 @@ async function loadFont(family, weight) {
   return fetch(match[1]).then(res => res.arrayBuffer());
 }
 
-function siteOrigin(request) {
-  const forwarded = request.headers.get('x-forwarded-host');
-  const host = (forwarded || request.headers.get('host') || '').split(',')[0].trim();
+function siteOrigin(req) {
+  const forwarded = req.headers['x-forwarded-host'];
+  const host = (forwarded || req.headers.host || '').split(',')[0].trim();
   if (host && !host.includes('localhost')) {
-    return `https://${host}`;
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    return `${protocol}://${host}`;
   }
   return PRODUCTION_ORIGIN;
 }
@@ -39,9 +36,159 @@ function el(type, props, ...children) {
   return React.createElement(type, props, ...children);
 }
 
-export default async function handler(request) {
+function buildOgElement({ title, description, eyebrow, logoUrl, fonts }) {
+  const descText =
+    description.length > 140 ? `${description.slice(0, 137)}…` : description;
+  const titleSize = title.length > 40 ? 56 : 68;
+  const headingFont = fonts.length ? 'Cormorant Garamond' : 'serif';
+  const bodyFont = fonts.length ? 'Source Sans 3' : 'sans-serif';
+
+  return el(
+    'div',
+    {
+      style: {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `linear-gradient(135deg, ${COLORS.navy} 0%, ${COLORS.navyMid} 52%, ${COLORS.navy} 100%)`,
+        padding: '56px 64px',
+        fontFamily: bodyFont,
+        color: COLORS.white,
+        position: 'relative',
+      },
+    },
+    el('div', {
+      style: {
+        position: 'absolute',
+        inset: 0,
+        background:
+          'radial-gradient(circle at 85% 20%, rgba(255,255,255,0.08) 0%, transparent 45%)',
+      },
+    }),
+    el(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 24,
+          position: 'relative',
+        },
+      },
+      el('img', {
+        src: logoUrl,
+        width: 72,
+        height: 72,
+        alt: '',
+        style: { objectFit: 'contain' },
+      }),
+      el(
+        'div',
+        { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
+        el('div', {
+          style: {
+            fontFamily: headingFont,
+            fontSize: 36,
+            fontWeight: 600,
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+          },
+          children: 'Dan Weihmiller',
+        }),
+        el('div', {
+          style: {
+            fontSize: 16,
+            fontWeight: 600,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: COLORS.muted,
+          },
+          children: 'Coldwell Banker Realty',
+        })
+      )
+    ),
+    el(
+      'div',
+      {
+        style: {
+          marginTop: 48,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          position: 'relative',
+          maxWidth: 980,
+        },
+      },
+      el('div', {
+        style: {
+          fontSize: 15,
+          fontWeight: 600,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: COLORS.faint,
+          marginBottom: 16,
+        },
+        children: eyebrow,
+      }),
+      el('div', {
+        style: {
+          fontFamily: headingFont,
+          fontSize: titleSize,
+          fontWeight: 600,
+          lineHeight: 1.05,
+          letterSpacing: '-0.02em',
+          marginBottom: 20,
+        },
+        children: title,
+      }),
+      el('div', {
+        style: {
+          fontSize: 24,
+          lineHeight: 1.45,
+          color: COLORS.muted,
+          maxWidth: 920,
+        },
+        children: descText,
+      })
+    ),
+    el(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: `1px solid ${COLORS.line}`,
+          paddingTop: 22,
+          position: 'relative',
+          fontSize: 17,
+        },
+      },
+      el('div', {
+        style: { fontWeight: 600, letterSpacing: '0.04em' },
+        children: 'danweihmiller.com',
+      }),
+      el('div', {
+        style: { color: COLORS.faint, fontSize: 15 },
+        children: 'Colorado Springs · Military & VA · Since 1985',
+      })
+    )
+  );
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).end('Method not allowed');
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host || 'danweihmiller.com';
+    const { searchParams } = new URL(req.url, `${protocol}://${host}`);
+
     const title = searchParams.get('title')?.trim() || 'Dan Weihmiller';
     const description =
       searchParams.get('description')?.trim() ||
@@ -49,7 +196,7 @@ export default async function handler(request) {
     const eyebrow =
       searchParams.get('eyebrow')?.trim() || 'Coldwell Banker · Colorado Springs';
 
-    const origin = siteOrigin(request);
+    const origin = siteOrigin(req);
     const logoUrl = `${origin}/images/CBLogo.png`;
 
     let fonts = [];
@@ -66,152 +213,28 @@ export default async function handler(request) {
       console.warn('OG fonts unavailable, using fallbacks:', fontError?.message);
     }
 
-    const descText =
-      description.length > 140 ? `${description.slice(0, 137)}…` : description;
-    const titleSize = title.length > 40 ? 56 : 68;
+    const element = buildOgElement({ title, description, eyebrow, logoUrl, fonts });
+    const stream = await unstable_createNodejsStream(element, {
+      width: 1200,
+      height: 630,
+      fonts,
+    });
 
-    return new ImageResponse(
-      el(
-        'div',
-        {
-          style: {
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            background: `linear-gradient(135deg, ${COLORS.navy} 0%, ${COLORS.navyMid} 52%, ${COLORS.navy} 100%)`,
-            padding: '56px 64px',
-            fontFamily: fonts.length ? 'Source Sans 3' : 'sans-serif',
-            color: COLORS.white,
-            position: 'relative',
-          },
-        },
-        el('div', {
-          style: {
-            position: 'absolute',
-            inset: 0,
-            background:
-              'radial-gradient(circle at 85% 20%, rgba(255,255,255,0.08) 0%, transparent 45%)',
-          },
-        }),
-        el(
-          'div',
-          {
-            style: {
-              display: 'flex',
-              alignItems: 'center',
-              gap: 24,
-              position: 'relative',
-            },
-          },
-          el('img', {
-            src: logoUrl,
-            width: 72,
-            height: 72,
-            alt: '',
-            style: { objectFit: 'contain' },
-          }),
-          el(
-            'div',
-            { style: { display: 'flex', flexDirection: 'column', gap: 4 } },
-            el('div', {
-              style: {
-                fontFamily: fonts.length ? 'Cormorant Garamond' : 'serif',
-                fontSize: 36,
-                fontWeight: 600,
-                letterSpacing: '-0.02em',
-                lineHeight: 1.1,
-              },
-              children: 'Dan Weihmiller',
-            }),
-            el('div', {
-              style: {
-                fontSize: 16,
-                fontWeight: 600,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: COLORS.muted,
-              },
-              children: 'Coldwell Banker Realty',
-            })
-          )
-        ),
-        el(
-          'div',
-          {
-            style: {
-              marginTop: 48,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              position: 'relative',
-              maxWidth: 980,
-            },
-          },
-          el('div', {
-            style: {
-              fontSize: 15,
-              fontWeight: 600,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: COLORS.faint,
-              marginBottom: 16,
-            },
-            children: eyebrow,
-          }),
-          el('div', {
-            style: {
-              fontFamily: fonts.length ? 'Cormorant Garamond' : 'serif',
-              fontSize: titleSize,
-              fontWeight: 600,
-              lineHeight: 1.05,
-              letterSpacing: '-0.02em',
-              marginBottom: 20,
-            },
-            children: title,
-          }),
-          el('div', {
-            style: {
-              fontSize: 24,
-              lineHeight: 1.45,
-              color: COLORS.muted,
-              maxWidth: 920,
-            },
-            children: descText,
-          })
-        ),
-        el(
-          'div',
-          {
-            style: {
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              borderTop: `1px solid ${COLORS.line}`,
-              paddingTop: 22,
-              position: 'relative',
-              fontSize: 17,
-            },
-          },
-          el('div', {
-            style: { fontWeight: 600, letterSpacing: '0.04em' },
-            children: 'danweihmiller.com',
-          }),
-          el('div', {
-            style: { color: COLORS.faint, fontSize: 15 },
-            children: 'Colorado Springs · Military & VA · Since 1985',
-          })
-        )
-      ),
-      {
-        width: 1200,
-        height: 630,
-        fonts,
-      }
-    );
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.statusCode = 200;
+    res.statusMessage = 'OK';
+
+    await new Promise((resolve, reject) => {
+      stream.on('error', reject);
+      res.on('error', reject);
+      res.on('finish', resolve);
+      stream.pipe(res);
+    });
   } catch (error) {
     console.error('OG image error:', error);
-    return new Response('Failed to generate image', { status: 500 });
+    if (!res.headersSent) {
+      res.status(500).end('Failed to generate image');
+    }
   }
 }
