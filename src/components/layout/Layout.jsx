@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import FloatingCallButton from './FloatingCallButton';
+import { trackPixel } from '../../lib/meta-pixel';
 
 const NAV_HEIGHT_DESKTOP = 72;
 const NAV_HEIGHT_MOBILE = 68;
@@ -45,6 +46,16 @@ const Main = styled.main`
 const Layout = () => {
   const { pathname } = useLocation();
   const isSearchRoute = pathname === '/search';
+  const firstPage = useRef(true);
+
+  // index.html fires the first PageView; this is a single-page app, so count in-app navigations too
+  useEffect(() => {
+    if (firstPage.current) {
+      firstPage.current = false;
+      return;
+    }
+    trackPixel('PageView');
+  }, [pathname]);
 
   useEffect(() => {
     const setNavHeight = () => {

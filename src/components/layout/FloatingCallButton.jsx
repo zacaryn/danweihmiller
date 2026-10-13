@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { FaPhone } from 'react-icons/fa';
+import { trackPixel } from '../../lib/meta-pixel';
 
 const PHONE_HREF = 'tel:7193018257';
 const PHONE_LABEL = '(719) 301-8257';
@@ -117,6 +118,7 @@ const FloatingCallButton = () => {
   return (
     <Fab
       href={PHONE_HREF}
+      onClick={() => trackPixel('Contact', { method: 'call', content_name: 'Floating call button' })}
       $visible={visible}
       aria-label={`Call Dan Weihmiller at ${PHONE_LABEL}`}
     >

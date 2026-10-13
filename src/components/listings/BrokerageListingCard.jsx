@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
-const Card = styled.a`
+const Card = styled(Link)`
   display: flex;
   flex-direction: column;
   background: ${props => props.theme.colors.white};
@@ -110,7 +111,7 @@ const BrokerageListingCard = ({ listing }) => {
   const isActive = listing.status?.toLowerCase() === 'active';
 
   return (
-    <Card href={listing.detailUrl} target="_blank" rel="noopener noreferrer">
+    <Card to={`/listings/${listing.slug || listing.mlsId}`}>
       <ImageWrap>
         {listing.photo && <Image src={listing.photo} alt="" loading="lazy" />}
         {listing.photoCount > 1 && <PhotoCount>{listing.photoCount} photos</PhotoCount>}
@@ -134,7 +135,8 @@ const BrokerageListingCard = ({ listing }) => {
 
 BrokerageListingCard.propTypes = {
   listing: PropTypes.shape({
-    detailUrl: PropTypes.string.isRequired,
+    detailUrl: PropTypes.string,
+    slug: PropTypes.string,
     photo: PropTypes.string,
     photoCount: PropTypes.number,
     status: PropTypes.string,

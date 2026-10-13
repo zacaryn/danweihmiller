@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { submitContactMessage } from '../../services/contact-api';
+import { trackPixel } from '../../lib/meta-pixel';
 
 const Form = styled.form`
   display: flex;
@@ -202,6 +203,10 @@ const ContactForm = () => {
         phone: formData.phone.trim() || undefined,
         context: formData.context.trim() || undefined,
         message: formData.message.trim(),
+      });
+      trackPixel('Lead', {
+        content_name: formData.context.trim() || 'Contact form',
+        content_category: /showing request/i.test(formData.context) ? 'showing_request' : 'contact',
       });
       setStatus({
         submitting: false,

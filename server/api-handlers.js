@@ -1,4 +1,4 @@
-import { fetchCbAgentListings } from './cb-agent-listings.js';
+import { fetchCbAgentListings, fetchCbListingDetail } from './cb-agent-listings.js';
 import { getSupabaseAdmin, isSupabaseConfigured } from './supabase-admin.js';
 import { sendContactNotification, isSmtpConfigured } from './send-contact-email.js';
 import { loadEnv } from './load-env.js';
@@ -107,6 +107,13 @@ export async function handleHealth(req, res) {
 
 export async function handleCbListings(req, res) {
   try {
+    const id = req.query?.id;
+    if (id) {
+      const detail = await fetchCbListingDetail(id);
+      if (!detail) return res.status(404).json({ error: 'Listing not found' });
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      return res.status(200).json(detail);
+    }
     const data = await fetchCbAgentListings();
     res.setHeader('Cache-Control', 'public, max-age=300');
     return res.status(200).json(data);
