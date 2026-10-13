@@ -101,10 +101,40 @@ export async function sendContactNotification({ name, email, phone, message, con
     });
     // Gmail can accept the message but refuse individual recipients; record any it refused
     const rejected = (info?.rejected || []).map(String);
-    return rejected.length ? { delivered: true, error: `Rejected recipients: ${rejected.join(', ')}` } : { delivered: true };
+    const smsError = await sendSmsAlert({ name, phone, email, context, message, transport });
+    const problems = [rejected.length ? `Rejected recipients: ${rejected.join(', ')}` : null, smsError].filter(Boolean);
+    return problems.length ? { delivered: true, error: problems.join(' | ') } : { delivered: true };
   } catch (err) {
     console.error('Contact email failed:', err);
     return { delivered: false, error: err.message };
+  }
+}
+
+/**
+ * Short text-message alert via a carrier email-to-SMS gateway, e.g. MAIL_SMS_TO=7195551234@tmomail.net
+ * (comma-separated for several phones). Sent separately from the full email: gateways turn long HTML
+ * emails into truncated picture messages, so phones get a plain one-liner that fits a single SMS.
+ * Returns an error string, or null when sent or not configured. Never blocks the main email.
+ */
+async function sendSmsAlert({ name, phone, email, context, message, transport }) {
+  const to = process.env.MAIL_SMS_TO;
+  if (!to) return null;
+  const address = showingAddress(context);
+  const what = address ? `Showing req ${address}` : 'Website msg';
+  const contact = phone || email;
+  let body = `${what}: ${name} ${contact}. ${String(message).replace(/\s+/g, ' ')}`;
+  if (body.length > 155) body = `${body.slice(0, 152)}...`;
+  try {
+    await transport.sendMail({
+      from: process.env.SMTP_USER,
+      to,
+      subject: '',
+      text: body,
+    });
+    return null;
+  } catch (err) {
+    console.error('SMS alert failed:', err);
+    return `SMS alert failed: ${err.message}`;
   }
 }
 
@@ -131,5 +161,6 @@ export function mailRecipientsSummary() {
     to: list(process.env.MAIL_TO_AGENT).map(mask),
     cc: list(process.env.MAIL_CC).map(mask),
     bcc: list(process.env.MAIL_BCC_ARCHIVE).map(mask),
+    sms: list(process.env.MAIL_SMS_TO).map((a) => a.replace(/^(\d{3})\d+(\d{2})@/, '$1…$2@')),
   };
 }
