@@ -3,7 +3,12 @@ import sceneImg from '../assets/images/scene.jpg';
 import headshot from '../assets/images/DWHeadshot.png';
 import SEO from '../components/shared/SEO';
 import { homeHeroOverlay } from '../styles/heroOverlays';
-import { FaPhone, FaSearch, FaBook, FaUser } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaPhone, FaHome, FaBook, FaUser } from 'react-icons/fa';
+import NowShowingRibbon from '../components/home/NowShowingRibbon';
+import FeaturedListings from '../components/home/FeaturedListings';
+import ReelsStrip from '../components/home/ReelsStrip';
+import { useCbListings } from '../hooks/useCbListings';
 
 const HeroSection = styled.section`
   min-height: min(92vh, 880px);
@@ -37,13 +42,14 @@ const HeroContent = styled.div`
   align-items: start;
 
   @media (max-width: 968px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
     gap: 1.75rem;
   }
 `;
 
 const HeroIntro = styled.div`
+  min-width: 0;
   color: ${props => props.theme.colors.white};
   max-width: 640px;
   grid-column: 1;
@@ -457,6 +463,13 @@ const FeatureText = styled.p`
 `;
 
 const Home = () => {
+  const { active, loading: listingsLoading } = useCbListings();
+  const listingsLine = listingsLoading
+    ? 'Homes Dan is representing right now, with photos, video tours and private showings.'
+    : active.length
+      ? `${active.length === 1 ? '1 home' : `${active.length} homes`} for sale now, with photos, video tours and one-tap showing requests.`
+      : "See homes Dan has recently sold, and be first to know when his next listing goes live.";
+
   return (
     <>
       <SEO
@@ -468,6 +481,7 @@ const Home = () => {
         <HeroSection>
           <HeroContent>
             <HeroIntro>
+              <NowShowingRibbon />
               <HeroEyebrow>Coldwell Banker · Colorado Springs · Since 1985</HeroEyebrow>
               <HeroTitle>Dan Weihmiller</HeroTitle>
               <HeroTagline>
@@ -504,19 +518,19 @@ const Home = () => {
               <PortraitCaption>Military Relocation Professional · MRP</PortraitCaption>
             </HeroVisual>
           </HeroContent>
-          <HeroScrollHint href="#home-features">Scroll</HeroScrollHint>
+          <HeroScrollHint href="#featured-listings">Scroll</HeroScrollHint>
         </HeroSection>
+
+        <FeaturedListings />
 
         <FeaturesSection id="home-features">
           <FeaturesGrid>
-            <FeatureCard href="/search">
+            <FeatureCard as={Link} to="/listings">
               <IconWrapper>
-                <FaSearch size={36} />
+                <FaHome size={36} />
               </IconWrapper>
-              <FeatureTitle>Search Properties</FeatureTitle>
-              <FeatureText>
-                Explore Colorado Springs homes for sale throughout the Front Range. From single-family homes to new construction, find your perfect match in our premier military community.
-              </FeatureText>
+              <FeatureTitle>Dan&apos;s Listings</FeatureTitle>
+              <FeatureText>{listingsLine}</FeatureText>
             </FeatureCard>
             <FeatureCard href="/resources">
               <IconWrapper>
@@ -538,6 +552,8 @@ const Home = () => {
             </FeatureCard>
           </FeaturesGrid>
         </FeaturesSection>
+
+        <ReelsStrip />
       </div>
     </>
   );

@@ -140,6 +140,7 @@ const SEO = ({
   };
 
   return (
+    <>
     <Helmet>
       <title>{displayTitle}</title>
       <meta name="description" content={displayDescription} />
@@ -175,10 +176,13 @@ const SEO = ({
       />
       <meta name="ICBM" content={`${OFFICE_GEO.latitude}, ${OFFICE_GEO.longitude}`} />
 
-      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
-      <script type="application/ld+json">{JSON.stringify(officeSchema)}</script>
     </Helmet>
+    {/* Structured data renders in the page itself: Helmet doesn't output these under React 19, and search
+        engines read JSON-LD anywhere in the document. */}
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(officeSchema) }} />
+    </>
   );
 };
 

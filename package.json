@@ -33,6 +33,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
     "framer-motion": "^12.4.3",
+    "leaflet": "^1.9.4",
     "nodemailer": "^10.0.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

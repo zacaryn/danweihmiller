@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import {
@@ -19,7 +19,7 @@ import { PageRoot } from '../components/layout/PageShell';
 import { fetchCbListingDetail } from '../services/cb-listings-service';
 import { submitContactMessage } from '../services/contact-api';
 import { mediaForListing } from '../config/listing-media';
-import { AGENT_NAME, AGENT_PHONE, AGENT_PHONE_HREF, BROKERAGE_NAME, CB_AGENT_PROFILE_URL } from '../config/agent';
+import { AGENT_NAME, AGENT_PHONE, AGENT_PHONE_HREF, BROKERAGE_NAME, CB_AGENT_PROFILE_URL, SITE_URL } from '../config/agent';
 import { trackPixel, trackPixelCustom } from '../lib/meta-pixel';
 
 const SMS_HREF = 'sms:7193018257';
@@ -877,6 +877,7 @@ InquiryForm.propTypes = {
 /** Listing page, built from the Coldwell Banker sync. Works for every listing on Dan's profile automatically. */
 const ListingDetail = () => {
   const { id } = useParams();
+  const { hash } = useLocation();
   const [data, setData] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | missing | error
   const [index, setIndex] = useState(0);
@@ -911,6 +912,16 @@ const ListingDetail = () => {
   }, [id]);
 
   const listing = data?.listing;
+
+  // links like "/listings/6724-harvey-ln#inquiry" (card shortcuts) open with the showing form in view
+  useEffect(() => {
+    if (state !== 'ready' || hash !== '#inquiry') return;
+    const t = setTimeout(() => {
+      document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+    return () => clearTimeout(t);
+  }, [state, hash]);
+
   const photos = listing?.photos?.length ? listing.photos : listing?.photo ? [listing.photo] : [];
   const count = photos.length;
   const media = listing ? mediaForListing(listing.mlsId) : null;
@@ -1028,6 +1039,47 @@ const ListingDetail = () => {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'RealEstateListing',
+            name: listing.address,
+            url: `${SITE_URL}/listings/${listing.slug || listing.mlsId}`,
+            image: photos.slice(0, 6),
+            description: listing.description ? listing.description.slice(0, 500) : undefined,
+            offers: listing.priceNumber
+              ? {
+                  '@type': 'Offer',
+                  price: listing.priceNumber,
+                  priceCurrency: 'USD',
+                  availability: isActive ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+                }
+              : undefined,
+            about: {
+              '@type': 'SingleFamilyResidence',
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: street,
+                addressLocality: (cityLine || '').split(',')[0]?.trim() || undefined,
+                addressRegion: ((cityLine || '').split(',')[1] || '').trim().split(' ')[0] || undefined,
+                postalCode: ((cityLine || '').match(/\b\d{5}\b/) || [])[0],
+                addressCountry: 'US',
+              },
+              numberOfRooms: listing.beds || undefined,
+              numberOfBathroomsTotal: listing.baths || undefined,
+              floorSize: listing.squareFeet
+                ? { '@type': 'QuantitativeValue', value: String(listing.squareFeet).replace(/,/g, ''), unitCode: 'FTK' }
+                : undefined,
+              yearBuilt: listing.yearBuilt || undefined,
+              geo:
+                listing.lat && listing.lng ? { '@type': 'GeoCoordinates', latitude: listing.lat, longitude: listing.lng } : undefined,
+            },
+            provider: { '@type': 'RealEstateAgent', name: AGENT_NAME, telephone: AGENT_PHONE, url: SITE_URL },
+          }),
+        }}
+      />
       <SEO
         pageName={street}
         title={`${street} · ${listing.price} | ${AGENT_NAME}, ${BROKERAGE_NAME}`}
