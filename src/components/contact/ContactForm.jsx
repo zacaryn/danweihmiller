@@ -6,6 +6,7 @@ import { submitContactMessage } from '../../services/contact-api';
 import { trackPixel } from '../../lib/meta-pixel';
 import { button } from '../../styles/buttons';
 import { AGENT_PHONE } from '../../config/agent';
+import { TOUR_TIMES, formatTour, todayIso } from '../../lib/tour-date';
 
 const NAVY = '#0E1F45';
 
@@ -76,6 +77,20 @@ const Input = styled.input`
   ${control}
   height: 2.9rem;
   padding: 0 0.85rem;
+`;
+
+const DateInput = styled.input`
+  ${control}
+  height: 2.9rem;
+  padding: 0 0.85rem;
+  appearance: none;
+  -webkit-appearance: none;
+  color: ${p => (p.value ? '#1A2B45' : '#6b7690')};
+  cursor: pointer;
+
+  &::-webkit-date-and-time-value {
+    text-align: left;
+  }
 `;
 
 const Select = styled.select`
@@ -192,7 +207,7 @@ const Success = styled.div`
   }
 `;
 
-const EMPTY = { name: '', email: '', phone: '', prefer: 'Call or text', message: '' };
+const EMPTY = { name: '', email: '', phone: '', prefer: 'Call or text', tourDate: '', tourTime: TOUR_TIMES[0], message: '' };
 
 /** Compact contact form: topic chips, two-column fields, inline validation, success state. */
 const ContactForm = () => {
@@ -210,6 +225,9 @@ const ContactForm = () => {
     }
   }, [topicFromUrl]);
 
+  // tour preference only matters when someone wants to see a home
+  const askTour = topic === 'Buying' || /showing|listing|MLS/i.test(regarding);
+
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const submit = async (e) => {
@@ -224,6 +242,7 @@ const ContactForm = () => {
     }
     setStatus({ sending: true, done: false, error: null, name: '' });
     const context = [regarding, topic].filter(Boolean).join(' · ') || undefined;
+    const tourDate = askTour ? formatTour(form.tourDate, form.tourTime) || undefined : undefined;
     try {
       await submitContactMessage({
         name: form.name.trim(),
@@ -231,6 +250,7 @@ const ContactForm = () => {
         phone: form.phone.trim() || undefined,
         context,
         message: `${form.message.trim()}\n\nBest way to reach me: ${form.prefer}`,
+        tourDate,
       });
       trackPixel('Lead', {
         content_name: context || 'Contact form',
@@ -313,6 +333,25 @@ const ContactForm = () => {
           <option>Email</option>
         </Select>
       </Field>
+
+      {askTour && (
+        <>
+          <Field>
+            <Label htmlFor="cf-tour-date">
+              Preferred tour date <span>(optional)</span>
+            </Label>
+            <DateInput id="cf-tour-date" type="date" min={todayIso()} value={form.tourDate} onChange={set('tourDate')} />
+          </Field>
+          <Field>
+            <Label htmlFor="cf-tour-time">Time of day</Label>
+            <Select id="cf-tour-time" value={form.tourTime} onChange={set('tourTime')}>
+              {TOUR_TIMES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </Select>
+          </Field>
+        </>
+      )}
 
       <Full>
         <Field>

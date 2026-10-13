@@ -19,6 +19,7 @@ import SEO from '../components/shared/SEO';
 import { PageRoot } from '../components/layout/PageShell';
 import { fetchCbListingDetail } from '../services/cb-listings-service';
 import { submitContactMessage } from '../services/contact-api';
+import { TOUR_TIMES, formatTour, todayIso } from '../lib/tour-date';
 import { mediaForListing } from '../config/listing-media';
 import { AGENT_NAME, AGENT_PHONE, AGENT_PHONE_HREF, BROKERAGE_NAME, CB_AGENT_PROFILE_URL, SITE_URL } from '../config/agent';
 import { trackPixel, trackPixelCustom } from '../lib/meta-pixel';
@@ -380,6 +381,35 @@ const Field = styled.input`
   }
 `;
 
+const TourLabel = styled.span`
+  grid-column: 1 / -1;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: ${p => p.theme.colors.primary};
+
+  span {
+    font-weight: 500;
+    color: ${p => p.theme.colors.darkGray};
+  }
+`;
+
+const DateField = styled(Field)`
+  appearance: none;
+  -webkit-appearance: none;
+  color: ${p => (p.value ? p.theme.colors.text : p.theme.colors.darkGray)};
+  cursor: pointer;
+
+  &::-webkit-date-and-time-value {
+    text-align: left;
+  }
+`;
+
+const TimeSelect = styled(Field)`
+  padding: 0 0.6rem;
+  cursor: pointer;
+`;
+
 const TextArea = styled.textarea`
   grid-column: 1 / -1;
   width: 100%;
@@ -726,6 +756,8 @@ function InquiryForm({ listing, isActive, pixelParams }) {
     message: isActive
       ? `I'd like to schedule a showing of ${street}.`
       : `I have a question about ${street}.`,
+    tourDate: '',
+    tourTime: TOUR_TIMES[0],
   });
   const [status, setStatus] = useState({ sending: false, done: false, error: null });
 
@@ -749,6 +781,7 @@ function InquiryForm({ listing, isActive, pixelParams }) {
         phone: form.phone.trim() || undefined,
         context: `${isActive ? 'Showing request' : 'Listing question'}: ${listing.address} (MLS# ${listing.mlsId})`,
         message: form.message.trim() || `Interested in ${listing.address}.`,
+        tourDate: isActive ? formatTour(form.tourDate, form.tourTime) || undefined : undefined,
       });
       trackPixel('Lead', { ...pixelParams, content_category: isActive ? 'showing_request' : 'listing_question' });
       setStatus({ sending: false, done: true, error: null });
@@ -794,6 +827,25 @@ function InquiryForm({ listing, isActive, pixelParams }) {
         onChange={set('email')}
         required
       />
+      {isActive && (
+        <>
+          <TourLabel id="tour-label">
+            Preferred tour date <span>(optional)</span>
+          </TourLabel>
+          <DateField
+            type="date"
+            aria-labelledby="tour-label"
+            min={todayIso()}
+            value={form.tourDate}
+            onChange={set('tourDate')}
+          />
+          <TimeSelect as="select" aria-label="Preferred time of day" value={form.tourTime} onChange={set('tourTime')}>
+            {TOUR_TIMES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </TimeSelect>
+        </>
+      )}
       <TextArea aria-label="Message" rows={3} value={form.message} onChange={set('message')} />
       <Submit type="submit" disabled={status.sending}>
         {status.sending ? 'Sending…' : isActive ? 'Request a Showing' : 'Send Message'}

@@ -27,6 +27,8 @@ export async function handlePostInquiry(req, res) {
     }
 
     const { name, email, phone, message, context, listingId } = body;
+    // optional, e.g. "Fri, Oct 16 · Afternoon"
+    const tourDate = typeof body.tourDate === 'string' ? body.tourDate.trim().slice(0, 60) || null : null;
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -55,6 +57,7 @@ export async function handlePostInquiry(req, res) {
       phone: phone?.trim() || null,
       message: message.trim(),
       context: contextText,
+      tourDate,
     });
 
     const supabase = getSupabaseAdmin();
@@ -64,7 +67,9 @@ export async function handlePostInquiry(req, res) {
         name: name.trim(),
         email: email.trim(),
         phone: phone?.trim() || null,
-        message: message.trim(),
+        message: tourDate ? `${message.trim()}
+
+Preferred tour: ${tourDate}` : message.trim(),
         context: contextText,
         is_read: false,
         email_delivered: emailResult.delivered,

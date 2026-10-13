@@ -36,7 +36,7 @@ function showingAddress(context) {
   return m ? m[1].trim() : null;
 }
 
-function buildHtml({ name, email, phone, message, context }) {
+function buildHtml({ name, email, phone, message, context, tourDate }) {
   const row = (label, value) =>
     value
       ? `<tr><td style="padding:6px 16px 6px 0;color:#5b6475;font-size:13px;white-space:nowrap;vertical-align:top">${label}</td>` +
@@ -55,6 +55,7 @@ ${row('Name', escapeHtml(name))}
 ${row('Email', `<a href="mailto:${safeEmail}" style="color:#1B3366">${safeEmail}</a>`)}
 ${row('Phone', phoneLink)}
 ${row('Topic / property', context ? escapeHtml(context) : '')}
+${row('Preferred tour', tourDate ? `<strong>${escapeHtml(tourDate)}</strong>` : '')}
 </table>
 <div style="margin-top:16px;padding:16px;background:#f4f5f7;border-radius:4px;color:#1a2b45;font-size:15px;line-height:1.55;white-space:pre-wrap">${escapeHtml(message)}</div>
 <p style="margin:20px 0 0"><a href="mailto:${safeEmail}" style="display:inline-block;background:#0E1F45;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:3px;font-size:14px">Reply to ${escapeHtml(name)}</a></p>
@@ -68,7 +69,7 @@ ${row('Topic / property', context ? escapeHtml(context) : '')}
  * Replies go straight to the visitor.
  * @returns {{ delivered: boolean, error?: string }}
  */
-export async function sendContactNotification({ name, email, phone, message, context }) {
+export async function sendContactNotification({ name, email, phone, message, context, tourDate }) {
   if (!isSmtpConfigured()) {
     return { delivered: false, error: 'SMTP not configured' };
   }
@@ -78,6 +79,7 @@ export async function sendContactNotification({ name, email, phone, message, con
     `Email: ${email}`,
     phone ? `Phone: ${phone}` : null,
     context ? `Topic / property: ${context}` : null,
+    tourDate ? `Preferred tour: ${tourDate}` : null,
     '',
     message,
   ]
@@ -97,11 +99,11 @@ export async function sendContactNotification({ name, email, phone, message, con
       replyTo: email,
       subject,
       text,
-      html: buildHtml({ name, email, phone, message, context }),
+      html: buildHtml({ name, email, phone, message, context, tourDate }),
     });
     // Gmail can accept the message but refuse individual recipients; record any it refused
     const rejected = (info?.rejected || []).map(String);
-    const smsError = await sendSmsAlert({ name, phone, email, context, message, transport });
+    const smsError = await sendSmsAlert({ name, phone, email, context, message, tourDate, transport });
     const problems = [rejected.length ? `Rejected recipients: ${rejected.join(', ')}` : null, smsError].filter(Boolean);
     return problems.length ? { delivered: true, error: problems.join(' | ') } : { delivered: true };
   } catch (err) {
@@ -116,13 +118,14 @@ export async function sendContactNotification({ name, email, phone, message, con
  * emails into truncated picture messages, so phones get a plain one-liner that fits a single SMS.
  * Returns an error string, or null when sent or not configured. Never blocks the main email.
  */
-async function sendSmsAlert({ name, phone, email, context, message, transport }) {
+async function sendSmsAlert({ name, phone, email, context, message, tourDate, transport }) {
   const to = process.env.MAIL_SMS_TO;
   if (!to) return null;
   const address = showingAddress(context);
   const what = address ? `Showing req ${address}` : 'Website msg';
   const contact = phone || email;
-  let body = `${what}: ${name} ${contact}. ${String(message).replace(/\s+/g, ' ')}`;
+  const when = tourDate ? ` Tour: ${tourDate}.` : '';
+  let body = `${what}: ${name} ${contact}.${when} ${String(message).replace(/\s+/g, ' ')}`;
   if (body.length > 155) body = `${body.slice(0, 152)}...`;
   try {
     await transport.sendMail({
