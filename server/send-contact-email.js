@@ -163,7 +163,7 @@ export async function sendContactNotification({ name, email, phone, message, con
  */
 /** The one-line alert. The headline, who and when always fit; only the message is shortened. */
 export function smsText({ name, phone, email, context, message, tourDate }) {
-  const who = `${clip(smsSafe(name), 28)} ${clip(smsSafe(phone || email), 70)}`;
+  const who = `${clip(smsSafe(name), 20)} ${clip(smsSafe(phone || email), 70)}`;
   const when = tourDate ? ` Tour: ${clip(smsSafe(tourDate), 32)}.` : '';
   const head = `${smsHeadline(context)}: ${who}.${when}`;
   const room = 155 - head.length - 1;
