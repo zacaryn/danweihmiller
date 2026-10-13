@@ -32,8 +32,51 @@ const escapeHtml = (value) =>
 
 /** "Showing request: 6724 Harvey Lane, Colorado Springs, CO 80923 (MLS# 6629102)" -> "6724 Harvey Lane" */
 function showingAddress(context) {
-  const m = /^showing request:\s*([^,(]+)/i.exec(context || '');
+  const m = /^showing request:\s*([^,(·]+)/i.exec(context || '');
   return m ? m[1].trim() : null;
+}
+
+/**
+ * Carrier gateways deliver plain GSM-7 text. One character outside it (curly quotes, "·", "—", emoji)
+ * switches the whole text to UCS-2, which splits it into several parts or turns it into an MMS.
+ */
+function smsSafe(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '') // é -> e
+    .replace(/[‘’ʼ]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—·•]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/[^\x20-\x5f\x61-\x7e]/g, ' ') // printable ASCII minus the backtick
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const STREET_ABBR = {
+  street: 'St', avenue: 'Ave', boulevard: 'Blvd', drive: 'Dr', lane: 'Ln', road: 'Rd', court: 'Ct',
+  circle: 'Cir', place: 'Pl', parkway: 'Pkwy', terrace: 'Ter', trail: 'Trl', highway: 'Hwy', point: 'Pt',
+  heights: 'Hts', north: 'N', south: 'S', east: 'E', west: 'W',
+};
+
+/** Clips to max characters at a word boundary, adding "..." when cut. */
+function clip(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 3);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,.;:-]+$/, '')}...`;
+}
+
+/** "Showing req 6724 Harvey Ln", "Question re 123 N Main St", "Website msg (Buying)". */
+function smsHeadline(context) {
+  const ctx = smsSafe(context);
+  const m = /^(showing request|listing question):\s*([^,(]+?)\s*(?:[,(]|\s-\s|$)/i.exec(ctx);
+  if (m) {
+    const street = m[2].replace(/\b[A-Za-z]+\b/g, (w) => STREET_ABBR[w.toLowerCase()] || w);
+    return `${/^showing/i.test(m[1]) ? 'Showing req' : 'Question re'} ${clip(street, 30)}`;
+  }
+  const topic = ctx.split(' - ').pop();
+  return topic ? `Website msg (${clip(topic, 24)})` : 'Website msg';
 }
 
 function buildHtml({ name, email, phone, message, context, tourDate }) {
@@ -118,15 +161,20 @@ export async function sendContactNotification({ name, email, phone, message, con
  * emails into truncated picture messages, so phones get a plain one-liner that fits a single SMS.
  * Returns an error string, or null when sent or not configured. Never blocks the main email.
  */
+/** The one-line alert. The headline, who and when always fit; only the message is shortened. */
+export function smsText({ name, phone, email, context, message, tourDate }) {
+  const who = `${clip(smsSafe(name), 28)} ${clip(smsSafe(phone || email), 70)}`;
+  const when = tourDate ? ` Tour: ${clip(smsSafe(tourDate), 32)}.` : '';
+  const head = `${smsHeadline(context)}: ${who}.${when}`;
+  const room = 155 - head.length - 1;
+  const note = smsSafe(message);
+  return room >= 20 && note ? `${head} ${clip(note, room)}` : head;
+}
+
 async function sendSmsAlert({ name, phone, email, context, message, tourDate, transport }) {
   const to = process.env.MAIL_SMS_TO;
   if (!to) return null;
-  const address = showingAddress(context);
-  const what = address ? `Showing req ${address}` : 'Website msg';
-  const contact = phone || email;
-  const when = tourDate ? ` Tour: ${tourDate}.` : '';
-  let body = `${what}: ${name} ${contact}.${when} ${String(message).replace(/\s+/g, ' ')}`;
-  if (body.length > 155) body = `${body.slice(0, 152)}...`;
+  const body = smsText({ name, phone, email, context, message, tourDate });
   try {
     await transport.sendMail({
       from: process.env.SMTP_USER,
