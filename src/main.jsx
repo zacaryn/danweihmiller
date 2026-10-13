@@ -88,19 +88,20 @@ const theme = {
     xl: '4rem'
   },
   shadows: {
-    small: '0 2px 4px rgba(23, 51, 107, 0.06)',
-    medium: '0 4px 6px rgba(23, 51, 107, 0.1)',
-    large: '0 6px 8px rgba(23, 51, 107, 0.14)'
+    small: '0 1px 3px rgba(14, 31, 69, 0.06), 0 1px 2px rgba(14, 31, 69, 0.04)',
+    medium: '0 8px 24px rgba(14, 31, 69, 0.08)',
+    large: '0 16px 40px rgba(14, 31, 69, 0.14)'
   },
   transitions: {
     default: 'all 0.3s ease',
     fast: 'all 0.2s ease',
     slow: 'all 0.4s ease'
   },
+  // one corner system across the site: controls (buttons, inputs) / cards / feature panels
   borderRadius: {
-    small: '2px',
-    medium: '4px',
-    large: '6px'
+    small: '6px',
+    medium: '10px',
+    large: '14px'
   },
   borders: {
     subtle: '1px solid rgba(14, 31, 69, 0.1)',

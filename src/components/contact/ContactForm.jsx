@@ -1,305 +1,347 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { FiCheck, FiX } from 'react-icons/fi';
 import { submitContactMessage } from '../../services/contact-api';
 import { trackPixel } from '../../lib/meta-pixel';
+import { button } from '../../styles/buttons';
+import { AGENT_PHONE } from '../../config/agent';
+
+const NAVY = '#0E1F45';
+
+const TOPICS = ['Buying', 'Selling', 'Relocating', 'Home value', 'Something else'];
+const PLACEHOLDERS = {
+  Buying: 'What are you looking for? Area, budget, timing…',
+  Selling: 'Tell Dan about your home and your timing…',
+  Relocating: 'Where are you moving from, and when?',
+  'Home value': 'Your address, and anything recently updated…',
+  'Something else': 'How can Dan help?',
+};
 
 const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${props => props.theme.spacing.md};
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem 0.9rem;
+
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 `;
 
-const FormGroup = styled.div`
+const Full = styled.div`
+  grid-column: 1 / -1;
+`;
+
+const Field = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.xs};
+  gap: 0.35rem;
+  min-width: 0;
 `;
 
 const Label = styled.label`
-  font-weight: 600;
-  color: ${props => props.theme.colors.primary};
-  margin-bottom: ${props => props.theme.spacing.xs};
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: ${p => p.theme.colors.primary};
+
+  span {
+    font-weight: 500;
+    color: ${p => p.theme.colors.darkGray};
+  }
+`;
+
+const control = `
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(14, 31, 69, 0.18);
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-size: 1rem; /* 16px keeps iOS from zooming on focus */
+  color: #1A2B45;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #6b7690;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${NAVY};
+    box-shadow: 0 0 0 3px rgba(14, 31, 69, 0.12);
+  }
 `;
 
 const Input = styled.input`
-  padding: ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.theme.colors.accent};
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-size: 1rem;
-  transition: ${props => props.theme.transitions.fast};
-  background-color: ${props => props.theme.colors.lightGray};
-  width: 100%;
-  height: 50px;
+  ${control}
+  height: 2.9rem;
+  padding: 0 0.85rem;
+`;
 
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
-    background-color: white;
-  }
-
-  &::placeholder {
-    color: ${props => props.theme.colors.darkGray};
-    opacity: 0.7;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    height: 55px;
-  }
+const Select = styled.select`
+  ${control}
+  height: 2.9rem;
+  padding: 0 0.75rem;
+  cursor: pointer;
 `;
 
 const Textarea = styled.textarea`
-  padding: ${props => props.theme.spacing.md};
-  border: 1px solid ${props => props.theme.colors.accent};
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-size: 1rem;
-  min-height: 140px;
+  ${control}
+  min-height: 6.25rem;
+  padding: 0.75rem 0.85rem;
+  line-height: 1.5;
   resize: vertical;
-  transition: ${props => props.theme.transitions.fast};
-  background-color: ${props => props.theme.colors.lightGray};
-  width: 100%;
-
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(14, 31, 69, 0.1);
-    background-color: white;
-  }
-
-  &::placeholder {
-    color: ${props => props.theme.colors.darkGray};
-    opacity: 0.7;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    min-height: 160px;
-  }
 `;
 
-const Button = styled.button`
-  padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.lg};
-  background-color: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  border: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  font-weight: 600;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: ${props => props.theme.transitions.fast};
-  margin-top: ${props => props.theme.spacing.sm};
-  width: 100%;
+const Chips = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  height: 54px;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+`;
+
+const Chip = styled.button`
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid ${p => (p.$on ? NAVY : 'rgba(14, 31, 69, 0.2)')};
+  background: ${p => (p.$on ? NAVY : '#fff')};
+  color: ${p => (p.$on ? '#fff' : NAVY)};
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 
   &:hover {
-    background-color: ${props => props.theme.colors.secondary};
-    transform: translateY(-2px);
-    box-shadow: ${props => props.theme.shadows.medium};
-  }
-
-  &:disabled {
-    background-color: ${props => props.theme.colors.lightGray};
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    height: 56px;
-    margin-top: ${props => props.theme.spacing.md};
+    border-color: ${NAVY};
   }
 `;
 
-const Message = styled.div`
-  padding: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.borderRadius.small};
-  margin-top: ${props => props.theme.spacing.md};
+const Regarding = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: ${p => p.theme.colors.lightGray};
+  font-size: 0.88rem;
+  color: ${p => p.theme.colors.text};
+
+  strong {
+    font-weight: 700;
+  }
+
+  span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: ${p => p.theme.colors.darkGray};
+    cursor: pointer;
+  }
+`;
+
+const Submit = styled.button`
+  ${button('primary', 'lg')}
+  width: 100%;
+`;
+
+const Note = styled.p`
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: ${p => p.theme.colors.darkGray};
   text-align: center;
 
-  ${props =>
-    props.type === 'success' &&
-    `
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  `}
-
-  ${props =>
-    props.type === 'error' &&
-    `
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  `}
+  &[data-error] {
+    color: #b42318;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
 `;
 
+const Success = styled.div`
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  border-radius: 10px;
+  background: #ecf6ee;
+  color: #1e5a2a;
+  line-height: 1.55;
+
+  svg {
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.1rem;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.05rem;
+    margin-bottom: 0.15rem;
+  }
+`;
+
+const EMPTY = { name: '', email: '', phone: '', prefer: 'Call or text', message: '' };
+
+/** Compact contact form: topic chips, two-column fields, inline validation, success state. */
 const ContactForm = () => {
   const [searchParams] = useSearchParams();
   const topicFromUrl = searchParams.get('topic') || searchParams.get('context') || '';
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    context: '',
-    message: '',
-  });
-
-  const [status, setStatus] = useState({
-    submitting: false,
-    message: null,
-    type: null,
-  });
+  const [regarding, setRegarding] = useState(topicFromUrl);
+  const [topic, setTopic] = useState(/showing|listing/i.test(topicFromUrl) ? 'Buying' : '');
+  const [form, setForm] = useState(EMPTY);
+  const [status, setStatus] = useState({ sending: false, done: false, error: null, name: '' });
 
   useEffect(() => {
+    setRegarding(topicFromUrl);
     if (topicFromUrl) {
-      setFormData(prev => ({
-        ...prev,
-        context: topicFromUrl,
-        message: prev.message || "I'm interested in learning more about this property.",
-      }));
+      setForm((f) => ({ ...f, message: f.message || "I'd like to learn more about this property." }));
     }
   }, [topicFromUrl]);
 
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = async e => {
+  const submit = async (e) => {
     e.preventDefault();
-
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      setStatus({
-        submitting: false,
-        message: 'Please fill out all required fields.',
-        type: 'error',
-      });
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setStatus((s) => ({ ...s, error: 'Please add your name, email and a short message.' }));
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setStatus({
-        submitting: false,
-        message: 'Please enter a valid email address.',
-        type: 'error',
-      });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setStatus((s) => ({ ...s, error: 'Please enter a valid email address.' }));
       return;
     }
-
-    setStatus({ submitting: true, message: null, type: null });
-
+    setStatus({ sending: true, done: false, error: null, name: '' });
+    const context = [regarding, topic].filter(Boolean).join(' · ') || undefined;
     try {
       await submitContactMessage({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim() || undefined,
-        context: formData.context.trim() || undefined,
-        message: formData.message.trim(),
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        context,
+        message: `${form.message.trim()}\n\nBest way to reach me: ${form.prefer}`,
       });
       trackPixel('Lead', {
-        content_name: formData.context.trim() || 'Contact form',
-        content_category: /showing request/i.test(formData.context) ? 'showing_request' : 'contact',
+        content_name: context || 'Contact form',
+        content_category: /showing request/i.test(regarding) ? 'showing_request' : (topic || 'contact').toLowerCase(),
       });
+      setStatus({ sending: false, done: true, error: null, name: form.name.trim().split(' ')[0] });
+      setForm(EMPTY);
+    } catch (err) {
       setStatus({
-        submitting: false,
-        message: "Thank you for your message! Dan will get back to you soon.",
-        type: 'success',
-      });
-      setFormData({
+        sending: false,
+        done: false,
+        error: err.message || `Something went wrong. Please call or text Dan at ${AGENT_PHONE}.`,
         name: '',
-        email: '',
-        phone: '',
-        context: topicFromUrl || '',
-        message: '',
-      });
-    } catch (error) {
-      console.error('Error submitting inquiry:', error);
-      setStatus({
-        submitting: false,
-        message:
-          error.message || 'Sorry, there was an error sending your message. Please try again.',
-        type: 'error',
       });
     }
   };
 
+  if (status.done) {
+    return (
+      <Success role="status">
+        <FiCheck aria-hidden />
+        <div>
+          <strong>Thanks, {status.name}! Your message is on its way.</strong>
+          Dan will be in touch within one business day. Need him sooner? Call or text {AGENT_PHONE}.
+        </div>
+      </Success>
+    );
+  }
+
   return (
-    <Form onSubmit={handleSubmit}>
-      <FormGroup>
-        <Label htmlFor="name">Name *</Label>
-        <Input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          placeholder="Your name"
-        />
-      </FormGroup>
+    <Form onSubmit={submit} noValidate>
+      {regarding && (
+        <Full>
+          <Regarding>
+            <span>
+              <strong>Regarding:</strong> {regarding}
+            </span>
+            <button type="button" aria-label="Remove" onClick={() => setRegarding('')}>
+              <FiX aria-hidden />
+            </button>
+          </Regarding>
+        </Full>
+      )}
 
-      <FormGroup>
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          placeholder="Your email address"
-        />
-      </FormGroup>
+      <Full>
+        <Field as="fieldset" style={{ border: 0, padding: 0, margin: 0 }}>
+          <Label as="legend" style={{ marginBottom: '0.45rem' }}>
+            What can Dan help with?
+          </Label>
+          <Chips>
+            {TOPICS.map((t) => (
+              <Chip key={t} type="button" $on={topic === t} aria-pressed={topic === t} onClick={() => setTopic(topic === t ? '' : t)}>
+                {t}
+              </Chip>
+            ))}
+          </Chips>
+        </Field>
+      </Full>
 
-      <FormGroup>
-        <Label htmlFor="phone">Phone (optional)</Label>
-        <Input
-          type="tel"
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          placeholder="Your phone number"
-        />
-      </FormGroup>
+      <Field>
+        <Label htmlFor="cf-name">Name</Label>
+        <Input id="cf-name" autoComplete="name" value={form.name} onChange={set('name')} required />
+      </Field>
+      <Field>
+        <Label htmlFor="cf-email">Email</Label>
+        <Input id="cf-email" type="email" autoComplete="email" value={form.email} onChange={set('email')} required />
+      </Field>
+      <Field>
+        <Label htmlFor="cf-phone">
+          Phone <span>(optional)</span>
+        </Label>
+        <Input id="cf-phone" type="tel" autoComplete="tel" value={form.phone} onChange={set('phone')} />
+      </Field>
+      <Field>
+        <Label htmlFor="cf-prefer">Best way to reach you</Label>
+        <Select id="cf-prefer" value={form.prefer} onChange={set('prefer')}>
+          <option>Call or text</option>
+          <option>Call</option>
+          <option>Text</option>
+          <option>Email</option>
+        </Select>
+      </Field>
 
-      <FormGroup>
-        <Label htmlFor="context">Property or topic (optional)</Label>
-        <Input
-          type="text"
-          id="context"
-          name="context"
-          value={formData.context}
-          onChange={handleChange}
-          placeholder="Address, MLS#, or how we can help"
-        />
-      </FormGroup>
+      <Full>
+        <Field>
+          <Label htmlFor="cf-message">Message</Label>
+          <Textarea
+            id="cf-message"
+            rows={4}
+            value={form.message}
+            onChange={set('message')}
+            placeholder={PLACEHOLDERS[topic] || 'How can Dan help?'}
+            required
+          />
+        </Field>
+      </Full>
 
-      <FormGroup>
-        <Label htmlFor="message">Message *</Label>
-        <Textarea
-          id="message"
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          placeholder="How can Dan help you today?"
-        />
-      </FormGroup>
-
-      <Button type="submit" disabled={status.submitting}>
-        {status.submitting ? 'Sending...' : 'Send Message'}
-      </Button>
-
-      {status.message && <Message type={status.type}>{status.message}</Message>}
+      <Full>
+        <Submit type="submit" disabled={status.sending}>
+          {status.sending ? 'Sending…' : 'Send Message'}
+        </Submit>
+      </Full>
+      <Full>
+        {status.error ? (
+          <Note data-error role="alert">
+            {status.error}
+          </Note>
+        ) : (
+          <Note>Dan replies personally, usually within one business day. Your info is never shared.</Note>
+        )}
+      </Full>
     </Form>
   );
 };

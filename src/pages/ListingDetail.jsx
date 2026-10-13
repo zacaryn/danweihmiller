@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { button } from '../styles/buttons';
 import PropTypes from 'prop-types';
 import {
   FiCheck,
@@ -400,26 +401,9 @@ const TextArea = styled.textarea`
 `;
 
 const Submit = styled.button`
+  ${button('primary')}
   grid-column: 1 / -1;
-  height: 2.75rem;
-  border: 0;
-  border-radius: 6px;
-  background: ${NAVY};
-  color: #fff;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: #1b3366;
-  }
-
-  &:disabled {
-    opacity: 0.65;
-    cursor: default;
-  }
+  width: 100%;
 `;
 
 const FormNote = styled.p`
@@ -467,27 +451,8 @@ const ContactRow = styled.div`
 `;
 
 const GhostLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  height: 2.4rem;
-  border: 1px solid rgba(14, 31, 69, 0.22);
-  border-radius: 6px;
-  color: ${NAVY};
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s ease;
-
-  svg {
-    width: 0.95rem;
-    height: 0.95rem;
-  }
-
-  &:hover {
-    background: ${p => p.theme.colors.lightGray};
-  }
+  ${button('outline', 'sm')}
+  width: 100%;
 `;
 
 const Agent = styled.div`
@@ -687,29 +652,8 @@ const ActionBar = styled.div`
 `;
 
 const BarLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  height: 2.75rem;
-  padding: 0 0.9rem;
-  border-radius: 6px;
-  border: 1px solid rgba(14, 31, 69, 0.22);
-  color: ${NAVY};
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-
-  &[data-primary] {
-    border-color: ${NAVY};
-    background: ${NAVY};
-    color: #fff;
-  }
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-  }
+  ${p => button(p['data-primary'] !== undefined ? 'primary' : 'outline')}
+  padding: 0 0.85rem;
 `;
 
 const Lightbox = styled.div`

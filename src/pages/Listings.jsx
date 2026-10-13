@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { button } from '../styles/buttons';
 import { FiGrid, FiMap } from 'react-icons/fi';
 import PropertyCard from '../components/listings/PropertyCard';
 import ListingSpotlight from '../components/listings/ListingSpotlight';
@@ -116,21 +117,9 @@ const SectionHead = styled.div`
 `;
 
 const TextButton = styled.button`
-  display: block;
+  ${button('outline')}
+  display: flex;
   margin: 1.25rem auto 0;
-  padding: 0.6rem 1.1rem;
-  border: 1px solid rgba(14, 31, 69, 0.22);
-  border-radius: 6px;
-  background: #fff;
-  color: ${NAVY};
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-
-  &:hover {
-    background: ${p => p.theme.colors.lightGray};
-  }
 `;
 
 const Empty = styled.div`
@@ -167,21 +156,11 @@ const EmptyActions = styled.div`
   gap: 0.6rem;
 
   a {
-    display: inline-flex;
-    align-items: center;
-    height: 2.6rem;
-    padding: 0 1.1rem;
-    border-radius: 6px;
-    border: 1px solid ${NAVY};
-    color: ${NAVY};
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-decoration: none;
+    ${button('outline')}
   }
 
   a:first-of-type {
-    background: ${NAVY};
-    color: #fff;
+    ${button('primary')}
   }
 `;
 

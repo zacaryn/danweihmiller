@@ -1,37 +1,47 @@
 import styled from '@emotion/styled';
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Link, NavLink as RouterNavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { FiMenu, FiX, FiPhone, FiMessageSquare } from 'react-icons/fi';
 import cbLogo from '../../assets/images/CBLogo.png';
+import { button } from '../../styles/buttons';
+import { AGENT_PHONE, AGENT_PHONE_HREF } from '../../config/agent';
+import { trackPixel } from '../../lib/meta-pixel';
+
+const BREAK = 1024; // below this, links move into the slide-out menu
 
 const Nav = styled.nav`
-  background: ${props => props.theme.colors.primary};
-  padding: 0.875rem 2rem;
   position: fixed;
-  width: 100%;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  box-shadow: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  height: var(--site-nav-height, 72px);
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+  background: ${p => p.theme.colors.primary};
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: ${p => (p.$scrolled ? '0 6px 24px rgba(5, 12, 30, 0.28)' : 'none')};
+  transition: box-shadow 0.25s ease;
 `;
 
 const NavContainer = styled.div`
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
 `;
 
-const BrandingGroup = styled(Link)`
+const Brand = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.8rem;
   text-decoration: none;
   color: inherit;
-
-  &:hover span:first-of-type {
-    color: rgba(255, 255, 255, 0.92);
-  }
+  min-width: 0;
 `;
 
 const BrandText = styled.div`
@@ -39,17 +49,19 @@ const BrandText = styled.div`
   flex-direction: column;
   gap: 0.15rem;
   line-height: 1.1;
+  min-width: 0;
 `;
 
 const AgentName = styled.span`
-  font-family: ${props => props.theme.fonts.heading};
-  color: ${props => props.theme.colors.white};
-  font-size: 1.2rem;
+  font-family: ${p => p.theme.fonts.heading};
+  color: #fff;
+  font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 
-  @media (max-width: 768px) {
-    font-size: 1.05rem;
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
   }
 `;
 
@@ -58,165 +70,303 @@ const BrandMeta = styled.span`
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
 `;
 
-const BrokerageLogo = styled.img`
+const Logo = styled.img`
   height: 36px;
   width: auto;
-  object-fit: contain;
-  display: block;
-  background: transparent;
   flex-shrink: 0;
-  opacity: 0.95;
 
-  @media (max-width: 768px) {
+  @media (max-width: 480px) {
     height: 30px;
   }
 `;
 
-const NavLinks = styled.div`
+const DesktopLinks = styled.div`
   display: flex;
-  gap: 2rem;
   align-items: center;
+  gap: clamp(1.1rem, 2vw, 1.9rem);
 
-  @media (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    right: ${props => props.isOpen ? '0' : '-100%'};
-    bottom: 0;
-    width: 250px;
-    flex-direction: column;
-    background: ${props => props.theme.colors.primary};
-    padding: 5rem 2rem 2rem;
-    gap: 1.5rem;
-    transition: right 0.3s ease-in-out;
-    box-shadow: ${props => props.isOpen ? props.theme.shadows.large : 'none'};
+  @media (max-width: ${BREAK - 1}px) {
+    display: none;
   }
 `;
 
-const NavLink = styled(Link)`
-  color: rgba(255, 255, 255, 0.82);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.72rem;
+const NavItem = styled(RouterNavLink)`
+  position: relative;
+  padding: 0.4rem 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.74rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-decoration: none;
   transition: color 0.2s ease;
-  position: relative;
 
-  &:hover {
-    color: ${props => props.theme.colors.white};
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.1rem;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
   }
 
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    width: 100%;
-    text-align: center;
-    padding: 0.5rem 0;
+  &:hover,
+  &.active {
+    color: #fff;
+  }
+
+  &.active::after {
+    transform: scaleX(1);
+  }
+`;
+
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const PhoneLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+
+  svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 1180px) {
+    display: none;
+  }
+`;
+
+const CtaButton = styled(Link)`
+  ${button('light', 'sm')}
+
+  @media (max-width: ${BREAK - 1}px) {
+    display: none;
   }
 `;
 
 const MenuButton = styled.button`
   display: none;
-  background: none;
-  border: none;
-  color: ${props => props.theme.colors.white};
-  font-size: 1.5rem;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
   cursor: pointer;
-  padding: 0.5rem;
-  z-index: 1001;
-  position: relative;
-  transition: transform 0.3s ease;
 
-  @media (max-width: 768px) {
-    display: block;
-    transform: ${props => props.isOpen ? 'rotate(90deg)' : 'none'};
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
+
+  @media (max-width: ${BREAK - 1}px) {
+    display: grid;
+  }
+`;
+
+const Drawer = styled.div`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1002;
+  width: min(86vw, 340px);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  background: ${p => p.theme.colors.primary};
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.35);
+  transform: translateX(${p => (p.$open ? '0' : '100%')});
+  visibility: ${p => (p.$open ? 'visible' : 'hidden')};
+  transition: transform 0.28s ease, visibility 0.28s;
+`;
+
+const DrawerHead = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+`;
+
+const DrawerLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const DrawerItem = styled(RouterNavLink)`
+  display: block;
+  padding: 0.95rem 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: ${p => p.theme.fonts.heading};
+  font-size: 1.45rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &.active {
+    color: #fff;
+  }
+
+  &.active::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 0.6rem 0.25rem 0;
+    border-radius: 50%;
+    background: #fff;
+    vertical-align: middle;
+  }
+`;
+
+const DrawerActions = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+
+  a:first-of-type {
+    grid-column: 1 / -1;
+  }
+`;
+
+const DrawerCta = styled(Link)`
+  ${button('light', 'lg')}
+  width: 100%;
+`;
+
+const DrawerCall = styled.a`
+  ${button('outlineLight', 'lg')}
+  width: 100%;
 `;
 
 const Overlay = styled.div`
-  display: none;
-  
-  @media (max-width: 768px) {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    opacity: ${props => props.isOpen ? 1 : 0};
-    visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: 999;
-  }
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: rgba(5, 10, 25, 0.55);
+  opacity: ${p => (p.$open ? 1 : 0)};
+  visibility: ${p => (p.$open ? 'visible' : 'hidden')};
+  transition: opacity 0.28s ease, visibility 0.28s;
 `;
 
+const LINKS = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/listings', label: 'My Listings' },
+  { to: '/search', label: 'Search Homes' },
+  { to: '/resources', label: 'Resources' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+];
+
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { pathname } = useLocation();
 
-  // Close menu when clicking outside
+  useEffect(() => setOpen(false), [pathname]);
+
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isOpen && !event.target.closest('nav')) {
-        setIsOpen(false);
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  // Prevent body scroll when menu is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = open ? 'hidden' : '';
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
     };
-  }, [isOpen]);
+  }, [open]);
 
-  const handleLinkClick = () => {
-    setIsOpen(false);
-  };
+  const call = (method) => () => trackPixel('Contact', { method, content_name: 'Navigation' });
 
   return (
     <>
-      <Nav>
+      <Nav $scrolled={scrolled} aria-label="Main">
         <NavContainer>
-          <BrandingGroup to="/" onClick={handleLinkClick}>
-            <BrokerageLogo src={cbLogo} alt="" aria-hidden />
+          <Brand to="/" aria-label="Dan Weihmiller, home">
+            <Logo src={cbLogo} alt="" aria-hidden />
             <BrandText>
               <AgentName>Dan Weihmiller</AgentName>
               <BrandMeta>Colorado Springs Realtor</BrandMeta>
             </BrandText>
-          </BrandingGroup>
-          
-          <MenuButton 
-            onClick={() => setIsOpen(!isOpen)} 
-            isOpen={isOpen}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? '×' : '☰'}
-          </MenuButton>
+          </Brand>
 
-          <NavLinks isOpen={isOpen}>
-            <NavLink to="/" onClick={handleLinkClick}>Home</NavLink>
-            <NavLink to="/search" onClick={handleLinkClick}>Search</NavLink>
-            <NavLink to="/listings" onClick={handleLinkClick}>My Listings</NavLink>
-            <NavLink to="/resources" onClick={handleLinkClick}>Resources</NavLink>
-            <NavLink to="/about" onClick={handleLinkClick}>About</NavLink>
-            <NavLink to="/contact" onClick={handleLinkClick}>Contact</NavLink>
-          </NavLinks>
+          <DesktopLinks>
+            {LINKS.slice(0, 5).map((l) => (
+              <NavItem key={l.to} to={l.to} end={l.end}>
+                {l.label}
+              </NavItem>
+            ))}
+          </DesktopLinks>
+
+          <Actions>
+            <PhoneLink href={AGENT_PHONE_HREF} onClick={call('call')}>
+              <FiPhone aria-hidden /> {AGENT_PHONE}
+            </PhoneLink>
+            <CtaButton to="/contact">Contact Dan</CtaButton>
+            <MenuButton type="button" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
+              <FiMenu />
+            </MenuButton>
+          </Actions>
         </NavContainer>
       </Nav>
-      <Overlay isOpen={isOpen} onClick={() => setIsOpen(false)} />
+
+      <Overlay $open={open} onClick={() => setOpen(false)} aria-hidden />
+      <Drawer $open={open} role="dialog" aria-modal="true" aria-label="Menu">
+        <DrawerHead>
+          <MenuButton type="button" onClick={() => setOpen(false)} aria-label="Close menu" style={{ display: 'grid' }}>
+            <FiX />
+          </MenuButton>
+        </DrawerHead>
+        <DrawerLinks>
+          {LINKS.map((l) => (
+            <DrawerItem key={l.to} to={l.to} end={l.end}>
+              {l.label}
+            </DrawerItem>
+          ))}
+        </DrawerLinks>
+        <DrawerActions>
+          <DrawerCta to="/contact">Contact Dan</DrawerCta>
+          <DrawerCall href={AGENT_PHONE_HREF} onClick={call('call')}>
+            <FiPhone aria-hidden /> Call
+          </DrawerCall>
+          <DrawerCall href="sms:7193018257" onClick={call('text')}>
+            <FiMessageSquare aria-hidden /> Text
+          </DrawerCall>
+        </DrawerActions>
+      </Drawer>
     </>
   );
 };
 
-export default Navbar; 
+export default Navbar;

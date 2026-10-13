@@ -3,6 +3,8 @@ import sceneImg from '../assets/images/scene.jpg';
 import headshot from '../assets/images/DWHeadshot.png';
 import SEO from '../components/shared/SEO';
 import { homeHeroOverlay } from '../styles/heroOverlays';
+import { button } from '../styles/buttons';
+import { EngagementCTA } from '../components/layout/PageShell';
 import { Link } from 'react-router-dom';
 import { FaPhone, FaHome, FaBook, FaUser } from 'react-icons/fa';
 import NowShowingRibbon from '../components/home/NowShowingRibbon';
@@ -171,67 +173,37 @@ const HeroActions = styled.div`
   }
 `;
 
-const HeroButton = styled.a`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.35rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  transition: ${props => props.theme.transitions.fast};
-  border: 1px solid transparent;
-  white-space: nowrap;
+const PrimaryButton = styled(Link)`
+  ${button('light', 'lg')}
 
   @media (max-width: 480px) {
     width: 100%;
   }
 `;
 
-const PrimaryButton = styled(HeroButton)`
-  background: ${props => props.theme.colors.white};
-  color: ${props => props.theme.colors.primary};
-  border-color: ${props => props.theme.colors.white};
+const SecondaryButton = styled(Link)`
+  ${button('outlineLight', 'lg')}
 
-  &:hover {
-    background: transparent;
-    color: ${props => props.theme.colors.white};
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `;
 
-const SecondaryButton = styled(HeroButton)`
-  background: transparent;
-  color: ${props => props.theme.colors.white};
-  border-color: rgba(255, 255, 255, 0.55);
-
-  &:hover {
-    border-color: ${props => props.theme.colors.white};
-    background: rgba(255, 255, 255, 0.08);
-  }
-`;
-
-const PhoneButton = styled(HeroButton)`
-  background: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
+/* the navy call button, sized and shaped like the other hero buttons */
+const PhoneButton = styled.a`
+  ${button('primary', 'lg')}
   border: 2px solid rgba(255, 255, 255, 0.5);
-  font-weight: 700;
-  font-size: 0.82rem;
-  padding: 0.9rem 1.4rem;
+  letter-spacing: 0.04em;
   box-shadow: 0 4px 16px rgba(8, 18, 40, 0.35);
 
-  svg {
-    width: 0.95rem;
-    height: 0.95rem;
+  &:hover {
+    background: #1b3366;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 6px 20px rgba(8, 18, 40, 0.42);
   }
 
-  &:hover {
-    background: ${props => props.theme.colors.secondary};
-    border-color: rgba(255, 255, 255, 0.65);
-    box-shadow: 0 5px 18px rgba(8, 18, 40, 0.4);
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `;
 
@@ -323,109 +295,59 @@ const HeroScrollHint = styled.a`
 `;
 
 const FeaturesSection = styled.section`
-  padding: ${props => props.theme.spacing.xl} clamp(1.25rem, 4vw, 3rem);
-  margin-top: 0;
+  padding: clamp(3rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 3rem);
   background: ${props => props.theme.colors.background};
-  position: relative;
-  border-top: ${props => props.theme.borders.subtle};
-
-  @media (max-height: 700px) {
-    margin-top: ${props => props.theme.spacing.md};
-  }
-
-  @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.lg} ${props => props.theme.spacing.sm};
-    margin-top: ${props => props.theme.spacing.xs};
-  }
-
-  @media (max-width: 480px) {
-    margin-top: 0;
-  }
 `;
 
 const FeaturesGrid = styled.div`
-  max-width: 1400px;
+  max-width: 1240px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: ${props => props.theme.spacing.lg};
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
 
-  @media (max-width: 968px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: ${props => props.theme.spacing.md};
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    max-width: 600px;
-    gap: ${props => props.theme.spacing.sm};
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
   }
 `;
 
-const FeatureCard = styled.a`
-  background: ${props => props.theme.colors.white};
-  padding: ${props => props.theme.spacing.lg};
-  border-radius: ${props => props.theme.borderRadius.medium};
-  box-shadow: none;
-  transition: ${props => props.theme.transitions.fast};
-  text-decoration: none;
-  cursor: pointer;
+const FeatureCard = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
-  position: relative;
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+  background: ${props => props.theme.colors.white};
   border: ${props => props.theme.borders.subtle};
+  border-radius: ${props => props.theme.borderRadius.large};
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &::after {
+    content: 'Learn more →';
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: ${props => props.theme.colors.secondary};
+  }
 
   &:hover {
     transform: translateY(-2px);
-    border-color: rgba(14, 31, 69, 0.22);
-    box-shadow: ${props => props.theme.shadows.small};
-
-    svg {
-      color: ${props => props.theme.colors.primary};
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: ${props => props.theme.spacing.md};
-    
-    &:hover {
-      transform: translateY(-4px);
-    }
-  }
-
-  @media (max-width: 480px) {
-    padding: ${props => props.theme.spacing.sm};
+    border-color: rgba(14, 31, 69, 0.2);
+    box-shadow: ${props => props.theme.shadows.medium};
   }
 `;
 
 const IconWrapper = styled.div`
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${props => props.theme.colors.lightGray};
-  border-radius: ${props => props.theme.borderRadius.small};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  position: relative;
-  border: ${props => props.theme.borders.subtle};
-
-  svg {
-    color: ${props => props.theme.colors.primary};
-    transition: all 0.3s ease;
-  }
-
-  @media (max-width: 768px) {
-    width: 56px;
-    height: 56px;
-  }
-
-  @media (max-width: 480px) {
-    width: 48px;
-    height: 48px;
-  }
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(14, 31, 69, 0.06);
+  color: ${props => props.theme.colors.primary};
+  margin-bottom: 1rem;
 `;
 
 const FeatureTitle = styled.h3`
@@ -459,6 +381,16 @@ const FeatureText = styled.p`
 
   @media (max-width: 480px) {
     font-size: 0.9rem;
+  }
+`;
+
+const ClosingCta = styled.div`
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(3rem, 6vw, 4.5rem);
+
+  aside {
+    margin-top: 0;
   }
 `;
 
@@ -503,8 +435,8 @@ const Home = () => {
                 </Metric>
               </HeroMetrics>
               <HeroActions>
-                <PrimaryButton href="/contact">Connect With Dan</PrimaryButton>
-                <SecondaryButton href="/search">Search Properties</SecondaryButton>
+                <PrimaryButton to="/contact">Connect With Dan</PrimaryButton>
+                <SecondaryButton to="/listings">View Listings</SecondaryButton>
                 <PhoneButton href="tel:7193018257" id="hero-call-cta">
                   <FaPhone aria-hidden />
                   (719) 301-8257
@@ -523,27 +455,29 @@ const Home = () => {
 
         <FeaturedListings />
 
+        <ReelsStrip />
+
         <FeaturesSection id="home-features">
           <FeaturesGrid>
-            <FeatureCard as={Link} to="/listings">
+            <FeatureCard to="/listings">
               <IconWrapper>
-                <FaHome size={36} />
+                <FaHome size={22} />
               </IconWrapper>
               <FeatureTitle>Dan&apos;s Listings</FeatureTitle>
               <FeatureText>{listingsLine}</FeatureText>
             </FeatureCard>
-            <FeatureCard href="/resources">
+            <FeatureCard to="/resources">
               <IconWrapper>
-                <FaBook size={36} />
+                <FaBook size={22} />
               </IconWrapper>
               <FeatureTitle>Real Estate Resources</FeatureTitle>
               <FeatureText>
                 Expert guides on VA loans Colorado Springs, military PCS relocation, first-time buyer programs, and Fort Carson housing. Make informed decisions with local expertise.
               </FeatureText>
             </FeatureCard>
-            <FeatureCard href="/about">
+            <FeatureCard to="/about">
               <IconWrapper>
-                <FaUser size={36} />
+                <FaUser size={22} />
               </IconWrapper>
               <FeatureTitle>Meet Dan</FeatureTitle>
               <FeatureText>
@@ -553,7 +487,12 @@ const Home = () => {
           </FeaturesGrid>
         </FeaturesSection>
 
-        <ReelsStrip />
+        <ClosingCta>
+          <EngagementCTA
+            title="Thinking about buying or selling?"
+            description="Get straightforward advice from a Colorado Springs broker with four decades of local experience."
+          />
+        </ClosingCta>
       </div>
     </>
   );

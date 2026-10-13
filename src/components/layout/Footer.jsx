@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import cbLogo from '../../assets/images/CBLogo.png';
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
 import {
   AGENT_EMAIL,
   AGENT_EMAIL_HREF,
@@ -12,6 +13,33 @@ import {
   OFFICE_PHONE,
   OFFICE_PHONE_HREF,
 } from '../../config/agent';
+
+const Socials = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  a {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #fff;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #fff;
+  }
+
+  svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+`;
 
 const FooterWrapper = styled.footer`
   background-color: ${props => props.theme.colors.primary};
@@ -146,6 +174,12 @@ const Footer = () => {
               Coldwell Banker agent profile
             </a>
           </p>
+          <Socials>
+            <a href="https://www.facebook.com/danweihmillerrealtor" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
+            <a href="https://www.instagram.com/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+            <a href="https://www.tiktok.com/@danielweihmiller" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><FaTiktok /></a>
+            <a href="https://www.linkedin.com/in/danweihmiller/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedinIn /></a>
+          </Socials>
         </FooterSection>
 
         <FooterSection>

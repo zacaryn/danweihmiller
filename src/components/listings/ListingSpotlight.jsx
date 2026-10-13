@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { button } from '../../styles/buttons';
 import PropTypes from 'prop-types';
 import { FiPlay } from 'react-icons/fi';
 import { listingBadges, listingPath, splitAddress } from '../../hooks/useCbListings';
@@ -183,23 +184,7 @@ const Actions = styled.div`
 `;
 
 const Button = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.75rem;
-  padding: 0 1.2rem;
-  border-radius: 6px;
-  border: 1px solid ${NAVY};
-  background: ${p => (p.$primary ? NAVY : 'transparent')};
-  color: ${p => (p.$primary ? '#fff' : NAVY)};
-  font-size: 0.88rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: ${p => (p.$primary ? '#1b3366' : p.theme.colors.lightGray)};
-  }
+  ${p => button(p.$primary ? 'primary' : 'outline')}
 `;
 
 /** Featured listing: big photo (or inline video tour), price, facts and the two key actions. */

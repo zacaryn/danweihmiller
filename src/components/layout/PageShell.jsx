@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import sceneImg from '../../assets/images/scene.jpg';
+import { button } from '../../styles/buttons';
 import {
   pageHeroOverlay,
   pageHeroOverlayMobile,
@@ -68,7 +69,7 @@ export const PageTitle = styled.h1`
   line-height: 1.08;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
-  max-width: 18ch;
+  max-width: 26ch;
 `;
 
 export const PageLead = styled.p`
@@ -87,35 +88,10 @@ export const PageHeroActions = styled.div`
 `;
 
 export const PageHeroButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.15rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  color: ${props => props.theme.colors.white};
-  background: transparent;
-  transition: ${props => props.theme.transitions.fast};
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: ${props => props.theme.colors.white};
-  }
+  ${button('outlineLight')}
 
   &.primary {
-    background: ${props => props.theme.colors.white};
-    color: ${props => props.theme.colors.primary};
-    border-color: ${props => props.theme.colors.white};
-
-    &:hover {
-      background: transparent;
-      color: ${props => props.theme.colors.white};
-    }
+    ${button('light')}
   }
 `;
 
@@ -183,28 +159,32 @@ export const Prose = styled.div`
 `;
 
 export const PageCTA = styled.aside`
-  margin-top: 2.5rem;
-  padding: 1.5rem;
-  border: ${props => props.theme.borders.subtle};
-  background: ${props => props.theme.colors.lightGray};
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: ${props => props.theme.borderRadius.large};
+  background: ${props => props.theme.colors.primary};
+  color: #fff;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem 2rem;
+  box-shadow: ${props => props.theme.shadows.medium};
 
   h2 {
     font-family: ${props => props.theme.fonts.heading};
-    font-size: 1.35rem;
+    font-size: clamp(1.5rem, 3vw, 1.9rem);
+    font-weight: 600;
     margin: 0 0 0.35rem;
-    color: ${props => props.theme.colors.primary};
+    color: #fff;
   }
 
   p {
     margin: 0;
-    font-size: 0.95rem;
-    color: ${props => props.theme.colors.darkGray};
-    max-width: 42ch;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 48ch;
   }
 `;
 
@@ -215,32 +195,10 @@ export const PageCTAActions = styled.div`
 `;
 
 export const PageCTAButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.7rem 1.1rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: ${props => props.theme.borderRadius.small};
-  background: ${props => props.theme.colors.primary};
-  color: ${props => props.theme.colors.white};
-  border: 1px solid ${props => props.theme.colors.primary};
-
-  &:hover {
-    background: ${props => props.theme.colors.secondary};
-    border-color: ${props => props.theme.colors.secondary};
-  }
+  ${button('light')}
 
   &.ghost {
-    background: transparent;
-    color: ${props => props.theme.colors.primary};
-
-    &:hover {
-      background: ${props => props.theme.colors.white};
-    }
+    ${button('outlineLight')}
   }
 `;
 
@@ -308,9 +266,10 @@ export function EngagementCTA({
   description = 'Call Dan for a straightforward conversation about buying, selling, or relocating in Colorado Springs.',
   primaryTo = '/contact',
   primaryLabel = 'Contact Dan',
-  secondaryTo = '/search',
-  secondaryLabel = 'Search homes',
+  secondaryTo = 'tel:7193018257',
+  secondaryLabel = 'Call (719) 301-8257',
 }) {
+  const isExternal = (to) => /^(tel|sms|mailto):/.test(to);
   return (
     <PageCTA>
       <div>
@@ -319,9 +278,15 @@ export function EngagementCTA({
       </div>
       <PageCTAActions>
         <PageCTAButton to={primaryTo}>{primaryLabel}</PageCTAButton>
-        <PageCTAButton to={secondaryTo} className="ghost">
-          {secondaryLabel}
-        </PageCTAButton>
+        {isExternal(secondaryTo) ? (
+          <PageCTAButton as="a" href={secondaryTo} className="ghost">
+            {secondaryLabel}
+          </PageCTAButton>
+        ) : (
+          <PageCTAButton to={secondaryTo} className="ghost">
+            {secondaryLabel}
+          </PageCTAButton>
+        )}
       </PageCTAActions>
     </PageCTA>
   );
