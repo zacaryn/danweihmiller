@@ -108,6 +108,7 @@ const SEO = ({
       'https://www.facebook.com/danweihmillerrealtor',
       'https://www.linkedin.com/in/danweihmiller/',
       'https://www.instagram.com/danweihmiller/',
+      'https://www.tiktok.com/@danielweihmiller',
     ],
   };
 

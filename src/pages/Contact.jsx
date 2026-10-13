@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { FaFacebookF, FaLinkedinIn, FaInstagram, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTiktok, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 import ContactForm from '../components/contact/ContactForm';
 import SEO from '../components/shared/SEO';
 import {
@@ -310,6 +310,9 @@ const Contact = () => {
                 </SocialButton>
                 <SocialButton href="https://www.instagram.com/danweihmiller/" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
                   <FaInstagram />
+                </SocialButton>
+                <SocialButton href="https://www.tiktok.com/@danielweihmiller" title="TikTok" aria-label="TikTok" target="_blank" rel="noopener noreferrer">
+                  <FaTiktok />
                 </SocialButton>
               </SocialLinks>
             </SocialCard>
