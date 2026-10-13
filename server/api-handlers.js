@@ -1,6 +1,6 @@
 import { fetchCbAgentListings, fetchCbListingDetail } from './cb-agent-listings.js';
 import { getSupabaseAdmin, isSupabaseConfigured } from './supabase-admin.js';
-import { sendContactNotification, isSmtpConfigured } from './send-contact-email.js';
+import { sendContactNotification, isSmtpConfigured, mailRecipientsSummary } from './send-contact-email.js';
 import { loadEnv } from './load-env.js';
 
 loadEnv();
@@ -102,6 +102,7 @@ export async function handleHealth(req, res) {
     timestamp: new Date().toISOString(),
     supabase: isSupabaseConfigured(),
     smtp: isSmtpConfigured(),
+    mailRecipients: mailRecipientsSummary(),
   });
 }
 

@@ -89,7 +89,7 @@ export async function sendContactNotification({ name, email, phone, message, con
 
   try {
     const transport = createTransport();
-    await transport.sendMail({
+    const info = await transport.sendMail({
       from: process.env.MAIL_FROM || process.env.SMTP_USER,
       to: process.env.MAIL_TO_AGENT,
       cc: process.env.MAIL_CC || undefined,
@@ -99,7 +99,9 @@ export async function sendContactNotification({ name, email, phone, message, con
       text,
       html: buildHtml({ name, email, phone, message, context }),
     });
-    return { delivered: true };
+    // Gmail can accept the message but refuse individual recipients; record any it refused
+    const rejected = (info?.rejected || []).map(String);
+    return rejected.length ? { delivered: true, error: `Rejected recipients: ${rejected.join(', ')}` } : { delivered: true };
   } catch (err) {
     console.error('Contact email failed:', err);
     return { delivered: false, error: err.message };
@@ -115,4 +117,19 @@ export async function verifySmtp() {
   } catch (err) {
     return { ok: false, error: err.message };
   }
+}
+
+const mask = (addr) => {
+  const [user, domain] = String(addr).trim().split('@');
+  return domain ? `${user.slice(0, 1)}…@${domain}` : '(invalid address)';
+};
+const list = (value) => (value ? String(value).split(',').map((a) => a.trim()).filter(Boolean) : []);
+
+/** Masked summary of who notifications go to, for /api/health (no full addresses are exposed). */
+export function mailRecipientsSummary() {
+  return {
+    to: list(process.env.MAIL_TO_AGENT).map(mask),
+    cc: list(process.env.MAIL_CC).map(mask),
+    bcc: list(process.env.MAIL_BCC_ARCHIVE).map(mask),
+  };
 }
