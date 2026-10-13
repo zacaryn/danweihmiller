@@ -1,95 +1,268 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
+import PropTypes from 'prop-types';
+import {
+  FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiExternalLink,
+  FiImage,
+  FiMaximize2,
+  FiMessageSquare,
+  FiPhone,
+  FiPlay,
+  FiX,
+} from 'react-icons/fi';
 import SEO from '../components/shared/SEO';
-import { PageRoot, PageMain, EngagementCTA } from '../components/layout/PageShell';
+import { PageRoot } from '../components/layout/PageShell';
 import { fetchCbListingDetail } from '../services/cb-listings-service';
+import { submitContactMessage } from '../services/contact-api';
 import { mediaForListing } from '../config/listing-media';
 import { AGENT_NAME, AGENT_PHONE, AGENT_PHONE_HREF, BROKERAGE_NAME, CB_AGENT_PROFILE_URL } from '../config/agent';
 import { trackPixel, trackPixelCustom } from '../lib/meta-pixel';
 
 const SMS_HREF = 'sms:7193018257';
+const NAVY = '#0E1F45';
+const LINE = 'rgba(14, 31, 69, 0.12)';
+
+/* ------------------------------------------------------------------ layout */
 
 const Wrap = styled.div`
   width: 100%;
-  max-width: 1180px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: calc(var(--site-nav-height, 72px) + 1.5rem) 1.25rem 0;
+  padding: calc(var(--site-nav-height, 72px) + 1.25rem) 1.5rem 3rem;
 
-  @media (max-width: 768px) {
-    padding: calc(var(--site-nav-height, 68px) + 1rem) 1rem 0;
+  @media (max-width: 1023px) {
+    padding: calc(var(--site-nav-height, 68px) + 0.75rem) 1rem 6.5rem; /* room for the sticky action bar */
   }
 `;
 
 const Crumb = styled.p`
-  margin: 0 0 1rem;
-  font-size: 0.82rem;
-  color: ${props => props.theme.colors.darkGray};
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  color: ${p => p.theme.colors.darkGray};
 
   a {
-    color: ${props => props.theme.colors.secondary};
+    color: ${p => p.theme.colors.secondary};
     font-weight: 600;
     text-decoration: none;
   }
 `;
 
+/* Desktop: gallery + details on the left, inquiry card sticky on the right (visible above the fold).
+   Mobile: gallery, then the card (price + form), then details. */
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
-  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-areas:
+    'gallery side'
+    'details side';
+  column-gap: 2rem;
   align-items: start;
 
-  /* let columns shrink below their content (the thumbnail strip would otherwise widen the page) */
-  & > * {
-    min-width: 0;
-  }
-
-  @media (max-width: 960px) {
+  @media (max-width: 1023px) {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-template-areas:
+      'gallery'
+      'side'
+      'details';
   }
 `;
 
-const MainPhoto = styled.button`
-  display: block;
-  position: relative;
-  width: 100%;
-  padding: 0;
-  padding-top: 66%;
-  border: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  background: ${props => props.theme.colors.lightGray};
-  cursor: zoom-in;
+const GalleryArea = styled.div`
+  grid-area: gallery;
+  min-width: 0;
+`;
 
-  img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+const DetailsArea = styled.div`
+  grid-area: details;
+  min-width: 0;
+`;
+
+const SideArea = styled.div`
+  grid-area: side;
+  min-width: 0;
+  align-self: stretch;
+
+  @media (max-width: 1023px) {
+    margin-top: 1rem;
+  }
+`;
+
+/* ------------------------------------------------------------------ media viewer */
+
+const Stage = styled.div`
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b1225;
+  user-select: none;
+
+  @media (max-width: 640px) {
+    margin: 0 -1rem;
+    border-radius: 0;
+  }
+`;
+
+const StageImg = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
+`;
+
+const VideoBackdrop = styled.img`
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  filter: blur(28px) brightness(0.55);
+`;
+
+const StageVideo = styled.video`
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  aspect-ratio: 9 / 16;
+  max-width: 100%;
+  background: #000;
+`;
+
+const RoundButton = styled.button`
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: ${NAVY};
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  &:hover {
+    background: #fff;
+    transform: scale(1.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+`;
+
+const PrevButton = styled(RoundButton)`
+  left: 0.85rem;
+  top: 50%;
+  margin-top: -1.25rem;
+`;
+
+const NextButton = styled(RoundButton)`
+  right: 0.85rem;
+  top: 50%;
+  margin-top: -1.25rem;
+`;
+
+const ExpandButton = styled(RoundButton)`
+  right: 0.85rem;
+  top: 0.85rem;
+  width: 2.25rem;
+  height: 2.25rem;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+`;
+
+const Counter = styled.span`
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(10, 16, 32, 0.7);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+`;
+
+const ModeTabs = styled.div`
+  position: absolute;
+  left: 0.85rem;
+  top: 0.85rem;
+  display: flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: rgba(10, 16, 32, 0.62);
+  backdrop-filter: blur(6px);
+`;
+
+const ModeTab = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: ${p => (p.$active ? '#fff' : 'transparent')};
+  color: ${p => (p.$active ? NAVY : '#fff')};
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  svg {
+    width: 0.85rem;
+    height: 0.85rem;
   }
 `;
 
 const Thumbs = styled.div`
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.6rem;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
   overflow-x: auto;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.3rem;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
 `;
 
 const Thumb = styled.button`
+  position: relative;
   flex: 0 0 auto;
-  width: 92px;
-  height: 64px;
+  width: 84px;
+  height: 56px;
   padding: 0;
-  border: 2px solid ${props => (props.$active ? props.theme.colors.primary : 'transparent')};
-  border-radius: 4px;
+  border: 0;
+  border-radius: 6px;
   overflow: hidden;
-  background: ${props => props.theme.colors.lightGray};
+  background: ${p => p.theme.colors.lightGray};
   cursor: pointer;
-  opacity: ${props => (props.$active ? 1 : 0.8)};
+  opacity: ${p => (p.$active ? 1 : 0.62)};
+  outline: 2px solid ${p => (p.$active ? NAVY : 'transparent')};
+  outline-offset: -2px;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
 
   img {
     width: 100%;
@@ -99,192 +272,383 @@ const Thumb = styled.button`
   }
 `;
 
-const Panel = styled.aside`
+const VideoThumbBadge = styled.span`
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 16, 32, 0.45);
+  color: #fff;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+`;
+
+/* ------------------------------------------------------------------ side card */
+
+const Card = styled.aside`
   position: sticky;
   top: calc(var(--site-nav-height, 72px) + 1rem);
-  background: ${props => props.theme.colors.white};
-  border: 1px solid rgba(14, 31, 69, 0.12);
-  border-radius: 6px;
-  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid ${LINE};
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: 0 6px 24px rgba(14, 31, 69, 0.07);
 
-  @media (max-width: 960px) {
+  @media (max-width: 1023px) {
     position: static;
   }
 `;
 
 const StatusPill = styled.span`
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.25rem 0.55rem;
-  border-radius: 2px;
-  color: white;
-  background: ${props => (props.$active ? '#2e7d32' : props.theme.colors.darkGray)};
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  color: #fff;
+  background: ${p => (p.$active ? '#2e7d32' : p.theme.colors.darkGray)};
 `;
 
 const Price = styled.p`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 2.6rem;
+  font-family: ${p => p.theme.fonts.heading};
+  font-size: 2.25rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.primary};
-  margin: 0.6rem 0 0.2rem;
+  color: ${NAVY};
+  margin: 0.45rem 0 0.1rem;
   line-height: 1.05;
 `;
 
 const Address = styled.h1`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 1.05rem;
+  font-family: ${p => p.theme.fonts.body};
+  font-size: 0.98rem;
   font-weight: 600;
-  color: ${props => props.theme.colors.text};
-  margin: 0 0 1rem;
-  line-height: 1.45;
+  color: ${p => p.theme.colors.text};
+  margin: 0;
+  line-height: 1.4;
 `;
 
-const Facts = styled.ul`
-  list-style: none;
-  margin: 0 0 1.25rem;
-  padding: 1rem 0;
-  border-top: 1px solid rgba(14, 31, 69, 0.1);
-  border-bottom: 1px solid rgba(14, 31, 69, 0.1);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  text-align: center;
+const QuickFacts = styled.p`
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: ${p => p.theme.colors.darkGray};
 
   strong {
-    display: block;
-    font-family: ${props => props.theme.fonts.heading};
-    font-size: 1.6rem;
-    color: ${props => props.theme.colors.primary};
-    line-height: 1.1;
-  }
-
-  span {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: ${props => props.theme.colors.darkGray};
+    color: ${p => p.theme.colors.text};
+    font-weight: 700;
   }
 `;
 
-const Button = styled.a`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0.95rem 1rem;
-  margin-bottom: 0.6rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
+const FormTitle = styled.h2`
+  margin: 1rem 0 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${LINE};
+  font-family: ${p => p.theme.fonts.body};
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid ${props => props.theme.colors.primary};
-  background: ${props => (props.$primary ? props.theme.colors.primary : 'transparent')};
-  color: ${props => (props.$primary ? 'white' : props.theme.colors.primary)};
-  transition: background 0.2s ease, color 0.2s ease;
-
-  &:hover {
-    background: ${props => (props.$primary ? props.theme.colors.secondary : props.theme.colors.lightGray)};
-  }
+  color: ${NAVY};
 `;
 
-const ButtonRow = styled.div`
+const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+  gap: 0.5rem;
 `;
 
-const AgentNote = styled.p`
-  margin: 0.4rem 0 0;
+const Field = styled.input`
+  grid-column: ${p => (p.$full ? '1 / -1' : 'auto')};
+  width: 100%;
+  min-width: 0;
+  height: 2.6rem;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(14, 31, 69, 0.2);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.92rem;
+  color: ${p => p.theme.colors.text};
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: ${NAVY};
+    box-shadow: 0 0 0 3px rgba(14, 31, 69, 0.12);
+  }
+`;
+
+const TextArea = styled.textarea`
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 4.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(14, 31, 69, 0.2);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: ${p => p.theme.colors.text};
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: ${NAVY};
+    box-shadow: 0 0 0 3px rgba(14, 31, 69, 0.12);
+  }
+`;
+
+const Submit = styled.button`
+  grid-column: 1 / -1;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 6px;
+  background: ${NAVY};
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #1b3366;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+`;
+
+const FormNote = styled.p`
+  grid-column: 1 / -1;
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: ${p => p.theme.colors.darkGray};
+
+  &[data-error] {
+    color: #b42318;
+    font-size: 0.8rem;
+  }
+`;
+
+const Success = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: #ecf6ee;
+  color: #1e5a2a;
+  font-size: 0.9rem;
+  line-height: 1.45;
+
+  svg {
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: 0.1rem;
+  }
+`;
+
+const ContactRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+
+  /* the sticky action bar covers call / text on small screens */
+  @media (max-width: 1023px) {
+    display: none;
+  }
+`;
+
+const GhostLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 2.4rem;
+  border: 1px solid rgba(14, 31, 69, 0.22);
+  border-radius: 6px;
+  color: ${NAVY};
   font-size: 0.85rem;
-  line-height: 1.5;
-  color: ${props => props.theme.colors.darkGray};
-  text-align: center;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+
+  svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  &:hover {
+    background: ${p => p.theme.colors.lightGray};
+  }
+`;
+
+const Agent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid ${LINE};
+
+  img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    color: ${p => p.theme.colors.darkGray};
+  }
+
+  strong {
+    color: ${p => p.theme.colors.text};
+  }
 `;
 
 const OutLink = styled.a`
-  display: block;
-  margin-top: 1rem;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  text-align: center;
-  color: ${props => props.theme.colors.secondary};
+  color: ${p => p.theme.colors.secondary};
   text-decoration: none;
+
+  svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
 
   &:hover {
     text-decoration: underline;
   }
 `;
 
-const Section = styled.section`
-  margin-top: 2.25rem;
+/* ------------------------------------------------------------------ details */
 
-  h2 {
-    font-family: ${props => props.theme.fonts.heading};
-    font-size: 1.6rem;
+const FactsBar = styled.dl`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin: 1.5rem 0 0;
+  padding: 1rem 0;
+  border-top: 1px solid ${LINE};
+  border-bottom: 1px solid ${LINE};
+
+  div {
+    text-align: left;
+  }
+
+  dt {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: ${p => p.theme.colors.darkGray};
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-family: ${p => p.theme.fonts.heading};
+    font-size: 1.45rem;
     font-weight: 600;
-    color: ${props => props.theme.colors.primary};
-    margin: 0 0 0.75rem;
+    color: ${NAVY};
+    line-height: 1.15;
   }
 `;
 
-const Description = styled.p`
-  margin: 0;
-  max-width: 72ch;
-  font-size: 1rem;
-  line-height: 1.75;
-  color: ${props => props.theme.colors.text};
-  white-space: pre-line;
+const Section = styled.section`
+  margin-top: 1.75rem;
+
+  h2 {
+    font-family: ${p => p.theme.fonts.heading};
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: ${NAVY};
+    margin: 0 0 0.6rem;
+  }
 `;
 
-const DetailList = styled.dl`
+const Description = styled.div`
+  position: relative;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: ${p => p.theme.colors.text};
+  white-space: pre-line;
+  max-height: ${p => (p.$open ? 'none' : '11.5rem')};
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    display: ${p => (p.$open ? 'none' : 'block')};
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3.5rem;
+    background: linear-gradient(rgba(252, 252, 253, 0), ${p => p.theme.colors.background});
+  }
+`;
+
+const TextButton = styled.button`
+  margin-top: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: ${p => p.theme.colors.secondary};
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+const FactList = styled.dl`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  column-gap: 1.5rem;
   margin: 0;
 
   div {
-    padding: 0.75rem 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
     border-bottom: 1px solid rgba(14, 31, 69, 0.08);
   }
 
   dt {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: ${props => props.theme.colors.darkGray};
+    font-size: 0.88rem;
+    color: ${p => p.theme.colors.darkGray};
   }
 
   dd {
-    margin: 0.2rem 0 0;
-    font-size: 1rem;
-    color: ${props => props.theme.colors.text};
-  }
-`;
-
-const VideoWrap = styled.div`
-  max-width: 380px;
-
-  video {
-    width: 100%;
-    aspect-ratio: 9 / 16;
-    border-radius: 6px;
-    background: #000;
-    display: block;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: ${p => p.theme.colors.text};
+    text-align: right;
   }
 `;
 
 const Disclaimer = styled.p`
   margin: 2rem 0 0;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   line-height: 1.55;
-  color: ${props => props.theme.colors.darkGray};
+  color: ${p => p.theme.colors.darkGray};
   opacity: 0.85;
 `;
 
@@ -293,11 +657,58 @@ const StateMessage = styled.div`
   padding: 4rem 1rem;
   font-size: 1.05rem;
   line-height: 1.6;
-  color: ${props => props.theme.colors.darkGray};
+  color: ${p => p.theme.colors.darkGray};
 
   a {
-    color: ${props => props.theme.colors.secondary};
+    color: ${p => p.theme.colors.secondary};
     font-weight: 600;
+  }
+`;
+
+/* ------------------------------------------------------------------ mobile action bar + lightbox */
+
+const ActionBar = styled.div`
+  display: none;
+
+  @media (max-width: 1023px) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 950;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid ${LINE};
+    box-shadow: 0 -4px 18px rgba(14, 31, 69, 0.08);
+  }
+`;
+
+const BarLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.75rem;
+  padding: 0 0.9rem;
+  border-radius: 6px;
+  border: 1px solid rgba(14, 31, 69, 0.22);
+  color: ${NAVY};
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &[data-primary] {
+    border-color: ${NAVY};
+    background: ${NAVY};
+    color: #fff;
+  }
+
+  svg {
+    width: 1rem;
+    height: 1rem;
   }
 `;
 
@@ -305,30 +716,31 @@ const Lightbox = styled.div`
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(10, 16, 32, 0.94);
+  background: rgba(8, 12, 24, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 3.5rem 1rem;
 
   img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    user-select: none;
   }
 `;
 
-const LightboxButton = styled.button`
+const LightboxCounter = styled.span`
   position: absolute;
-  background: rgba(255, 255, 255, 0.14);
-  border: 0;
-  color: white;
-  font-size: 1.6rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  cursor: pointer;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 600;
 `;
+
+/* ------------------------------------------------------------------ helpers */
 
 const stripHtml = (html) => (html ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
 
@@ -341,18 +753,144 @@ function formatLot(listing) {
   return null;
 }
 
+/** Left/right swipe on touch screens. */
+function useSwipe(onPrev, onNext) {
+  const start = useRef(null);
+  return {
+    onTouchStart: (e) => {
+      start.current = e.touches[0].clientX;
+    },
+    onTouchEnd: (e) => {
+      if (start.current === null) return;
+      const dx = e.changedTouches[0].clientX - start.current;
+      start.current = null;
+      if (Math.abs(dx) < 40) return;
+      if (dx > 0) onPrev();
+      else onNext();
+    },
+  };
+}
+
+/* ------------------------------------------------------------------ inquiry form */
+
+function InquiryForm({ listing, isActive, pixelParams }) {
+  const street = listing.address?.split(',')[0] || listing.address;
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: isActive
+      ? `I'd like to schedule a showing of ${street}.`
+      : `I have a question about ${street}.`,
+  });
+  const [status, setStatus] = useState({ sending: false, done: false, error: null });
+
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim()) {
+      setStatus({ sending: false, done: false, error: 'Please add your name and email.' });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setStatus({ sending: false, done: false, error: 'Please enter a valid email address.' });
+      return;
+    }
+    setStatus({ sending: true, done: false, error: null });
+    try {
+      await submitContactMessage({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        context: `${isActive ? 'Showing request' : 'Listing question'}: ${listing.address} (MLS# ${listing.mlsId})`,
+        message: form.message.trim() || `Interested in ${listing.address}.`,
+      });
+      trackPixel('Lead', { ...pixelParams, content_category: isActive ? 'showing_request' : 'listing_question' });
+      setStatus({ sending: false, done: true, error: null });
+    } catch (err) {
+      setStatus({
+        sending: false,
+        done: false,
+        error: err.message || 'Something went wrong. Please call or text Dan instead.',
+      });
+    }
+  };
+
+  if (status.done) {
+    return (
+      <Success role="status">
+        <FiCheck aria-hidden />
+        <span>
+          Thanks, {form.name.trim().split(' ')[0]}! Dan will reach out shortly
+          {isActive ? ' to set up your showing' : ''}. Need him sooner? Call or text {AGENT_PHONE}.
+        </span>
+      </Success>
+    );
+  }
+
+  return (
+    <Form onSubmit={submit} noValidate>
+      <Field aria-label="Name" placeholder="Name" autoComplete="name" value={form.name} onChange={set('name')} required />
+      <Field
+        aria-label="Phone"
+        placeholder="Phone"
+        type="tel"
+        autoComplete="tel"
+        value={form.phone}
+        onChange={set('phone')}
+      />
+      <Field
+        $full
+        aria-label="Email"
+        placeholder="Email"
+        type="email"
+        autoComplete="email"
+        value={form.email}
+        onChange={set('email')}
+        required
+      />
+      <TextArea aria-label="Message" rows={3} value={form.message} onChange={set('message')} />
+      <Submit type="submit" disabled={status.sending}>
+        {status.sending ? 'Sending…' : isActive ? 'Request a Showing' : 'Send Message'}
+      </Submit>
+      {status.error ? (
+        <FormNote data-error>{status.error}</FormNote>
+      ) : (
+        <FormNote>Dan replies personally, usually the same day. No spam, ever.</FormNote>
+      )}
+    </Form>
+  );
+}
+
+InquiryForm.propTypes = {
+  listing: PropTypes.shape({
+    address: PropTypes.string,
+    mlsId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+  isActive: PropTypes.bool,
+  pixelParams: PropTypes.object,
+};
+
+/* ------------------------------------------------------------------ page */
+
 /** Listing page, built from the Coldwell Banker sync. Works for every listing on Dan's profile automatically. */
 const ListingDetail = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | missing | error
-  const [photoIndex, setPhotoIndex] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [mode, setMode] = useState('photos'); // photos | video
   const [lightbox, setLightbox] = useState(false);
+  const [descOpen, setDescOpen] = useState(false);
+  const videoRef = useRef(null);
+  const thumbsRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     setState('loading');
-    setPhotoIndex(0);
+    setIndex(0);
+    setMode('photos');
     fetchCbListingDetail(id)
       .then((d) => {
         if (cancelled) return;
@@ -374,6 +912,36 @@ const ListingDetail = () => {
 
   const listing = data?.listing;
   const photos = listing?.photos?.length ? listing.photos : listing?.photo ? [listing.photo] : [];
+  const count = photos.length;
+  const media = listing ? mediaForListing(listing.mlsId) : null;
+
+  const go = useCallback(
+    (delta) => {
+      if (!count) return;
+      setMode('photos');
+      setIndex((i) => (i + delta + count) % count);
+    },
+    [count]
+  );
+  const swipe = useSwipe(() => go(-1), () => go(1));
+
+  // keep the active thumbnail in view
+  useEffect(() => {
+    const strip = thumbsRef.current;
+    const el = strip?.querySelector(`[data-index="${index}"]`);
+    if (strip && el && mode === 'photos') {
+      strip.scrollLeft = el.offsetLeft - strip.clientWidth / 2 + el.clientWidth / 2;
+    }
+  }, [index, mode]);
+
+  // preload the neighbours so arrows feel instant
+  useEffect(() => {
+    if (!count) return;
+    [index + 1, index - 1].forEach((i) => {
+      const img = new Image();
+      img.src = photos[(i + count) % count];
+    });
+  }, [index, count, photos]);
 
   useEffect(() => {
     if (!listing) return;
@@ -387,15 +955,25 @@ const ListingDetail = () => {
   }, [listing]);
 
   useEffect(() => {
-    if (!lightbox || photos.length === 0) return undefined;
+    if (!lightbox) return undefined;
     const onKey = (e) => {
       if (e.key === 'Escape') setLightbox(false);
-      if (e.key === 'ArrowRight') setPhotoIndex((i) => (i + 1) % photos.length);
-      if (e.key === 'ArrowLeft') setPhotoIndex((i) => (i - 1 + photos.length) % photos.length);
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [lightbox, photos.length]);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [lightbox, go]);
+
+  const showVideo = () => {
+    setMode('video');
+    // started by a tap, so playback with sound is allowed
+    setTimeout(() => videoRef.current?.play().catch(() => {}), 0);
+  };
 
   if (state !== 'ready') {
     return (
@@ -426,23 +1004,27 @@ const ListingDetail = () => {
   }
 
   const isActive = listing.status === 'active';
-  const media = mediaForListing(listing.mlsId);
   const street = listing.address?.split(',')[0] || listing.address;
-  const showingTopic = `Showing request: ${listing.address} (MLS# ${listing.mlsId})`;
+  const cityLine = listing.address?.split(',').slice(1).join(',').trim();
   const pixelParams = { content_name: listing.address, content_ids: [String(listing.mlsId)] };
-  const details = [
+  const lot = formatLot(listing);
+  const keyFacts = [
+    ['Beds', listing.beds],
+    ['Baths', listing.baths],
+    ['Sq Ft', listing.squareFeet],
+    ['Year Built', listing.yearBuilt],
+    ['Lot', listing.lotSizeAcres ? `${Number(listing.lotSizeAcres).toFixed(2)} ac` : null],
+  ].filter(([, v]) => v !== null && v !== undefined && v !== '');
+  const homeFacts = [
     ['Property type', listing.propertyType],
     ['Year built', listing.yearBuilt],
-    ['Lot size', formatLot(listing)],
+    ['Lot size', lot],
     ['Heating', listing.heating],
     ['Cooling', listing.cooling],
+    ['Status', isActive ? 'For sale' : listing.status],
     ['MLS#', listing.mlsId],
   ].filter(([, v]) => v !== null && v !== undefined && v !== '');
-
-  const step = (delta) => (e) => {
-    e.stopPropagation();
-    setPhotoIndex((i) => (i + delta + photos.length) % photos.length);
-  };
+  const longDescription = (listing.description || '').length > 600;
 
   return (
     <>
@@ -462,144 +1044,236 @@ const ListingDetail = () => {
           </Crumb>
 
           <Grid>
-            <div>
-              {photos.length > 0 && (
-                <>
-                  <MainPhoto type="button" onClick={() => setLightbox(true)} aria-label="Open photo gallery">
-                    <img src={photos[photoIndex]} alt={`${street}, photo ${photoIndex + 1} of ${photos.length}`} />
-                  </MainPhoto>
-                  {photos.length > 1 && (
-                    <Thumbs>
-                      {photos.map((src, i) => (
-                        <Thumb
-                          key={src}
-                          type="button"
-                          $active={i === photoIndex}
-                          onClick={() => setPhotoIndex(i)}
-                          aria-label={`Show photo ${i + 1}`}
-                        >
-                          <img src={src} alt="" loading="lazy" />
-                        </Thumb>
-                      ))}
-                    </Thumbs>
+            <GalleryArea>
+              <Stage {...(mode === 'photos' ? swipe : {})}>
+                {mode === 'photos' && count > 0 && (
+                  <>
+                    <StageImg
+                      src={photos[index]}
+                      alt={`${street}, photo ${index + 1} of ${count}`}
+                      onClick={() => setLightbox(true)}
+                      draggable={false}
+                    />
+                    {count > 1 && (
+                      <>
+                        <PrevButton type="button" aria-label="Previous photo" onClick={() => go(-1)}>
+                          <FiChevronLeft />
+                        </PrevButton>
+                        <NextButton type="button" aria-label="Next photo" onClick={() => go(1)}>
+                          <FiChevronRight />
+                        </NextButton>
+                      </>
+                    )}
+                    <ExpandButton type="button" aria-label="View full screen" onClick={() => setLightbox(true)}>
+                      <FiMaximize2 />
+                    </ExpandButton>
+                    <Counter>
+                      {index + 1} / {count}
+                    </Counter>
+                  </>
+                )}
+
+                {mode === 'video' && media?.video && (
+                  <>
+                    {media.poster && <VideoBackdrop src={media.poster} alt="" aria-hidden />}
+                    <StageVideo
+                      ref={videoRef}
+                      src={media.video}
+                      poster={media.poster}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      onPlay={() => trackPixelCustom('PlayListingVideo', pixelParams)}
+                    />
+                  </>
+                )}
+
+                {media?.video && (
+                  <ModeTabs role="tablist" aria-label="Media">
+                    <ModeTab
+                      type="button"
+                      role="tab"
+                      aria-selected={mode === 'photos'}
+                      $active={mode === 'photos'}
+                      onClick={() => setMode('photos')}
+                    >
+                      <FiImage aria-hidden /> Photos
+                    </ModeTab>
+                    <ModeTab type="button" role="tab" aria-selected={mode === 'video'} $active={mode === 'video'} onClick={showVideo}>
+                      <FiPlay aria-hidden /> Video tour
+                    </ModeTab>
+                  </ModeTabs>
+                )}
+              </Stage>
+
+              {(count > 1 || media?.video) && (
+                <Thumbs ref={thumbsRef}>
+                  {media?.video && (
+                    <Thumb type="button" $active={mode === 'video'} onClick={showVideo} aria-label="Play video tour">
+                      <img src={media.poster || photos[0]} alt="" />
+                      <VideoThumbBadge>
+                        <FiPlay aria-hidden />
+                      </VideoThumbBadge>
+                    </Thumb>
                   )}
-                </>
+                  {photos.map((src, i) => (
+                    <Thumb
+                      key={src}
+                      type="button"
+                      data-index={i}
+                      $active={mode === 'photos' && i === index}
+                      onClick={() => {
+                        setMode('photos');
+                        setIndex(i);
+                      }}
+                      aria-label={`Show photo ${i + 1}`}
+                    >
+                      <img src={src} alt="" loading="lazy" />
+                    </Thumb>
+                  ))}
+                </Thumbs>
               )}
-            </div>
+            </GalleryArea>
 
-            <Panel>
-              <StatusPill $active={isActive}>{isActive ? 'For Sale' : listing.status}</StatusPill>
-              <Price>{listing.price}</Price>
-              <Address>{listing.address}</Address>
-              <Facts>
-                <li>
-                  <strong>{listing.beds}</strong>
-                  <span>Beds</span>
-                </li>
-                <li>
-                  <strong>{listing.baths}</strong>
-                  <span>Baths</span>
-                </li>
-                <li>
-                  <strong>{listing.squareFeet}</strong>
-                  <span>Sq Ft</span>
-                </li>
-              </Facts>
+            <SideArea>
+              <Card id="inquiry">
+                <StatusPill $active={isActive}>{isActive ? 'For Sale' : listing.status}</StatusPill>
+                <Price>{listing.price}</Price>
+                <Address>
+                  {street}
+                  {cityLine ? <span style={{ fontWeight: 400 }}>, {cityLine}</span> : null}
+                </Address>
+                <QuickFacts>
+                  <strong>{listing.beds}</strong> bd · <strong>{listing.baths}</strong> ba ·{' '}
+                  <strong>{listing.squareFeet}</strong> sq ft
+                </QuickFacts>
 
-              {isActive && (
-                <Button
-                  as={Link}
-                  to={`/contact?topic=${encodeURIComponent(showingTopic)}`}
-                  $primary
-                  onClick={() => trackPixel('Schedule', pixelParams)}
+                <FormTitle>{isActive ? 'Request a private showing' : 'Ask Dan about this home'}</FormTitle>
+                <InquiryForm listing={listing} isActive={isActive} pixelParams={pixelParams} />
+
+                <ContactRow>
+                  <GhostLink href={AGENT_PHONE_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'call' })}>
+                    <FiPhone aria-hidden /> Call
+                  </GhostLink>
+                  <GhostLink href={SMS_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'text' })}>
+                    <FiMessageSquare aria-hidden /> Text
+                  </GhostLink>
+                </ContactRow>
+
+                <Agent>
+                  <img src="/images/DWHeadshot.png" alt="" />
+                  <p>
+                    <strong>{AGENT_NAME}</strong> · {AGENT_PHONE}
+                    <br />
+                    Broker, {BROKERAGE_NAME}
+                  </p>
+                </Agent>
+                <OutLink
+                  href={listing.detailUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackPixelCustom('ViewCBListing', pixelParams)}
                 >
-                  Request a Private Showing
-                </Button>
-              )}
-              <ButtonRow>
-                <Button href={AGENT_PHONE_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'call' })}>
-                  Call Dan
-                </Button>
-                <Button href={SMS_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'text' })}>
-                  Text Dan
-                </Button>
-              </ButtonRow>
-              <AgentNote>
-                {AGENT_NAME} · {AGENT_PHONE}
-                <br />
-                {BROKERAGE_NAME}
-              </AgentNote>
-              <OutLink
-                href={listing.detailUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackPixelCustom('ViewCBListing', pixelParams)}
-              >
-                Full listing details on Coldwell Banker →
-              </OutLink>
-            </Panel>
-          </Grid>
+                  Full listing on Coldwell Banker <FiExternalLink aria-hidden />
+                </OutLink>
+              </Card>
+            </SideArea>
 
-          {media?.video && (
-            <Section>
-              <h2>Video Tour</h2>
-              <VideoWrap>
-                <video
-                  src={media.video}
-                  poster={media.poster}
-                  controls
-                  playsInline
-                  preload="none"
-                  onPlay={() => trackPixelCustom('PlayListingVideo', pixelParams)}
-                />
-              </VideoWrap>
-            </Section>
-          )}
-
-          {listing.description && (
-            <Section>
-              <h2>About This Home</h2>
-              <Description>{listing.description}</Description>
-            </Section>
-          )}
-
-          {details.length > 0 && (
-            <Section>
-              <h2>Home Facts</h2>
-              <DetailList>
-                {details.map(([label, value]) => (
+            <DetailsArea>
+              <FactsBar>
+                {keyFacts.map(([label, value]) => (
                   <div key={label}>
                     <dt>{label}</dt>
                     <dd>{value}</dd>
                   </div>
                 ))}
-              </DetailList>
-            </Section>
-          )}
+              </FactsBar>
 
-          {listing.disclaimer && <Disclaimer>{stripHtml(listing.disclaimer)}</Disclaimer>}
+              {listing.description && (
+                <Section>
+                  <h2>About this home</h2>
+                  <Description $open={descOpen || !longDescription}>{listing.description}</Description>
+                  {longDescription && (
+                    <TextButton type="button" onClick={() => setDescOpen((o) => !o)}>
+                      {descOpen ? 'Show less' : 'Read more'}
+                    </TextButton>
+                  )}
+                </Section>
+              )}
+
+              {homeFacts.length > 0 && (
+                <Section>
+                  <h2>Home facts</h2>
+                  <FactList>
+                    {homeFacts.map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                  </FactList>
+                </Section>
+              )}
+
+              {listing.disclaimer && <Disclaimer>{stripHtml(listing.disclaimer)}</Disclaimer>}
+            </DetailsArea>
+          </Grid>
         </Wrap>
-        <PageMain>
-          <EngagementCTA />
-        </PageMain>
       </PageRoot>
 
-      {lightbox && photos.length > 0 && (
-        <Lightbox onClick={() => setLightbox(false)} role="dialog" aria-label="Photo gallery">
-          <img src={photos[photoIndex]} alt="" onClick={(e) => e.stopPropagation()} />
-          <LightboxButton type="button" style={{ top: '1rem', right: '1rem' }} aria-label="Close">
-            ×
-          </LightboxButton>
-          {photos.length > 1 && (
+      <ActionBar aria-label="Contact Dan">
+        <BarLink href={AGENT_PHONE_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'call' })}>
+          <FiPhone aria-hidden /> Call
+        </BarLink>
+        <BarLink href={SMS_HREF} onClick={() => trackPixel('Contact', { ...pixelParams, method: 'text' })}>
+          <FiMessageSquare aria-hidden /> Text
+        </BarLink>
+        <BarLink
+          data-primary
+          href="#inquiry"
+          onClick={(e) => {
+            e.preventDefault();
+            trackPixel('Schedule', pixelParams);
+            document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        >
+          {isActive ? 'Request a Showing' : 'Ask Dan'}
+        </BarLink>
+      </ActionBar>
+
+      {lightbox && count > 0 && (
+        <Lightbox onClick={() => setLightbox(false)} role="dialog" aria-label="Photo gallery" {...swipe}>
+          <img src={photos[index]} alt={`${street}, photo ${index + 1} of ${count}`} onClick={(e) => e.stopPropagation()} />
+          <RoundButton type="button" style={{ top: '1rem', right: '1rem' }} aria-label="Close">
+            <FiX />
+          </RoundButton>
+          {count > 1 && (
             <>
-              <LightboxButton type="button" style={{ left: '1rem', top: '50%' }} aria-label="Previous photo" onClick={step(-1)}>
-                ‹
-              </LightboxButton>
-              <LightboxButton type="button" style={{ right: '1rem', top: '50%' }} aria-label="Next photo" onClick={step(1)}>
-                ›
-              </LightboxButton>
+              <PrevButton
+                type="button"
+                aria-label="Previous photo"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(-1);
+                }}
+              >
+                <FiChevronLeft />
+              </PrevButton>
+              <NextButton
+                type="button"
+                aria-label="Next photo"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(1);
+                }}
+              >
+                <FiChevronRight />
+              </NextButton>
             </>
           )}
+          <LightboxCounter>
+            {index + 1} / {count}
+          </LightboxCounter>
         </Lightbox>
       )}
     </>

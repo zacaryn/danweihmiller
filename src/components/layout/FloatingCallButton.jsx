@@ -111,7 +111,8 @@ const FloatingCallButton = () => {
     return () => observer.disconnect();
   }, [pathname]);
 
-  if (pathname.startsWith('/admin') || pathname === '/search') {
+  // listing pages have their own call / text / showing actions
+  if (pathname.startsWith('/admin') || pathname === '/search' || /^\/listings\/[^/]+/.test(pathname)) {
     return null;
   }
 
