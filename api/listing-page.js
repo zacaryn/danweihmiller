@@ -19,9 +19,23 @@ function setMeta(html, attr, key, value) {
   return re.test(html) ? html.replace(re, tag) : html.replace('</head>', `    ${tag}\n  </head>`);
 }
 
+// The template is fetched from the request host, so only our own hosts may be used; anything else
+// (spoofed Host / X-Forwarded-Host) falls back to the production site.
+function templateOrigin(req) {
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase();
+  const allowed = [
+    'danweihmiller.com',
+    'www.danweihmiller.com',
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  ].filter(Boolean).map((h) => h.toLowerCase());
+  return `https://${allowed.includes(host) ? host : 'danweihmiller.com'}`;
+}
+
 export default async function handler(req, res) {
   const slug = String(req.query?.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const origin = `https://${req.headers['x-forwarded-host'] || req.headers.host}`;
+  const origin = templateOrigin(req);
 
   let html;
   try {
