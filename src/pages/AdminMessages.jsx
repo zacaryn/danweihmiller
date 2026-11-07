@@ -308,7 +308,7 @@ const AdminMessages = () => {
                   <PreviewSnippet>{msg.message}</PreviewSnippet>
                 </div>
                 <Badge $unread={!msg.is_read}>
-                  {msg.is_read ? 'Read' : 'New'}
+                  {msg.email_error?.startsWith('Spam filter:') ? 'Spam?' : msg.is_read ? 'Read' : 'New'}
                 </Badge>
               </CardButton>
               {expandedId === msg.id && (
@@ -330,7 +330,9 @@ const AdminMessages = () => {
                   )}
                   {msg.email_delivered === false && msg.email_error && (
                     <DetailRow>
-                      Email not sent yet: {msg.email_error}
+                      {msg.email_error.startsWith('Spam filter:')
+                        ? `Filtered as likely spam, so no email or text alert was sent (${msg.email_error.slice('Spam filter:'.length).trim()})`
+                        : `Email not sent yet: ${msg.email_error}`}
                     </DetailRow>
                   )}
                   <DetailBody>{msg.message}</DetailBody>

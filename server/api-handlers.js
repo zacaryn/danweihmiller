@@ -2,10 +2,14 @@ import { fetchCbAgentListings, fetchCbListingDetail } from './cb-agent-listings.
 import { getSupabaseAdmin, isSupabaseConfigured } from './supabase-admin.js';
 import { sendContactNotification, isSmtpConfigured, mailRecipientsSummary } from './send-contact-email.js';
 import { loadEnv } from './load-env.js';
+import { scoreSpam } from './spam-filter.js';
 
 loadEnv();
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+/** Marker stored in email_error so the admin inbox can label filtered messages. */
+export const SPAM_NOTE_PREFIX = 'Spam filter:';
 
 function parseBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -51,14 +55,26 @@ export async function handlePostInquiry(req, res) {
       (listingId ? `Legacy property reference: ${listingId}` : null) ||
       null;
 
-    const emailResult = await sendContactNotification({
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone?.trim() || null,
-      message: message.trim(),
-      context: contextText,
-      tourDate,
-    });
+    // Content spam filter ("SEO", "Leads" pitches). Flagged messages are still saved to the
+    // inbox (already marked read) so nothing real is lost — they just skip the email/text alerts.
+    const spam = scoreSpam({ name, email, message });
+    let emailResult;
+    if (spam.isSpam) {
+      console.warn('[inquiries] flagged as spam, alerts skipped', { score: spam.score, reasons: spam.reasons });
+      emailResult = {
+        delivered: false,
+        error: `${SPAM_NOTE_PREFIX} ${spam.reasons.join(', ')} (score ${spam.score})`,
+      };
+    } else {
+      emailResult = await sendContactNotification({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone?.trim() || null,
+        message: message.trim(),
+        context: contextText,
+        tourDate,
+      });
+    }
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -71,7 +87,7 @@ export async function handlePostInquiry(req, res) {
 
 Preferred tour: ${tourDate}` : message.trim(),
         context: contextText,
-        is_read: false,
+        is_read: spam.isSpam,
         email_delivered: emailResult.delivered,
         email_error: emailResult.error || null,
       })
