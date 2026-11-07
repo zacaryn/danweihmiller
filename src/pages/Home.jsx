@@ -407,14 +407,14 @@ const Home = () => {
       <SEO
         pageName="Home"
         ogTitle="Colorado Springs Realtor"
-        ogDescription="Broker with Coldwell Banker since 1985 — military relocation, VA loans, and Front Range real estate."
+        ogDescription="Broker with Coldwell Banker since 1987 — military relocation, VA loans, and Front Range real estate."
       />
       <div>
         <HeroSection>
           <HeroContent>
             <HeroIntro>
               <NowShowingRibbon />
-              <HeroEyebrow>Coldwell Banker · Colorado Springs · Since 1985</HeroEyebrow>
+              <HeroEyebrow>Coldwell Banker · Colorado Springs · Since 1987</HeroEyebrow>
               <HeroTitle>Dan Weihmiller</HeroTitle>
               <HeroTagline>
                 Trusted local Realtor for military families, VA loans, and Front Range homeownership.
@@ -481,7 +481,7 @@ const Home = () => {
               </IconWrapper>
               <FeatureTitle>Meet Dan</FeatureTitle>
               <FeatureText>
-                Learn about my career with Coldwell Banker since 1985 and decades of Colorado Springs real estate experience. Discover how my proven track record and local knowledge can benefit you.
+                Learn about my career with Coldwell Banker since 1987 and decades of Colorado Springs real estate experience. Discover how my proven track record and local knowledge can benefit you.
               </FeatureText>
             </FeatureCard>
           </FeaturesGrid>
@@ -490,7 +490,7 @@ const Home = () => {
         <ClosingCta>
           <EngagementCTA
             title="Thinking about buying or selling?"
-            description="Get straightforward advice from a Colorado Springs broker with four decades of local experience."
+            description="Get straightforward advice from a Colorado Springs broker with nearly four decades of local experience."
           />
         </ClosingCta>
       </div>

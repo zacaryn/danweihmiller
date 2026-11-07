@@ -198,7 +198,7 @@ export function BrokerageDisclosurePage() {
     >
       <p>
         Dan Weihmiller is a real estate licensee in the State of Colorado, affiliated with {BROKERAGE_NAME}.
-        Dan has been affiliated with Coldwell Banker since 1985. Office: {OFFICE_ADDRESS}. Office phone:{' '}
+        Dan has been affiliated with Coldwell Banker since 1987. Office: {OFFICE_ADDRESS}. Office phone:{' '}
         {OFFICE_PHONE}. Agent phone: <a href={AGENT_PHONE_HREF}>{AGENT_PHONE}</a>. Email:{' '}
         <a href={AGENT_EMAIL_HREF}>{AGENT_EMAIL}</a>. Official agent profile:{' '}
         <a href={CB_AGENT_PROFILE_URL} target="_blank" rel="noopener noreferrer">

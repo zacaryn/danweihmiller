@@ -20,15 +20,15 @@ const About = () => {
       <SEO
         pageName="About Dan Weihmiller"
         title="About Dan Weihmiller | Colorado Springs Realtor"
-        description="Meet Dan Weihmiller, your trusted Colorado Springs Realtor with Coldwell Banker since 1985. Specializing in military relocation, VA loans, and Front Range real estate."
+        description="Meet Dan Weihmiller, your trusted Colorado Springs Realtor with Coldwell Banker since 1987. Specializing in military relocation, VA loans, and Front Range real estate."
         ogTitle="About Dan"
       />
 
       <PageRoot>
         <PageHeader
-          eyebrow="About · Coldwell Banker since 1985"
+          eyebrow="About · Coldwell Banker since 1987"
           title="Dan Weihmiller"
-          lead="Colorado Springs Realtor and Military Relocation Professional helping buyers and sellers across the Front Range for more than 40 years."
+          lead="Colorado Springs Realtor and Military Relocation Professional helping buyers and sellers across the Front Range for nearly 40 years."
           primaryAction={{ to: '/contact', label: 'Get in Touch' }}
           secondaryAction={{ to: '/search', label: 'Search Homes' }}
         />
@@ -36,9 +36,9 @@ const About = () => {
           <PagePanel $narrow>
             <Prose>
               <p>
-                Dan Weihmiller is your trusted Colorado Springs Realtor with over 40 years of experience
+                Dan Weihmiller is your trusted Colorado Springs Realtor with nearly 40 years of experience
                 serving military families and residents throughout the Front Range. Affiliated with Coldwell
-                Banker since 1985, Dan has established himself as Colorado Springs&apos; leading Military
+                Banker since 1987, Dan has established himself as Colorado Springs&apos; leading Military
                 Relocation Professional (MRP), specializing in VA loans, military PCS moves, and expert
                 guidance for Fort Carson, Peterson AFB, and Schriever AFB personnel.
               </p>

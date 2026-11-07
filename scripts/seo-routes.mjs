@@ -5,7 +5,7 @@ export const SEO_SITE_NAME = 'Dan Weihmiller · Coldwell Banker';
 export const SEO_DEFAULT_TITLE =
   'Dan Weihmiller | Colorado Springs Realtor · Coldwell Banker';
 export const SEO_DEFAULT_DESCRIPTION =
-  'Dan Weihmiller, Broker with Coldwell Banker Realty in Colorado Springs since 1985. Military relocation, VA loans, and Front Range real estate. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920.';
+  'Dan Weihmiller, Broker with Coldwell Banker Realty in Colorado Springs since 1987. Military relocation, VA loans, and Front Range real estate. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920.';
 
 export function ogImageSlug(routePath) {
   if (routePath === '/') return 'home';
@@ -41,13 +41,13 @@ export const SEO_ROUTES = [
     description: SEO_DEFAULT_DESCRIPTION,
     ogTitle: 'Colorado Springs Realtor',
     ogDescription:
-      'Broker with Coldwell Banker since 1985 — military relocation, VA loans, and Front Range real estate.',
-    ogEyebrow: 'Coldwell Banker · Since 1985',
+      'Broker with Coldwell Banker since 1987 — military relocation, VA loans, and Front Range real estate.',
+    ogEyebrow: 'Coldwell Banker · Since 1987',
   }),
   route('/about', {
     title: 'About Dan Weihmiller | Colorado Springs Realtor',
     description:
-      'Meet Dan Weihmiller, your trusted Colorado Springs Realtor with Coldwell Banker since 1985. Specializing in military relocation, VA loans, and Front Range real estate.',
+      'Meet Dan Weihmiller, your trusted Colorado Springs Realtor with Coldwell Banker since 1987. Specializing in military relocation, VA loans, and Front Range real estate.',
     ogTitle: 'About Dan',
     eyebrow: 'About',
   }),

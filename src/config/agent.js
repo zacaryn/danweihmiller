@@ -31,7 +31,7 @@ export const SITE_URL = 'https://danweihmiller.com';
 export const SEO_SITE_NAME = 'Dan Weihmiller · Coldwell Banker';
 export const SEO_DEFAULT_TITLE = 'Dan Weihmiller | Colorado Springs Realtor · Coldwell Banker';
 export const SEO_DEFAULT_DESCRIPTION =
-  'Dan Weihmiller, Broker with Coldwell Banker Realty in Colorado Springs since 1985. Military relocation, VA loans, and Front Range real estate. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920.';
+  'Dan Weihmiller, Broker with Coldwell Banker Realty in Colorado Springs since 1987. Military relocation, VA loans, and Front Range real estate. Office: 1755 Telstar Dr. Ste. 250, Colorado Springs, CO 80920.';
 
 /** Approximate geo for office (Telstar Dr) — schema / meta */
 export const OFFICE_GEO = {

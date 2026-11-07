@@ -24,7 +24,7 @@ export function buildOgImageUrl({ pathname }) {
 
 export function eyebrowForPath(pathname) {
   const path = pathname.replace(/\/+$/, '') || '/';
-  if (path === '/') return 'Coldwell Banker · Since 1985';
+  if (path === '/') return 'Coldwell Banker · Since 1987';
   if (path === '/about') return 'About';
   if (path === '/contact') return 'Contact';
   if (path === '/listings') return 'MLS Listings';

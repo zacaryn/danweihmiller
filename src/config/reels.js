@@ -1,19 +1,27 @@
 /** Short videos shown in the homepage "Watch" strip. Files live in public/videos/reels/. Newest or best first. */
 export const REELS = [
   {
+    id: 'holiday-jingle-deck',
+    title: 'Price Drop: 6724 Harvey Lane',
+    blurb: 'Now $434,900. Home for the holidays, 3 bed / 2 bath. Holiday decor digitally added.',
+    video: '/videos/reels/holiday-jingle-deck.mp4',
+    poster: '/videos/reels/holiday-jingle-deck.jpg',
+    link: '/listings/6724-harvey-ln',
+  },
+  {
+    id: 'holiday-jingle',
+    title: 'Home for the Holidays',
+    blurb: 'The Harvey Lane holiday tour, set to the jingle. Holiday decor digitally added.',
+    video: '/videos/reels/holiday-jingle.mp4',
+    poster: '/videos/reels/holiday-jingle.jpg',
+    link: '/listings/6724-harvey-ln',
+  },
+  {
     id: 'welcome',
     title: 'Welcome to Colorado Springs',
     blurb: '39 years helping people buy and sell across the Pikes Peak region.',
     video: '/videos/reels/welcome.mp4',
     poster: '/videos/reels/welcome.jpg',
-  },
-  {
-    id: '6724-harvey-ln-spotlight',
-    title: 'Home Spotlight: 6724 Harvey Lane',
-    blurb: 'Single-level, 3 bed / 2 bath on a quiet cul-de-sac.',
-    video: '/videos/reels/6724-harvey-ln-spotlight.mp4',
-    poster: '/videos/reels/6724-harvey-ln-spotlight.jpg',
-    link: '/listings/6724-harvey-ln',
   },
   {
     id: 'buy-and-sell',

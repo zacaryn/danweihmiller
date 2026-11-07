@@ -156,7 +156,7 @@ const Footer = () => {
             <div>
               <h3>Dan Weihmiller</h3>
               <p>{BROKERAGE_NAME}</p>
-              <p>Serving Colorado Springs since 1985</p>
+              <p>Serving Colorado Springs since 1987</p>
             </div>
           </BrandRow>
           <p>{OFFICE_ADDRESS}</p>

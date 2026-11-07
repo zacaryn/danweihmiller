@@ -203,7 +203,7 @@ function buildElement({ title, description, eyebrow, logoSrc, heroSrc, customFon
       }),
       el('div', {
         style: { color: COLORS.faint, fontSize: 15 },
-        children: 'Colorado Springs · Military & VA · Since 1985',
+        children: 'Colorado Springs · Military & VA · Since 1987',
       })
     )
   );

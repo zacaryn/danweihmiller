@@ -77,13 +77,13 @@ const Socials = styled.div`
   }
 `;
 
-/* 4 across on desktop; a swipeable row on phones */
+/* one row across on wide screens (sized to the number of reels); a swipeable row below that */
 const Row = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(${REELS.length}, minmax(0, 1fr));
   gap: 1.25rem;
 
-  @media (max-width: 900px) {
+  @media (max-width: ${REELS.length > 4 ? 1100 : 900}px) {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -102,8 +102,8 @@ const Row = styled.div`
 const Reel = styled.figure`
   margin: 0;
 
-  @media (max-width: 900px) {
-    flex: 0 0 62%;
+  @media (max-width: ${REELS.length > 4 ? 1100 : 900}px) {
+    flex: 0 0 min(62%, 300px);
     scroll-snap-align: start;
   }
 
