@@ -17,7 +17,7 @@ export const SPAM_THRESHOLD = 4;
 const RULES = [
   // ── Strong (one is enough) ──────────────────────────────────────────────────
   [4, 'search engine optimization', /search[- ]engine optimi[sz]ation/],
-  [4, 'SEO pitch', /\bseo (services?|agency|agencies|company|companies|firm|experts?|specialists?|consultants?|audit|packages?|reports?|team|strategy|plans?|optimi[sz]ation|campaigns?|work)\b/],
+  [4, 'SEO pitch', /\bseo (services?|agency|agencies|company|companies|firm|experts?|specialists?|consultants?|audit|packages?|reports?|team|strategy|plans?|optimi[sz]ation|campaigns?|work|improvements?|fixes|fix|issues?|problems?|help|tweaks?|upgrades?|score|rankings?|proposals?|pricing)\b/],
   [4, 'first page of Google', /\b(first|1st|top|front|page one|page 1)( page)? (of|on|in) (google|bing|search)/],
   [4, 'ranking pitch', /\brank(ing)? (your |you )?(website|site|business|company|listings?|page|brand)\b/],
   [4, 'link building', /\b(backlinks?|link[- ]building|guest[- ]post(s|ing)?|domain authority)\b/],
@@ -31,12 +31,17 @@ const RULES = [
   [4, 'white label', /\bwhite[- ]label(ed)?\b/],
 
   // ── Medium ──────────────────────────────────────────────────────────────────
+  [3, 'Google ranking talk', /\b(rank|ranks|ranked|ranking|rankings)\b[^.!?\n]{0,40}\b(google|search results|search engines?|bing)\b|\b(google|search) (rankings?|positions?|visibility)\b/],
+  [3, 'site audit offer', /\b(quick|free|full|complete|detailed|short|brief|website|site|seo|technical) (website |site |seo )?audit\b/],
+  [3, 'industry cold opener', /\b(reviewing|checking|looking at|browsing|researching|analy[sz]ing|going through) (\w+ ){0,2}(websites|web ?sites|sites)\b|\bwebsites? in your (industry|niche|area|field)\b|\bfound yours\b/],
   [3, 'SEO', /\bs\.?e\.?o\b/],
   [3, 'unsubscribe line', /\b(unsubscribe|opt[- ]?out|remove you from (our|my|the) list|not interested\?? (just )?(reply|let me know))\b|\b(reply|respond|text) (back )?(with )?["'“]?(stop|no|yes|unsubscribe|remove)["'”]?( to| if| and|\.|!|,|$)/],
   [3, 'not ranking on Google', /\b(not|isn'?t|aren'?t|wasn'?t|never) (showing up|ranking|appearing|visible|found)( well)? (on|in) (google|search|bing)\b/],
   [3, 'site critique', /\b(your )?(website|site) (is|looks|seems) (outdated|slow|old|not mobile|broken|not optimi[sz]ed)\b/],
   [3, 'agent-targeting pitch', /\b(we|i) (can )?help (local |other )?(real estate |small )?(agents|realtors|brokers|brokerages|businesses|business owners|companies|teams) (to )?(get|grow|close|generate|find|win|book|land|scale|increase|attract)\b/],
   [3, 'volume pitch', /\b\d+\+?( \w+)? (homeowners|sellers|buyers|clients|customers|appointments|listings|closings|leads)\s*(per|a|each|every|\/)\s*(month|week|mo)\b/],
+  [2, 'send pricing offer', /\b(send|share|email|show) (you )?(over )?(a |an |some |my |the )?(quick |free |short |brief |few )?(audit|proposal|quote|pricing|price list|report|suggestions|recommendations|mock-?ups?|samples?|plan|strategy)\b/],
+  [2, 'traffic pitch', /\b(attract|bring|get|drive|generate)\w* (you )?(much |a lot |lots |way |far )?(more |additional |extra )?(organic |web |website )?(traffic|visitors|customers|clients)\b/],
   [2, 'paid ads', /\b(ppc|pay[- ]per[- ]click|google ads|adwords|facebook ads|meta ads|ad campaigns?)\b/],
   [2, 'digital marketing', /\b(digital|online|internet|social media|content) marketing\b|\bmarketing (agency|agencies|firm|services|company)\b/],
   [2, 'web traffic', /\b(web|website|site|organic|search) traffic\b/],
@@ -89,6 +94,13 @@ export function scoreSpam({ name = '', email = '', message = '' } = {}) {
     reasons.push(links >= 3 ? 'many links' : 'link');
   }
   if (links >= 3) score += 2;
+
+  // Marketing-style sender address, e.g. "williamjones.digital7@gmail.com".
+  const mailbox = String(email || '').toLowerCase().split('@')[0];
+  if (/(seo|digital|marketing|leads|rank|growth|webdesign|webdev|outreach)/.test(mailbox)) {
+    score += 2;
+    reasons.push('marketing-style email address');
+  }
 
   // A website/URL in the name field is a classic bot pattern.
   if (countLinks(name) > 0) {
